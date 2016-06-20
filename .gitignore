@@ -1,0 +1,5 @@
+*~
+.DS_Store
+/uploads/
+*.pyc
+/test_inputs/

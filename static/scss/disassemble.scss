@@ -1,0 +1,20 @@
+main.row {
+	padding: 25px;
+}
+
+
+$max-content-height: 80vh;
+
+#functions {
+	max-height: $max-content-height;
+	overflow-y: scroll;
+
+	.function {
+		cursor: pointer;
+	}
+}
+
+#function-disasm {
+	max-height: $max-content-height;
+	overflow-y: scroll;
+}

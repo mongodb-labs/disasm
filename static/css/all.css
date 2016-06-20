@@ -1,0 +1,16 @@
+html, body {
+  padding: 0;
+  margin: 0; }
+
+main.row {
+  padding: 25px; }
+
+  #functions {
+    max-height: 80vh;
+    overflow-y: scroll; }
+    #functions .function {
+      cursor: pointer; }
+
+#function-disasm {
+  max-height: 80vh;
+  overflow-y: scroll; }

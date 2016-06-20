@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="static/css/skeleton.css">
+  <link rel="stylesheet" href="static/css/normalize.css">
+  {% assets "css_all" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
+  <title>Disassembler</title>
+</head>
+
+
+<body>
+  <h2 class='filename'> {{ filename }} </h2>
+
+  <main class="row">
+    <div class='four columns' id='functions'>
+      {% for func in functions %}
+        <div class='function' data-offset='{{ func.offset }}' data-size='{{ func.size }}'>
+          <span> {{ func.sym.name }} </span>
+        </div>
+      {% endfor %}
+    </div>
+
+
+    <div class='eight columns' id='function-disasm'>
+    </div>
+
+  </main>
+
+
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+{% assets "js_all" %} <script src="{{ ASSET_URL }}"></script> {% endassets %}
+</body>
+
+</html>
