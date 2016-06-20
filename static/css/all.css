@@ -9,7 +9,8 @@ main.row {
     max-height: 80vh;
     overflow-y: scroll; }
     #functions .function {
-      cursor: pointer; }
+      cursor: pointer;
+      margin-bottom: 15px; }
 
 #function-disasm {
   max-height: 80vh;

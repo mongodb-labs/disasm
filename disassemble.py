@@ -2,6 +2,7 @@ import sys, os
 from capstone import *
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
+from demangler import demangle
 
 # list of function symbols
 def get_function_syms(elff):
@@ -36,6 +37,7 @@ def _get_functions(elff):
         func = {}
         func["offset"] = sym["st_value"] - section["sh_addr"] + section["sh_offset"]
         func["size"] = sym["st_size"]
+        sym.name = demangle(sym.name)
         func["sym"] = sym
         functions.append(func)
 

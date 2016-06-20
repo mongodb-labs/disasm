@@ -28,7 +28,7 @@ $("#functions .function").click(function(e) {
 // given JSON of functions, return HTML string
 function getFunctionDisasmHTML(instructions) {
 	var res = "";
-	console.log(instructions.length);
+	
 	instructions.forEach(function(i, index, arr) {
 		var row = "<span class='row'><div class='address two columns'>0x" + i.address.toString(16) 
 			+ "</div><div class='mnemonic two columns'>" + i.mnemonic 
