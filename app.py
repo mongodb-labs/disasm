@@ -24,6 +24,8 @@ def index():
 	if request.method == 'POST':
 		file = request.files['file']
 		filename = secure_filename(file.filename)
+		if not os.path.exists(app.config['UPLOAD_DIR']):
+			os.makedirs(app.config['UPLOAD_DIR'])
 		file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
 		return redirect(url_for('get_functions', f=filename))
 	else:
