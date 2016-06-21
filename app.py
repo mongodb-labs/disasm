@@ -15,7 +15,7 @@ assets = Environment(app)
 scss = Bundle('scss/index.scss', 'scss/disassemble.scss', filters='pyscss', output='css/all.css')
 assets.register('css_all', scss)
 
-js = Bundle('js/disassemble.js', output='js/all.js')
+js = Bundle('js/disassemble.js', 'js/index.js', output='js/all.js')
 assets.register('js_all', js)
 
 # home and upload
