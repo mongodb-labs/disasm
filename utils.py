@@ -18,18 +18,4 @@ def get_text_data(filename):
         with open("../inputs/text_data", "w") as data:
             data.write(text.data())
 
-# class CsInsn exposes all the internal information about the disassembled 
-# instruction that we want to access to
-def jsonify_capstone(data):
-    ret = []
-    for i in data:
-        row = {
-            "id": i.id,
-            "address": i.address,
-            "mnemonic": i.mnemonic,
-            "op_str": i.op_str,
-            "size": i.size,
-            # "bytes": i.bytes # json can't serialize byte array
-        }
-        ret.append(row)
-    return ret
+

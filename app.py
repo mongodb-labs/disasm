@@ -3,8 +3,8 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_assets import Environment, Bundle
 from werkzeug.utils import secure_filename
 
-import disassemble as disasm
-import utils
+from executable import *
+from disassemble import disasm, jsonify_capstone
 
 app = Flask(__name__)
 app.config['UPLOAD_DIR'] = './uploads/'
@@ -35,15 +35,27 @@ def index():
 @app.route('/get_functions', methods=['GET'])
 def get_functions():
 	path = app.config['UPLOAD_DIR'] + request.args['f']
-	functions = disasm.get_functions(path)
+	f = open(path, 'rb')
+	
+	# determine correct file format of input file
+	if Executable.isElf(f):
+		ex = ElfExecutable(f)
+	elif Executable.isMacho(f):
+		ex = MachoExecutable(f)
+	else:
+		raise Exception("Couldn't find executable format")
+	functions = ex.get_all_functions()
 	return render_template('disassemble.jinja.html', filename=request.args['f'], functions=functions)
 
 # expects {"filename": "", func_name: "", "offset": "", "size": ""}
 @app.route('/disasm_function', methods=['POST'])
 def disasm_function():
 	file_path = app.config['UPLOAD_DIR'] + request.form['filename']
-	data = disasm.disasm(file_path, int(request.form['offset']), int(request.form['size']))	
-	return jsonify(utils.jsonify_capstone(data))
+	f = open(file_path, 'rb')
+	ex = ElfExecutable(f)
+	input_bytes = ex.get_bytes(int(request.form['offset']), int(request.form['size']))
+	data = disasm(input_bytes, int(request.form['offset']))	
+	return jsonify(jsonify_capstone(data))
 
 
 # debug=True auto reloads whenever server code changes
