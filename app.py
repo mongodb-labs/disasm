@@ -31,19 +31,21 @@ def index():
 	else:
 		return render_template("index.jinja.html")
 
+## determine which kind of executable
+def get_executable(f):
+	if Executable.isElf(f):
+		return ElfExecutable(f)
+	elif Executable.isMacho(f):
+		return MachoExecutable(f)
+	else:
+		raise Exception("Couldn't find executable format")
+
 # disassemble into functions
 @app.route('/get_functions', methods=['GET'])
 def get_functions():
 	path = app.config['UPLOAD_DIR'] + request.args['f']
 	f = open(path, 'rb')
-	
-	# determine correct file format of input file
-	if Executable.isElf(f):
-		ex = ElfExecutable(f)
-	elif Executable.isMacho(f):
-		ex = MachoExecutable(f)
-	else:
-		raise Exception("Couldn't find executable format")
+	ex = get_executable(f)
 	functions = ex.get_all_functions()
 	return render_template('disassemble.jinja.html', filename=request.args['f'], functions=functions)
 
@@ -52,9 +54,12 @@ def get_functions():
 def disasm_function():
 	file_path = app.config['UPLOAD_DIR'] + request.form['filename']
 	f = open(file_path, 'rb')
-	ex = ElfExecutable(f)
-	input_bytes = ex.get_bytes(int(request.form['offset']), int(request.form['size']))
-	data = disasm(input_bytes, int(request.form['offset']))	
+	ex = get_executable(f)
+
+	# get sequence of bytes and offset, and pass into disasm
+	offset = int(request.form['offset'])
+	input_bytes = ex.get_bytes(offset, int(request.form['size']))
+	data = disasm(input_bytes, offset)	
 	return jsonify(jsonify_capstone(data))
 
 

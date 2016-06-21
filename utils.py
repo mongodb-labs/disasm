@@ -17,5 +17,3 @@ def get_text_data(filename):
         text = elf.get_section_by_name(".text")
         with open("../inputs/text_data", "w") as data:
             data.write(text.data())
-
-
