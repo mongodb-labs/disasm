@@ -4,13 +4,20 @@ from sets import Set
 import sys
 
 subStringIndex = {}
-functionsList = []
+functionsList = None
 
-def storeFunctionNames(functions):
+def storeFunctions(functions):
     # Store the list of functions in a global list.
     #import pdb; pdb.set_trace()
     global functionsList
     functionsList = functions
+
+def getFunctions(start_index, num_functions):
+    global functionsList
+    if functionsList:
+        return functionsList[start_index:start_index+num_functions]
+    else:
+        return None
 
 # This takes far too long, and there's not enough RAM in the room to complete this operation.
 def indexSubstrings(functions):
@@ -26,9 +33,9 @@ def indexSubstrings(functions):
     print subStringIndex
 
 # Given a string of the form AB...MN, generate a regex pattern of the form .*A.*B ... .*M.*N.*
-def getFunctionsBySubstring(substring):
+def getFunctionsBySubstring(substring, start_index, num_functions):
     if subStringIndex.has_key(substring):
-        return subStringIndex[substring]
+        return subStringIndex[substring][start_index:start_index+num_functions]
     else:
         functions = []
         # pattern = ".*"
@@ -45,9 +52,11 @@ def getFunctionsBySubstring(substring):
             if matchesSubstring(function['name'], substring):
                 functions.append(function)
         subStringIndex[substring] = functions
-        return functions
+        return functions[start_index:start_index+num_functions]
 
 def matchesSubstring(string, substring):
+    if len(substring) == 0:
+        return True
     index = 0
     for char in string:
         if char == substring[index]:

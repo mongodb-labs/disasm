@@ -6,7 +6,7 @@ import threading
 
 import disassemble as disasm
 import utils
-from function_store import (storeFunctionNames, getFunctionsBySubstring)
+from function_store import (storeFunctions, getFunctions, getFunctionsBySubstring)
 from executable import *
 from disassemble import disasm, jsonify_capstone
 
@@ -31,9 +31,20 @@ def index():
 		if not os.path.exists(app.config['UPLOAD_DIR']):
 			os.makedirs(app.config['UPLOAD_DIR'])
 		file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
-		return redirect(url_for('get_functions', f=filename))
+		# thread = threading.Thread(target=loadExec, args=(filename,))
+		# thread.start()
+		loadExec(filename)
+		return redirect(url_for('get_functions', f=filename, start_index=0, num_functions=100))
 	else:
 		return render_template("index.jinja.html")
+
+def loadExec(filename):
+	path = app.config['UPLOAD_DIR'] + filename
+	f = open(path, 'rb')
+	ex = get_executable(f)
+	functions = ex.get_all_functions()
+	storeFunctions(functions)
+	print "Done loading the executable"
 
 ## determine which kind of executable
 def get_executable(f):
@@ -45,15 +56,10 @@ def get_executable(f):
 		raise Exception("Couldn't find executable format")
 
 # disassemble into functions
+# expects {"f": "", "start_index": <int>, "num_functions": <int>}
 @app.route('/get_functions', methods=['GET'])
 def get_functions():
-	path = app.config['UPLOAD_DIR'] + request.args['f']
-	f = open(path, 'rb')
-	ex = get_executable(f)
-	functions = ex.get_all_functions()
-        # Store the relevant function information to be obtained later
-	thread = threading.Thread(target=storeFunctionNames, args=(functions,))
-	thread.start()
+	functions = getFunctions(int(request.args['start_index']), int(request.args['num_functions']))
 	return render_template('disassemble.jinja.html', filename=request.args['f'], functions=functions)
 
 # expects {"filename": "", func_name: "", "offset": "", "size": ""}
@@ -69,10 +75,14 @@ def disasm_function():
 	data = disasm(input_bytes, offset)	
 	return jsonify(jsonify_capstone(data))
 
+# expects {"substring": "", "start_index": <int>, "num_functions": <int>}
 @app.route('/get_substring_matches', methods=['GET'])
 def get_substring_matches():
+	print "Starting to process substring"
 	substring = request.args['substring']
-	functions = getFunctionsBySubstring(substring)
+	functions = getFunctionsBySubstring(substring, int(request.args['start_index']), 
+		int(request.args['num_functions']))
+	print "Finished processing substring"
 	return jsonify(functions)
 
 # debug=True auto reloads whenever server code changes

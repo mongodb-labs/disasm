@@ -12,23 +12,29 @@
 <body>
   <h2 class='filename'> {{ filename }} </h2>
 
-  <main class="row">
-
-    <textarea class="u-full-width" placeholder="function name" id="function-name-input"></textarea>
-    <div class='four columns' id='functions'>
-      <!--
-      {% for func in functions %}
-        <div class='function' data-offset='{{ func.offset }}' data-size='{{ func.size }}'>
-          <span> {{ func.name }} </span>
-        </div>
-      {% endfor %}
-    -->
+  <main>
+    <div class="row">
+      <button class="button-primary" id="button-prev">Previous 100 results</button>
+      <button class="button-primary" id="button-next">Next 100 results</button>
     </div>
+    <div class="row">
+
+      <textarea class="u-full-width" placeholder="function name" id="function-name-input"></textarea>
+      <div class='four columns' id='functions'>
+        <!--
+        {% for func in functions %}
+          <div class='function' data-offset='{{ func.offset }}' data-size='{{ func.size }}'>
+            <span> {{ func.name }} </span>
+          </div>
+        {% endfor %}
+      -->
+      </div>
 
 
-    <div class='eight columns' id='function-disasm'>
+      <div class='six columns' id='function-disasm'>
+      </div>
+
     </div>
-
   </main>
 
 

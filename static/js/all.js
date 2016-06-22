@@ -1,28 +1,32 @@
 var URL_DISASM_FUNCTION = "/disasm_function"
 
-$("#functions .function").click(function(e) {
-	// data about function 
-	data = {
-		filename: $('h2.filename').text().trim(),
-		funcname: $(this).text().trim(),
-		offset: $(this).data("offset"),
-		size: $(this).data("size")
-	}
+function registerFunctionHandler() {
+	console.log("registering handlers for when a function is clicked on");
+	$("#functions .function").click(function(e) {
+		// data about function 
+		console.log("Function clicked");
+		data = {
+			filename: $('h2.filename').text().trim(),
+			funcname: $(this).text().trim(),
+			offset: $(this).data("offset"),
+			size: $(this).data("size")
+		}
 
-	// send to server
-	$.ajax({
-		type: "POST",
-		url: URL_DISASM_FUNCTION,
-		data: data
-	})
-	.done(function(data) {
-		content = getFunctionDisasmHTML(data)
-		$("#function-disasm").html(content)
-	})
-	.fail(function(data) {
-		$("#function-disasm").html("Sorry, something went wrong!")
+		// send to server
+		$.ajax({
+			type: "POST",
+			url: URL_DISASM_FUNCTION,
+			data: data
+		})
+		.done(function(data) {
+			content = getFunctionDisasmHTML(data)
+			$("#function-disasm").text(content);
+		})
+		.fail(function(data) {
+			$("#function-disasm").text("Sorry, something went wrong!");
+		});
 	});
-});
+}
 
 
 // given JSON of functions, return HTML string
@@ -55,9 +59,14 @@ $(document).ready(function() {
 		}
 	});
 });
+var curr_index = 0;
+var NUM_FUNCTIONS = 100;
+
 $('#function-name-input').on('keyup', function() {
+    console.log(this.value.length);
+    console.log(this.value);
     if (this.value.length >= 1) {
-        $.get('http://localhost:5000/get_substring_matches', { substring: this.value } )
+        $.get('/get_substring_matches', { substring: this.value, start_index: 0, num_functions: NUM_FUNCTIONS } )
         .done(function(data) {
             clearFuncList();
             populateFuncList(data);
@@ -86,5 +95,42 @@ function populateFuncList(data) {
         newSpan.innerHTML = data[i]['name'];
         newDiv.appendChild(newSpan);
         functions.appendChild(newDiv);
+
     }
+    registerFunctionHandler();
 }
+
+$('#button-prev').click(function() {
+    curr_index -= NUM_FUNCTIONS;
+    if (curr_index < 0) {
+        curr_index = 0;
+    }
+    var input = document.getElementById('function-name-input');
+    $.get('/get_substring_matches', { substring: this.value, start_index: curr_index, num_functions:100 } )
+        .done(function(data) {
+            clearFuncList();
+            populateFuncList(data);
+        })
+        .fail(function() {
+            alert("Unable to contact server.");
+        })
+        .always(function() {
+            console.log("Request complete.");
+        });
+});
+
+$('#button-next').click(function() {
+    curr_index += NUM_FUNCTIONS;
+    var input = document.getElementById('function-name-input');
+    $.get('/get_substring_matches', { substring: this.value, start_index: curr_index, num_functions:100 } )
+        .done(function(data) {
+            clearFuncList();
+            populateFuncList(data);
+        })
+        .fail(function() {
+            alert("Unable to contact server.");
+        })
+        .always(function() {
+            console.log("Request complete.");
+        });
+});

@@ -1,28 +1,32 @@
 var URL_DISASM_FUNCTION = "/disasm_function"
 
-$("#functions .function").click(function(e) {
-	// data about function 
-	data = {
-		filename: $('h2.filename').text().trim(),
-		funcname: $(this).text().trim(),
-		offset: $(this).data("offset"),
-		size: $(this).data("size")
-	}
+function registerFunctionHandler() {
+	console.log("registering handlers for when a function is clicked on");
+	$("#functions .function").click(function(e) {
+		// data about function 
+		console.log("Function clicked");
+		data = {
+			filename: $('h2.filename').text().trim(),
+			funcname: $(this).text().trim(),
+			offset: $(this).data("offset"),
+			size: $(this).data("size")
+		}
 
-	// send to server
-	$.ajax({
-		type: "POST",
-		url: URL_DISASM_FUNCTION,
-		data: data
-	})
-	.done(function(data) {
-		content = getFunctionDisasmHTML(data)
-		$("#function-disasm").html(content)
-	})
-	.fail(function(data) {
-		$("#function-disasm").html("Sorry, something went wrong!")
+		// send to server
+		$.ajax({
+			type: "POST",
+			url: URL_DISASM_FUNCTION,
+			data: data
+		})
+		.done(function(data) {
+			content = getFunctionDisasmHTML(data)
+			$("#function-disasm").text(content);
+		})
+		.fail(function(data) {
+			$("#function-disasm").text("Sorry, something went wrong!");
+		});
 	});
-});
+}
 
 
 // given JSON of functions, return HTML string

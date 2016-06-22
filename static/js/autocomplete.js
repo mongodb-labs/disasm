@@ -1,6 +1,11 @@
+var curr_index = 0;
+var NUM_FUNCTIONS = 100;
+
 $('#function-name-input').on('keyup', function() {
+    console.log(this.value.length);
+    console.log(this.value);
     if (this.value.length >= 1) {
-        $.get('http://localhost:5000/get_substring_matches', { substring: this.value } )
+        $.get('/get_substring_matches', { substring: this.value, start_index: 0, num_functions: NUM_FUNCTIONS } )
         .done(function(data) {
             clearFuncList();
             populateFuncList(data);
@@ -29,5 +34,42 @@ function populateFuncList(data) {
         newSpan.innerHTML = data[i]['name'];
         newDiv.appendChild(newSpan);
         functions.appendChild(newDiv);
+
     }
+    registerFunctionHandler();
 }
+
+$('#button-prev').click(function() {
+    curr_index -= NUM_FUNCTIONS;
+    if (curr_index < 0) {
+        curr_index = 0;
+    }
+    var input = document.getElementById('function-name-input');
+    $.get('/get_substring_matches', { substring: this.value, start_index: curr_index, num_functions:100 } )
+        .done(function(data) {
+            clearFuncList();
+            populateFuncList(data);
+        })
+        .fail(function() {
+            alert("Unable to contact server.");
+        })
+        .always(function() {
+            console.log("Request complete.");
+        });
+});
+
+$('#button-next').click(function() {
+    curr_index += NUM_FUNCTIONS;
+    var input = document.getElementById('function-name-input');
+    $.get('/get_substring_matches', { substring: this.value, start_index: curr_index, num_functions:100 } )
+        .done(function(data) {
+            clearFuncList();
+            populateFuncList(data);
+        })
+        .fail(function() {
+            alert("Unable to contact server.");
+        })
+        .always(function() {
+            console.log("Request complete.");
+        });
+});
