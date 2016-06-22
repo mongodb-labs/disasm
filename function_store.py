@@ -1,6 +1,7 @@
 from itertools import combinations
 import re
 from sets import Set
+import sys
 
 subStringIndex = {}
 functionsList = []
@@ -24,16 +25,41 @@ def indexSubstrings(functions):
                     subStringIndex[subString] = [index]
     print subStringIndex
 
+# Given a string of the form AB...MN, generate a regex pattern of the form .*A.*B ... .*M.*N.*
 def getFunctionsBySubstring(substring):
-    # Given a string of the form AB...MN, generate a regex pattern of the form .*A.*B ... .*M.*N.*
-    #import pdb; pdb.set_trace()
-    strings = []
-    pattern = ".*"
-    for char in substring:
-        pattern += char + ".*"
-    # Check every function name to see if it matches the requested pattern
-    prog = re.compile(pattern, flags=re.IGNORECASE)
-    for function in functionsList:
-        if prog.match(function['name']):
-            strings.append(function)
-    return strings
+    if subStringIndex.has_key(substring):
+        return subStringIndex[substring]
+    else:
+        functions = []
+        # pattern = ".*"
+        # for char in substring:
+        #     pattern += char + ".*"
+        # # Check every function name to see if it matches the requested pattern
+        # prog = re.compile(pattern, flags=re.IGNORECASE)
+        if subStringIndex.has_key(substring[:-1]):
+            listToIter = subStringIndex[substring[:-1]]
+        else:
+            listToIter = functionsList
+        for function in listToIter:
+            # if prog.match(function['name']):
+            if matchesSubstring(function['name'], substring):
+                functions.append(function)
+        subStringIndex[substring] = functions
+        return functions
+
+def matchesSubstring(string, substring):
+    index = 0
+    for char in string:
+        if char == substring[index]:
+            index += 1
+        if index == len(substring):
+            return True
+    return False
+
+def test(argv):
+    print argv[0]
+    print argv[1]
+    print matchesSubstring(argv[0], argv[1])
+
+if __name__ == '__main__':
+    test(sys.argv[1:])
