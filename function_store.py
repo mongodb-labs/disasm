@@ -7,6 +7,8 @@ functionsList = []
 
 def storeFunctionNames(functions):
     # Store the list of functions in a global list.
+    #import pdb; pdb.set_trace()
+    global functionsList
     functionsList = functions
 
 # This takes far too long, and there's not enough RAM in the room to complete this operation.
@@ -24,6 +26,7 @@ def indexSubstrings(functions):
 
 def getFunctionsBySubstring(substring):
     # Given a string of the form AB...MN, generate a regex pattern of the form .*A.*B ... .*M.*N.*
+    #import pdb; pdb.set_trace()
     strings = []
     pattern = ".*"
     for char in substring:
@@ -31,6 +34,6 @@ def getFunctionsBySubstring(substring):
     # Check every function name to see if it matches the requested pattern
     prog = re.compile(pattern, flags=re.IGNORECASE)
     for function in functionsList:
-        if prog.match(function.name):
-            strings.append(string)
+        if prog.match(function['name']):
+            strings.append(function)
     return strings
