@@ -19,8 +19,11 @@ assets = Environment(app)
 scss = Bundle('scss/index.scss', 'scss/disassemble.scss', filters='pyscss', output='css/all.css')
 assets.register('css_all', scss)
 
-js = Bundle('js/disassemble.js', 'js/index.js', 'js/autocomplete.js', output='js/all.js')
-assets.register('js_all', js)
+js_index = Bundle('js/index.js', output='js/index_all.js')
+assets.register('js_index', js_index)
+
+js_disassemble = Bundle('js/rivets.js', 'js/disassemble.js', 'js/autocomplete.js', output='js/disassemble_all.js')
+assets.register('js_disassemble', js_disassemble)
 
 # home and upload
 @app.route('/', methods=['GET', 'POST'])
