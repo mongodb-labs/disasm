@@ -28,7 +28,7 @@
           rv-data-offset="func.offset"
           rv-data-size="func.size"
           onclick="functionClicked(this)" >
-          <span rv-text="func.name"></span>
+          <span rv-html="func.name | collapse_func"></span>
         </div>
       </div>
 
