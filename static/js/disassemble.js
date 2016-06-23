@@ -36,10 +36,10 @@ function registerFunctionHandler() {
 		})
 		.done(function(data) {
 			content = getFunctionDisasmHTML(data)
-			$("#function-disasm").text(content);
+			$("#function-disasm").html(content);
 		})
 		.fail(function(data) {
-			$("#function-disasm").text("Sorry, something went wrong!");
+			$("#function-disasm").html("Sorry, something went wrong!");
 		});
 	});
 }

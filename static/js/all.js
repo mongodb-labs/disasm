@@ -1,3 +1,19 @@
+/* 
+ * Copyright 2016 MongoDB Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 var URL_DISASM_FUNCTION = "/disasm_function"
 
 function registerFunctionHandler() {
@@ -20,10 +36,10 @@ function registerFunctionHandler() {
 		})
 		.done(function(data) {
 			content = getFunctionDisasmHTML(data)
-			$("#function-disasm").text(content);
+			$("#function-disasm").html(content);
 		})
 		.fail(function(data) {
-			$("#function-disasm").text("Sorry, something went wrong!");
+			$("#function-disasm").html("Sorry, something went wrong!");
 		});
 	});
 }
@@ -44,6 +60,22 @@ function getFunctionDisasmHTML(instructions) {
 }
 
 
+/* 
+ * Copyright 2016 MongoDB Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 $(document).ready(function() {
 	if ($("#file_selector").val() == "") {
 		$("#file_submit").prop("disabled", true);
@@ -59,6 +91,22 @@ $(document).ready(function() {
 		}
 	});
 });
+/* 
+ * Copyright 2016 MongoDB Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 var curr_index = 0;
 var NUM_FUNCTIONS = 100;
 
@@ -92,7 +140,7 @@ function populateFuncList(data) {
         newDiv.setAttribute('data-offset', data[i]['offset']);
         newDiv.setAttribute('data-size', data[i]['size']);
         var newSpan = document.createElement('span');
-        newSpan.innerHTML = data[i]['name'];
+        newSpan.innerHTML = (curr_index + parseInt(i)) + ") " + data[i]['name'];
         newDiv.appendChild(newSpan);
         functions.appendChild(newDiv);
 

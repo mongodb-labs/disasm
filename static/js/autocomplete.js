@@ -47,7 +47,7 @@ function populateFuncList(data) {
         newDiv.setAttribute('data-offset', data[i]['offset']);
         newDiv.setAttribute('data-size', data[i]['size']);
         var newSpan = document.createElement('span');
-        newSpan.innerHTML = data[i]['name'];
+        newSpan.innerHTML = (curr_index + parseInt(i)) + ") " + data[i]['name'];
         newDiv.appendChild(newSpan);
         functions.appendChild(newDiv);
 
