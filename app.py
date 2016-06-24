@@ -17,7 +17,6 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_assets import Environment, Bundle
 from werkzeug.utils import secure_filename
 import threading
-from jsmin import jsmin
 
 import disassemble as disasm
 import utils
@@ -45,7 +44,7 @@ assets.register('js_index', js_index)
 js_disassemble = Bundle('js/rivets.js', 
 	'js/disassemble.js', 
 	'js/autocomplete.js',
-        'js/jquery.contextMenu.js',
+    'js/jquery.contextMenu.js',
 	'js/jquery.ui.position.js',
 	output='js/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
