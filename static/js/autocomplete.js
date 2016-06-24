@@ -22,27 +22,50 @@ rivets.bind($("#functions"), {functions: functions});
 
 var searchbar = $('#function-name-input');
 
+var searchRequest;
+// Number of miliseconds to wait before checking to see if the request is stale
+var SEARCH_DELAY = 10;
+
 // helper for getting functions/pagination of functions
 function getNextPage(query, curr_index, num_functions) {
-  $.get('/get_substring_matches', { substring: query, start_index: curr_index, num_functions:num_functions } )
-    .done(function(funcs) {
-      functions.contents = funcs;
-    })
-    .fail(function() {
-      alert("Unable to contact server.");
-    })
-    .always(function() {
-      console.log("Request complete.");
-    });
+    searchRequest = query;
+    setTimeout(function(){
+        if (searchRequest !== query) {
+            console.log("Discarding request: " + query);
+            return;
+        }
+        searchRequest = "";
+        var case_sensitive = false;
+        // Test to see if the query has any capital letters. If it does, then the search must be
+        // case sensitive
+        // http://stackoverflow.com/questions/2830826/javascript-checking-for-any-lowercase-letters-in-a-string
+        if (query.toLowerCase() !== query) {
+            case_sensitive = true;
+        }
+        $.get('/get_substring_matches', { 
+                substring: query, 
+                start_index: curr_index, 
+                num_functions: num_functions, 
+                case_sensitive: case_sensitive 
+            })
+            .done(function(funcs) {
+            functions.contents = funcs;
+        })
+        .fail(function() {
+            alert("Unable to contact server.");
+        })
+        .always(function() {
+            console.log("Request complete.");
+        });
+    }, 10);
 }
 
 // search bar 
 $('#function-name-input').on('keyup', function() {
-  if (this.value.length >= 1) {
+  if (this.value.length >= 3) {
   	getNextPage(this.value, 0, NUM_FUNCTIONS);
   }
 });
-
 
 $('#button-prev').click(function() {
     curr_index -= NUM_FUNCTIONS;

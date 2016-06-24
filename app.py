@@ -103,13 +103,13 @@ def disasm_function():
 	data = disasm(input_bytes, offset)	
 	return jsonify(jsonify_capstone(data))
 
-# expects {"substring": "", "start_index": <int>, "num_functions": <int>}
+# expects {"substring": "", "start_index": <int>, "num_functions": <int>, "case_sensitive": <bool>}
 @app.route('/get_substring_matches', methods=['GET'])
 def get_substring_matches():
 	print "Starting to process substring"
 	substring = request.args['substring']
 	functions = getFunctionsBySubstring(substring, int(request.args['start_index']), 
-		int(request.args['num_functions']))
+		int(request.args['num_functions']), request.args['case_sensitive'] == 'True')
 	print "Finished processing substring"
 	return jsonify(functions)
 

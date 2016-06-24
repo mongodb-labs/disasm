@@ -116,7 +116,7 @@ function wrapHexAndDec(str) {
 		// Hex string located
  		if (c == '0' && str.charAt(i+1) == 'x') {
  			var hexString = '0x';
- 			for (i += 2; (c = str.charAt(i)) && isHexChar(i); i++) {
+ 			for (i += 2; (c = str.charAt(i)) && isHexChar(c); i++) {
  				hexString += c;
  			}
  			outputStr += '<span class="number" value="hex">' + hexString + '</span>';

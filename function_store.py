@@ -47,7 +47,7 @@ def indexSubstrings(functions):
     print subStringIndex
 
 # Given a string of the form AB...MN, generate a regex pattern of the form .*A.*B ... .*M.*N.*
-def getFunctionsBySubstring(substring, start_index, num_functions):
+def getFunctionsBySubstring(substring, start_index, num_functions, case_sensitive):
     if subStringIndex.has_key(substring):
         return subStringIndex[substring][start_index:start_index+num_functions]
     else:
@@ -63,12 +63,15 @@ def getFunctionsBySubstring(substring, start_index, num_functions):
             listToIter = functionsList
         for function in listToIter:
             # if prog.match(function['name']):
-            if matchesSubstring(function['name'], substring):
+            if matchesSubstring(function['name'], substring, case_sensitive):
                 functions.append(function)
         subStringIndex[substring] = functions
         return functions[start_index:start_index+num_functions]
 
-def matchesSubstring(string, substring):
+def matchesSubstring(string, substring, case_sensitive):
+    if not case_sensitive:
+        string = string.lower()
+        substring = substring.lower()
     if len(substring) == 0:
         return True
     index = 0
@@ -82,7 +85,8 @@ def matchesSubstring(string, substring):
 def test(argv):
     print argv[0]
     print argv[1]
-    print matchesSubstring(argv[0], argv[1])
+    print argv[2]
+    print matchesSubstring(argv[0], argv[1], (argv[2] == 'True'))
 
 if __name__ == '__main__':
     test(sys.argv[1:])
