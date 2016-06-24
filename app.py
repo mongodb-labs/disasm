@@ -1,12 +1,27 @@
+# Copyright 2016 MongoDB Inc.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_assets import Environment, Bundle
 from werkzeug.utils import secure_filename
 import threading
+from jsmin import jsmin
 
 import disassemble as disasm
 import utils
-from function_store import (storeFunctions, getFunctions, getFunctionsBySubstring)
+from function_store import storeFunctions, getFunctions, getFunctionsBySubstring
 from executable import *
 from disassemble import disasm, jsonify_capstone
 
@@ -16,6 +31,7 @@ app.config['UPLOAD_DIR'] = './uploads/'
 assets = Environment(app)
 
 # relative to static dir
+
 scss = Bundle('scss/index.scss', 
 	'scss/disassemble.scss', 
 	filters='pyscss', 
@@ -29,6 +45,8 @@ assets.register('js_index', js_index)
 js_disassemble = Bundle('js/rivets.js', 
 	'js/disassemble.js', 
 	'js/autocomplete.js',
+        'js/jquery.contextMenu.js',
+	'js/jquery.ui.position.js',
 	output='js/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
 

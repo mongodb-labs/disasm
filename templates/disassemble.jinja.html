@@ -4,6 +4,7 @@
 <head>
   <link rel="stylesheet" href="static/css/skeleton.css">
   <link rel="stylesheet" href="static/css/normalize.css">
+  <link rel="stylesheet" href="static/css/jquery.contextMenu.css">
   {% assets "css_all" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
   <title>Disassembler</title>
 </head>
@@ -44,7 +45,7 @@
         <span class='row' rv-each-i="assembly.contents">
           <div class='address two columns'>{i.address}</div>
           <div class='mnemonic two columns'>{i.mnemonic}</div>
-          <div class='op_str eight columns'>{i.op_str}</div>
+          <div class='op_str eight columns' rv-html="i.op_str"></div>
         </span>
       </div>
 
