@@ -16,35 +16,8 @@
 
 var URL_DISASM_FUNCTION = "/disasm_function"
 
-function registerFunctionHandler() {
-	console.log("registering handlers for when a function is clicked on");
-	$("#functions .function").click(function(e) {
-		// data about function 
-		console.log("Function clicked");
-		data = {
-			filename: $('h2.filename').text().trim(),
-			funcname: $(this).text().trim(),
-			offset: $(this).data("offset"),
-			size: $(this).data("size")
-		}
-
-		// send to server
-		$.ajax({
-			type: "POST",
-			url: URL_DISASM_FUNCTION,
-			data: data
-		})
-		.done(function(data) {
-			content = getFunctionDisasmHTML(data);
-			$("#function-disasm").html(content);
-			// registerHexHandler($(".hex-string"));
-			// registerDecHandler($(".decimal-string"));
-		})
-		.fail(function(data) {
-			$("#function-disasm").html("Sorry, something went wrong!");
-		});
-	});
-}
+var assembly = {contents : []};
+rivets.bind($("#function-disasm"), {assembly: assembly});
 
 $(function() {
 	$.contextMenu({
@@ -108,39 +81,32 @@ function contextMenuConvertBase(key, opt) {
 	console.log("Converted " + base + " number " + oldValue + " to " + key + " number " + newValue);
 }
 
-function contextMenuHex(key, opt) {
-	console.log("Menu item: hex");
-	return true;
-}
+function functionClicked(el) {
+	data = {
+		filename: $('h2.filename').text().trim(),
+		funcname: $(el).text().trim(),
+		offset: $(el).data("offset"),
+		size: $(el).data("size")
+	}
 
-function contextMenuDec(key, opt) {
-	console.log("Menu item: dec");
-	return true;
-}
-
-function contextMenuUnsignedBinary(key, opt) {
-	console.log("Menu item: us bin");
-	return true;
-}
-
-function contextMenuSignedBinary(key, opt) {
-	console.log("Menu item: s bin");
-	return true;
-}
-
-// given JSON of functions, return HTML string
-function getFunctionDisasmHTML(instructions) {
-	var res = "";
-	
-	instructions.forEach(function(i, index, arr) {
-		i.op_str = wrapHexAndDec(i.op_str);
-		var row = "<span class='row'><div class='address two columns'>0x" + i.address.toString(16) 
-			+ "</div><div class='mnemonic two columns'>" + i.mnemonic 
-			+ "</div><div class='op_str eight columns'>" + i.op_str
-			+ "</div></span>";
-		res += row;
+	$.ajax({
+		type: "POST",
+		url: URL_DISASM_FUNCTION,
+		data: data
+	})
+	.done(function(data) {
+		// change to hex
+		data = data.map(function(i) {
+			i.address = "0x" + i.address.toString(16);
+			i.op_str =wrapHexAndDec(i.op_str);
+			return i;
+		});
+		// wrapHexAndDec(data);
+		assembly.contents = data;
+	})
+	.fail(function(data) {
+		$("#function-disasm").text("Sorry, something went wrong!");
 	});
-	return res;
 }
 
 function wrapHexAndDec(str) {

@@ -20,19 +20,26 @@
     </div>
     <div class="row">
 
-      <textarea class="u-full-width" placeholder="function name" id="function-name-input"></textarea>
+      <input type="text" class="u-full-width" placeholder="function name" id="function-name-input"/>
+
+      {# all functions #}
       <div class='four columns' id='functions'>
-        <!--
-        {% for func in functions %}
-          <div class='function' data-offset='{{ func.offset }}' data-size='{{ func.size }}'>
-            <span> {{ func.name }} </span>
-          </div>
-        {% endfor %}
-      -->
+        <div rv-each-func="functions.contents"
+          class='function'
+          rv-data-offset="func.offset"
+          rv-data-size="func.size"
+          onclick="functionClicked(this)" >
+          <span rv-html="func.name | collapse_func"></span>
+        </div>
       </div>
 
-
+      {# selected function's assembly #}
       <div class='six columns' id='function-disasm'>
+        <span class='row' rv-each-i="assembly.contents">
+          <div class='address two columns'>{i.address}</div>
+          <div class='mnemonic two columns'>{i.mnemonic}</div>
+          <div class='op_str eight columns' rv-html="i.op_str"></div>
+        </span>
       </div>
 
     </div>
@@ -40,7 +47,7 @@
 
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-{% assets "js_all" %} <script src="{{ ASSET_URL }}"></script> {% endassets %}
+{% assets "js_disassemble" %} <script src="{{ ASSET_URL }}"></script> {% endassets %}
 </body>
 
 </html>
