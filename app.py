@@ -44,7 +44,7 @@ assets.register('js_index', js_index)
 js_disassemble = Bundle('js/rivets.js', 
 	'js/disassemble.js', 
 	'js/autocomplete.js',
-        'js/jquery.contextMenu.js',
+    'js/jquery.contextMenu.js',
 	'js/jquery.ui.position.js',
 	output='js/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)

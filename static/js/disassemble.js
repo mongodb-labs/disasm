@@ -81,16 +81,22 @@ function contextMenuConvertBase(key, opt) {
 	console.log("Converted " + base + " number " + oldValue + " to " + key + " number " + newValue);
 }
 
-function functionClicked(event, el) {
-	if (event.srcElement.classList.contains("expandable")) {
+function functionClicked(event, model) {
+	var el = event.currentTarget;
+	if (event.target.className.trim() == "expandable") {
+		expandFunctionName(event, model);
 		return;
 	}
-	
+	else if (event.target.className.trim() == "collapsable") {
+		collapseFunctionName(event, model);
+		return;
+	}
+
 	data = {
 		filename: $('h2.filename').text().trim(),
-		funcname: $(el).text().trim(),
-		offset: $(el).data("offset"),
-		size: $(el).data("size")
+		funcname: el.innerText,
+		offset: el.attributes["data-offset"].value,//$(el).data("offset"),
+		size: el.attributes["data-size"].value
 	}
 
 	$.ajax({

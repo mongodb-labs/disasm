@@ -28,12 +28,11 @@
           class='function'
           rv-data-offset="func.offset"
           rv-data-size="func.size"
-          onclick="functionClicked(event, this)" >
-          {# I'm not 100% about browser compatibility with the onclick = ...(event,) thing but it works on chrome and IE #}
-
+          rv-on-click="ctrl.functionClicked" >
+          
           <span rv-each-part="func.name" 
             rv-class-expandable="part.expandable"
-            rv-on-click="ctrl.expand"
+            rv-class-collapsable="part.collapsable"
             rv-text="part.display">
               
             </span>

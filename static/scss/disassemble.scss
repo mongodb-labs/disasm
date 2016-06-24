@@ -4,8 +4,8 @@ main.row {
 
 
 $max-content-height: 80vh;
-$expandable-color: rgba(77,182,172, 0.7);
-
+$expandable-color: rgba(77,182,172, 0.2);
+$collapsable-color: rgba(240,98,146, 0.2);
 #functions {
 	max-height: $max-content-height;
 	overflow-y: scroll;
@@ -14,8 +14,11 @@ $expandable-color: rgba(77,182,172, 0.7);
 		cursor: pointer;
 		margin-bottom: 15px;
 
-		span.expandable:hover {
+		span.expandable {
 			background-color: $expandable-color;
+		}
+		span.collapsable {
+			background-color: $collapsable-color;
 		}
 	}
 }

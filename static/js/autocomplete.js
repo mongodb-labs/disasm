@@ -17,14 +17,14 @@
 var curr_index = 0;
 var NUM_FUNCTIONS = 100;
 
-
 // structure of each func in function.contents:
 // {
-//	name: {
+//	name: [{
 //   	value: "",
 // 		display: "",
 //   	expandable: true/false
-//  }, 
+//		collapsable: int
+//  }, ... ], 
 //  offset: "", size: ""
 // }
 var functions = {contents: []};
@@ -32,12 +32,15 @@ var ctrl = {
 	something: function(e, model) {
 		console.log("ffs")
 	},
+	functionClicked: functionClicked, // located in disassemble.js
 	expand: function(e, model) {
-		console.log(e);
-		console.log(model);
-		var p = model.part
+		console.log(e)
+		console.log(model)
+		var p = model.part;
+		console.log(p);
 		if (p.expandable && p.display != p.value) {
-			p.display = p.value;
+			var new_names = format_function_name(p.value);
+			// p.display = p.value;
 		}
 		else if (p.expandable && p.display == p.value) {
 			model.part.display = "<...>";
@@ -52,25 +55,28 @@ rivets.bind($("#functions"),
 	}
 );
 
+function format_function_name(str_name) {
+	var parts = chunk_str(str_name);
+	var name = []
+	// build name array
+	for (var i = 0; i < parts.length; i++) {
+		var part = {}
+		part.value = parts[i];
+		part.expandable = (i%2 == 1);
+		if (part.expandable) {
+			part.display = "<...>";
+		}
+		else {
+			part.display = part.value;
+		}
+		name.push(part);
+	}
+	return name;
+}
 
 function format_functions(functions) {
 	var updated = functions.map(function(func) {
-		var parts = chunk_str(func.name);
-		var name = []
-		// build name array
-		for (var i = 0; i < parts.length; i++) {
-			var part = {}
-			part.value = parts[i];
-			part.expandable = (i%2 == 1);
-			if (part.expandable) {
-				part.display = "<...>";
-			}
-			else {
-				part.display = part.value;
-			}
-			name.push(part);
-		}
-		func.name = name;
+		func.name = format_function_name(func.name);
 		return func;
 	});
 	return updated;
@@ -158,3 +164,90 @@ $('#button-next').click(function() {
     curr_index += NUM_FUNCTIONS;
     getNextPage(searchbar.val(), curr_index, NUM_FUNCTIONS);
 });
+
+// get the index of the part of the name that was clicked
+// helper function because of rivet weirdness
+function getTargetPartIndex(event) {
+	var OFFSET = -2 // because of rivet weirdness
+	var node = event.target
+	var i = OFFSET;
+	while((node = node.previousSibling) != null) {i++};
+	return i;
+}
+
+// when you click a "<...>"
+function expandFunctionName(event, el) {
+	var i = getTargetPartIndex(event);
+	
+	// which part of the function name is collapsed?
+	var func = functions.contents[el.index];
+	var part = func.name[i];
+	var newParts = format_function_name(part.value.slice(1, -1));
+
+	// display brackets correctly & update the collapsable part
+	for (var j = 0; j < newParts.length; j++) {
+		if (j == 0) {
+			newParts[0].value = "<" + newParts[0].value;
+			newParts[0].display = newParts[0].value;
+		}
+		if (j == newParts.length - 1) {
+			newParts[j].value = newParts[j].value + ">";
+			newParts[j].display = newParts[j].value;
+		}
+		if (j % 2 == 0) {
+			newParts[j].collapsable = i;
+			newParts[j].expandable = false;
+		}
+		else {
+			newParts[j].collapsable = undefined;
+			newParts[j].expandable = true;
+		}
+	}
+
+	// renders to DOM
+	func.name = func.name.slice(0, i).concat(newParts, func.name.slice(i+1));
+	console.log("expanded!")
+	console.log(func.name)
+}
+
+// when you click something collapsable
+function collapseFunctionName(event, el) {
+	var i = getTargetPartIndex(event);
+	
+	// which part of the function name was clicked?
+	var func = functions.contents[el.index];	
+	var part = func.name[i];
+	var collapse_id = part.collapsable;
+
+	// get the bookend parts with the collapse_id
+	var first = undefined;
+	var last = undefined;
+	for (var j = 0; j < func.name.length; j++) {
+		if (first == undefined && func.name[j].collapsable == collapse_id) {
+			first = j;
+		}
+		if (func.name[j].collapsable == collapse_id) {
+			last = j;
+		}
+	}
+	
+	// create new part
+	var newPart = {
+		value: "",
+		display: "",
+		expandable: true,
+		collapsable: undefined
+	}
+	for (var j = first; j <= last; j++) {
+		newPart.value += func.name[j].value;
+	}
+	newPart.display = "<...>";
+
+	// splice into func.name
+	func.name = func.name.slice(0, first).concat([newPart], func.name.slice(last+1));
+	console.log("collapsed!")
+	console.log(func.name)
+}
+
+
+
