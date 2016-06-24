@@ -29,23 +29,9 @@ var NUM_FUNCTIONS = 100;
 // }
 var functions = {contents: []};
 var ctrl = {
-	something: function(e, model) {
-		console.log("ffs")
-	},
 	functionClicked: functionClicked, // located in disassemble.js
-	expand: function(e, model) {
-		console.log(e)
-		console.log(model)
-		var p = model.part;
-		console.log(p);
-		if (p.expandable && p.display != p.value) {
-			var new_names = format_function_name(p.value);
-			// p.display = p.value;
-		}
-		else if (p.expandable && p.display == p.value) {
-			model.part.display = "<...>";
-		}
-	}
+	hoverCollapsable: hoverCollapsable,
+	removeHoverCollapsable: removeHoverCollapsable
 };
 
 rivets.bind($("#functions"), 
@@ -183,6 +169,10 @@ $('#button-next').click(function() {
     getNextPage(searchbar.val(), curr_index, NUM_FUNCTIONS);
 });
 
+/*
+	for function declaration highlighting
+*/
+
 // get the index of the part of the name that was clicked
 // helper function because of rivet weirdness
 function getTargetPartIndex(event) {
@@ -191,6 +181,32 @@ function getTargetPartIndex(event) {
 	var i = OFFSET;
 	while((node = node.previousSibling) != null) {i++};
 	return i;
+}
+
+function hoverCollapsable(event, model) {
+	if (!event.target.classList.contains("collapsable")) {
+		return;
+	}
+
+	var i = getTargetPartIndex(event);
+	var func = functions.contents[model.index];
+	var collapse_id = func.name[i].collapsable;
+
+	for (var j = 0; j < func.name.length; j++) {
+		if (func.name[j].collapsable == collapse_id) {
+			func.name[j].hovered = true;
+		}
+	}
+}
+
+function removeHoverCollapsable(event, model) {
+	if (!event.target.classList.contains("collapsable")) {
+		return;
+	}
+	var func = functions.contents[model.index];
+	for (var j = 0; j < func.name.length; j++) {
+		func.name[j].hovered = false;
+	}
 }
 
 // when you click a "<...>"
@@ -224,8 +240,6 @@ function expandFunctionName(event, el) {
 
 	// renders to DOM
 	func.name = func.name.slice(0, i).concat(newParts, func.name.slice(i+1));
-	console.log("expanded!")
-	console.log(func.name)
 }
 
 // when you click something collapsable
@@ -263,8 +277,6 @@ function collapseFunctionName(event, el) {
 
 	// splice into func.name
 	func.name = func.name.slice(0, first).concat([newPart], func.name.slice(last+1));
-	console.log("collapsed!")
-	console.log(func.name)
 }
 
 

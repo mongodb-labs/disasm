@@ -4,8 +4,8 @@ main.row {
 
 
 $max-content-height: 80vh;
-$expandable-color: rgba(77,182,172, 0.2);
-$collapsable-color: rgba(240,98,146, 0.2);
+$expandable-color: rgb(77,182,172);
+$collapsable-color: rgb(240,98,146);
 #functions {
 	max-height: $max-content-height;
 	overflow-y: scroll;
@@ -15,10 +15,16 @@ $collapsable-color: rgba(240,98,146, 0.2);
 		margin-bottom: 15px;
 
 		span.expandable {
-			background-color: $expandable-color;
+			background-color: rgba($expandable-color, 0.7);
 		}
 		span.collapsable {
-			background-color: $collapsable-color;
+			background-color: rgba($collapsable-color,0.7);
+		}
+		span.expandable:hover {
+			background-color: rgba($expandable-color, 0.3);
+		}
+		span.collapsable.hovered {
+			background-color: rgba($collapsable-color, 0.3);
 		}
 	}
 }
