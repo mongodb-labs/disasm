@@ -3,7 +3,11 @@ var URL_DISASM_FUNCTION = "/disasm_function"
 var assembly = {contents : []};
 rivets.bind($("#function-disasm"), {assembly: assembly});
 
-function functionClicked(el) {
+function functionClicked(event, el) {
+	if (event.srcElement.classList.contains("expandable")) {
+		return;
+	}
+
 	data = {
 		filename: $('h2.filename').text().trim(),
 		funcname: $(el).text().trim(),

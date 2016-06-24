@@ -4,6 +4,7 @@ main.row {
 
 
 $max-content-height: 80vh;
+$expandable-color: rgba(77,182,172, 0.7);
 
 #functions {
 	max-height: $max-content-height;
@@ -12,6 +13,10 @@ $max-content-height: 80vh;
 	.function {
 		cursor: pointer;
 		margin-bottom: 15px;
+
+		span.expandable:hover {
+			background-color: $expandable-color;
+		}
 	}
 }
 
