@@ -28,9 +28,12 @@
           class='function'
           rv-data-offset="func.offset"
           rv-data-size="func.size"
-          rv-on-click="ctrl.functionClicked" >
-          
-          <span rv-each-part="func.name" 
+          rv-on-click="ctrl.functionClicked"
+          rv-on-mouseover="ctrl.hoverCollapsable"
+          rv-on-mouseout="ctrl.removeHoverCollapsable">
+
+          <span rv-each-part="func.name"
+            rv-class-hovered="part.hovered"
             rv-class-expandable="part.expandable"
             rv-class-collapsable="part.collapsable"
             rv-text="part.display">

@@ -83,11 +83,11 @@ function contextMenuConvertBase(key, opt) {
 
 function functionClicked(event, model) {
 	var el = event.currentTarget;
-	if (event.target.className.trim() == "expandable") {
+	if (event.target.classList.contains("expandable")) {
 		expandFunctionName(event, model);
 		return;
 	}
-	else if (event.target.className.trim() == "collapsable") {
+	else if (event.target.classList.contains("collapsable")) {
 		collapseFunctionName(event, model);
 		return;
 	}
