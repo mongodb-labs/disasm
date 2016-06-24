@@ -17,7 +17,6 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_assets import Environment, Bundle
 from werkzeug.utils import secure_filename
 import threading
-from jsmin import jsmin
 
 import disassemble as disasm
 import utils
