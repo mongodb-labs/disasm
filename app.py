@@ -17,10 +17,11 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_assets import Environment, Bundle
 from werkzeug.utils import secure_filename
 import threading
+from jsmin import jsmin
 
 import disassemble as disasm
 import utils
-from function_store import (storeFunctions, getFunctions, getFunctionsBySubstring)
+from function_store import storeFunctions, getFunctions, getFunctionsBySubstring
 from executable import *
 from disassemble import disasm, jsonify_capstone
 
@@ -30,10 +31,23 @@ app.config['UPLOAD_DIR'] = './uploads/'
 assets = Environment(app)
 
 # relative to static dir
-scss = Bundle('scss/index.scss', 'scss/disassemble.scss', filters='pyscss', output='css/all.css')
-assets.register('css_all', scss)
+css = Bundle(
+	# Local scss files
+	'scss/index.scss', 
+	'scss/disassemble.scss', 
+	filters='pyscss',
+	output='css/all.css')
+assets.register('css_all', css)
 
-js = Bundle('js/disassemble.js', 'js/index.js', 'js/autocomplete.js', output='js/all.js')
+js = Bundle(
+	# Local js files
+	Bundle('js/disassemble.js', 
+		'js/index.js', 
+		'js/autocomplete.js'),
+	# jQuery js files
+	Bundle('js/jquery.contextMenu.js',
+		'js/jquery.ui.position.js'),
+	output='js/all.js')
 assets.register('js_all', js)
 
 # home and upload
