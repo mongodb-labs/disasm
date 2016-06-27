@@ -82,10 +82,10 @@ class ElfExecutable(Executable):
         for sym in function_syms:
             func = {}
             func["offset"] = sym["st_value"] - section["sh_addr"] + section["sh_offset"]
+            func["st_value"] = sym["st_value"]
             func["size"] = sym["st_size"]
             func["name"] = demangle(sym.name)
             functions.append(func)
-
         return functions
 
     def get_function_syms(self):
@@ -119,6 +119,7 @@ class ElfExecutable(Executable):
     def get_all_sections(self):
         for sec in self.elff.iter_sections():
             print sec["sh_type"] + ", name: " + str(sec["sh_name"])
+
 
 """
 Mach-o executable

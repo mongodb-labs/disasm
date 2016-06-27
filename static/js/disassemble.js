@@ -99,7 +99,8 @@ function functionClicked(event, model) {
 	data = {
 		filename: $('h2.filename').text().trim(),
 		funcname: el.innerText,
-		offset: el.attributes["data-offset"].value,//$(el).data("offset"),
+		st_value: el.attributes["data-st-value"].value,
+		file_offset: el.attributes["data-offset"].value,
 		size: el.attributes["data-size"].value
 	}
 
@@ -115,7 +116,6 @@ function functionClicked(event, model) {
 			i.op_str =wrapHexAndDec(i.op_str);
 			return i;
 		});
-		// wrapHexAndDec(data);
 		assembly.contents = data;
 	})
 	.fail(function(data) {

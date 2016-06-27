@@ -25,7 +25,8 @@
       {# all functions #}
       <div class='four columns' id='functions'>
         <div rv-each-func="functions.contents"
-          class='function'
+          class="function"
+          rv-data-st-value="func.st_value"
           rv-data-offset="func.offset"
           rv-data-size="func.size"
           rv-on-click="ctrl.functionClicked"
