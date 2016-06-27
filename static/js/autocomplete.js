@@ -25,7 +25,7 @@ var NUM_FUNCTIONS = 100;
 //   	expandable: true/false
 //		collapsable: int
 //  }, ... ], 
-//  offset: "", size: ""
+//  offset: "", size: "", sh_addr: ""
 // }
 var functions = {contents: []};
 var ctrl = {
@@ -40,6 +40,7 @@ rivets.bind($("#functions"),
 		ctrl: ctrl 
 	}
 );
+
 
 function format_function_name(str_name) {
 	var parts = chunk_str(str_name);
