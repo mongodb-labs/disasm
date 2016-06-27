@@ -32,4 +32,11 @@ $collapsable-color: rgb(240,98,146);
 #function-disasm {
 	max-height: $max-content-height;
 	overflow-y: scroll;
+
+	.instruction.row {
+		display: block
+	}
+	.instruction.row:hover {
+		background-color: aliceblue;
+	}
 }

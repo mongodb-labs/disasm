@@ -17,7 +17,11 @@
 var URL_DISASM_FUNCTION = "/disasm_function"
 
 var assembly = {contents : []};
-rivets.bind($("#function-disasm"), {assembly: assembly});
+var assembly_ctrl = {
+	instructionClicked: instructionClicked // in disassembly_analysis
+}
+rivets.bind($("#function-disasm"), 
+	{assembly: assembly, ctrl: assembly_ctrl});
 
 $(function() {
 	$.contextMenu({

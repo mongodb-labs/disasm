@@ -44,7 +44,9 @@
 
       {# selected function's assembly #}
       <div class='six columns' id='function-disasm'>
-        <span class='row' rv-each-i="assembly.contents">
+        <span class='row instruction' 
+          rv-each-i="assembly.contents"
+          rv-on-click="ctrl.instructionClicked">
           <div class='address two columns'>{i.address}</div>
           <div class='mnemonic two columns'>{i.mnemonic}</div>
           <div class='op_str eight columns' rv-html="i.op_str"></div>

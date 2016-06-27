@@ -18,10 +18,18 @@ main.row {
       cursor: pointer;
       margin-bottom: 15px; }
       #functions .function span.expandable {
-        background-color: rgba(77, 182, 172, 0.2); }
+        background-color: rgba(77, 182, 172, 0.7); }
         #functions .function span.collapsable {
-          background-color: rgba(240, 98, 146, 0.2); }
+          background-color: rgba(240, 98, 146, 0.7); }
+          #functions .function span.expandable:hover {
+            background-color: rgba(77, 182, 172, 0.3); }
+            #functions .function span.collapsable.hovered {
+              background-color: rgba(240, 98, 146, 0.3); }
 
 #function-disasm {
   max-height: 80vh;
   overflow-y: scroll; }
+  #function-disasm .instruction.row {
+    display: block; }
+    #function-disasm .instruction.row:hover {
+      background-color: aliceblue; }

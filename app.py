@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import os
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, g
 from flask_assets import Environment, Bundle
 from werkzeug.utils import secure_filename
 import threading
@@ -44,10 +44,14 @@ assets.register('js_index', js_index)
 js_disassemble = Bundle('js/rivets.js', 
 	'js/disassemble.js', 
 	'js/autocomplete.js',
+	'js/disassembly_analysis.js',
     'js/jquery.contextMenu.js',
 	'js/jquery.ui.position.js',
 	output='js/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
+
+## the executable we're looking at
+ex = None
 
 # home and upload
 @app.route('/', methods=['GET', 'POST'])
@@ -66,6 +70,7 @@ def index():
 		return render_template("index.jinja.html")
 
 def loadExec(filename):
+	global ex
 	path = app.config['UPLOAD_DIR'] + filename
 	f = open(path, 'rb')
 	ex = get_executable(f)
@@ -92,14 +97,11 @@ def get_functions():
 # expects {"filename": "", func_name: "", "offset": "", "size": ""}
 @app.route('/disasm_function', methods=['POST'])
 def disasm_function():
-	file_path = app.config['UPLOAD_DIR'] + request.form['filename']
-	f = open(file_path, 'rb')
-	ex = get_executable(f)
-
+	global ex
 	# get sequence of bytes and offset, and pass into disasm
 	offset = int(request.form['offset'])
 	input_bytes = ex.get_bytes(offset, int(request.form['size']))
-	data = disasm(input_bytes, offset)	
+	data = disasm(input_bytes, offset)
 	return jsonify(jsonify_capstone(data))
 
 # expects {"substring": "", "start_index": <int>, "num_functions": <int>, "case_sensitive": <bool>}
@@ -111,6 +113,13 @@ def get_substring_matches():
 		int(request.args['num_functions']), request.args['case_sensitive'] == 'True')
 	print "Finished processing substring"
 	return jsonify(functions)
+
+@app.route('/get_line_info', methods=["GET"])
+def get_line_info():
+	global ex
+	addr = int(request.args['addr'])
+	return jsonify(ex.get_line_info(addr))
+
 
 # debug=True auto reloads whenever server code changes
 app.run(debug=True)
