@@ -37,7 +37,7 @@ class Executable(object):
 
         f.seek(0)
         magic = f.read(4).encode('hex')
-        return magic == "cffaedfe" 
+        return magic in MAGIC
 
     def raise_not_implemented(self):
         raise NotImplementedError("Class %s doesn't implement a method" 
@@ -64,6 +64,8 @@ class ElfExecutable(Executable):
             self.dwarff = self.elff.get_dwarf_info()
         else:
             self.dwarff = None
+
+        self.aranges = self.dwarff.get_aranges()
 
     def get_bytes(self, start, n):
         self.f.seek(start)
@@ -93,26 +95,48 @@ class ElfExecutable(Executable):
         function_syms = list(filter(lambda sym: sym["st_info"]["type"] == "STT_FUNC", symtab.iter_symbols()))
         return function_syms
 
-    # returns filename, line for given address
-    def get_line_info(self, address):
-        info = {}
-        # Go over all the line programs in the DWARF information, looking for
-        # one that describes the given address.
-        for CU in self.dwarff.iter_CUs():
-            # First, look at line programs to find the file/line for the address
-            lineprog = self.dwarff.line_program_for_CU(CU)
-            prevstate = None
-            for entry in lineprog.get_entries():
-                # We're interested in those entries where a new state is assigned
-                if entry.state is None or entry.state.end_sequence:
-                    continue
-                # Looking for a range of addresses in two consecutive states that
-                # contain the required address.
-                if prevstate and prevstate.address <= address < entry.state.address:
-                    filename = lineprog['file_entry'][prevstate.file - 1].name
-                    line = prevstate.line
-                    return {"filename": filename, "line": line}
-                prevstate = entry.state
+    # get the line info for a given function, whose addresses are
+    # bound by begin and begin+size
+    def get_function_line_info(self, begin, size):
+        print hex(begin), hex(size)
+        info = []
+
+        CU_offset = self.aranges.cu_offset_at_addr(begin)
+        CU = self.dwarff._parse_CU_at_offset(CU_offset)
+        lineprog = self.dwarff.line_program_for_CU(CU)
+        for entry in lineprog.get_entries():
+            # We're interested in those entries where a new state is assigned
+            if entry.state is None or entry.state.end_sequence:
+                continue
+
+            # Looking for all addresses in [begin, begin + size]
+            if begin <= entry.state.address <= (begin + size):
+                filename = lineprog['file_entry'][entry.state.file - 1].name
+                info.append((hex(entry.state.address), entry.state.line, filename))
+
+            elif entry.state.address > (begin + size):
+                return info
+        return info
+
+    # get line info for given address
+    def get_addr_line_info(self, address):
+        CU_offset = self.aranges.cu_offset_at_addr(address)
+        CU = self.dwarff._parse_CU_at_offset(CU_offset)
+       
+        lineprog = self.dwarff.line_program_for_CU(CU)
+        prevstate = None
+        for entry in lineprog.get_entries():
+            # We're interested in those entries where a new state is assigned
+            if entry.state is None or entry.state.end_sequence:
+                continue
+            # Looking for a range of addresses in two consecutive states that
+            # contain the required address.
+            if prevstate and prevstate.address <= address < entry.state.address:
+                filename = lineprog['file_entry'][prevstate.file - 1].name
+                line = prevstate.line
+                return {"filename": filename, "line":line}
+            prevstate = entry.state
+
         return {}
 
     # general helpers; may or may not be useful

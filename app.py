@@ -100,6 +100,8 @@ def disasm_function():
 	# get sequence of bytes and offset, and pass into disasm
 	file_offset = int(request.form['file_offset'])
 	input_bytes = ex.get_bytes(file_offset, int(request.form['size']))
+	
+	# we want to display the addr in memory where the function is located
 	memory_addr = int(request.form['st_value'])
 	data = disasm(input_bytes, memory_addr)	
 	return jsonify(jsonify_capstone(data))
@@ -117,9 +119,15 @@ def get_substring_matches():
 @app.route('/get_line_info', methods=["GET"])
 def get_line_info():
 	global ex
-	addr = int(request.args['addr'])
-	return jsonify(ex.get_line_info(addr))
+	begin = int(request.args['begin'])
+	size = int(request.args['size'])
+	return jsonify(ex.get_function_line_info(begin, size))
 
+# @app.route('/get_line_info', methods=["GET"])
+# def get_line_info():
+# 	global ex
+# 	address = int(request.args['addr'])
+# 	return jsonify(ex.get_addr_line_info(address))
 
 # debug=True auto reloads whenever server code changes
 app.run(debug=True)

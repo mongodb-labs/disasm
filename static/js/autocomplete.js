@@ -316,3 +316,5 @@ match(needle_start, needle_len, haystack_start, haystack_end, last_index, score)
     return score
 
 I think.... Maybe run through this on Monday to make sure it's right
+
+*/

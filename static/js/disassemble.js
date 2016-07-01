@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-var URL_DISASM_FUNCTION = "/disasm_function"
+var URL_DISASM_FUNCTION = "/disasm_function";
+var URL_LINE_INFO = "/get_line_info";
 
 var assembly = {contents : []};
 var assembly_ctrl = {
@@ -96,7 +97,8 @@ function functionClicked(event, model) {
 		return;
 	}
 
-	data = {
+	// disassemble function
+	data_disassemble = {
 		filename: $('h2.filename').text().trim(),
 		funcname: el.innerText,
 		st_value: el.attributes["data-st-value"].value,
@@ -107,7 +109,7 @@ function functionClicked(event, model) {
 	$.ajax({
 		type: "POST",
 		url: URL_DISASM_FUNCTION,
-		data: data
+		data: data_disassemble
 	})
 	.done(function(data) {
 		// change to hex
@@ -120,6 +122,20 @@ function functionClicked(event, model) {
 	})
 	.fail(function(data) {
 		$("#function-disasm").text("Sorry, something went wrong!");
+	});
+
+	// get line info for function
+	begin = el.attributes["data-st-value"].value;
+	size = el.attributes["data-size"].value;
+	$.ajax({
+		type:"GET",
+		url: URL_LINE_INFO + "?begin=" + begin + "&size=" + size,
+	})
+	.done(function(data) {
+		console.log(data)
+	})
+	.fail(function(data) {
+		console.log("something went wrong in getting line info")
 	});
 }
 
