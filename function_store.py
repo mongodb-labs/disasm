@@ -83,6 +83,8 @@ def getFunctionsBySubstring(substring, start_index, num_functions, case_sensitiv
         haystack = function['name']
         if prog.search(haystack):
             functions.append(function)
+            if len(functions) == start_index + num_functions:
+                break
     # elif ALGO == "OG":
     #     if subStringIndex.has_key(substring):
     #         return subStringIndex[substring][start_index:start_index+num_functions]
@@ -103,6 +105,7 @@ def getFunctionsBySubstring(substring, start_index, num_functions, case_sensitiv
     #         subStringIndex[substring] = functions
     # else:
     #     raise "Not a valid search algo"
+    # print len(functions)
     return functions[start_index:start_index+num_functions]
 
 def filterName(funcHeader):
@@ -218,8 +221,8 @@ def test(argv):
     with open('functions_list.txt', 'r') as f:
         global functionsList
         functionsList = pickle.load(f)
-    matches = getFunctionsBySubstring("vector.*push", 0, 20, False)
-    print matches
+    # matches = getFunctionsBySubstring("vector.*push", 0, 20, False)
+    matches = getFunctionsBySubstring("e", 100, 20, False)
     # for matchItem in matches:
     #     print "%f : %s" % (matchItem.score, matchItem.name)
 
