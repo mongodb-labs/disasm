@@ -2,6 +2,10 @@
 .DS_Store
 /uploads/
 /test_inputs/
+convert_func_list.py
+*.txt
+*.lprof
+*.swp
 
 # Flask stuff:
 instance/
