@@ -86,10 +86,9 @@ def get_executable(f):
 # expects {"f": "", "start_index": <int>, "num_functions": <int>}
 @app.route('/get_functions', methods=['GET'])
 def get_functions():
-	functions = getFunctions(int(request.args['start_index']), int(request.args['num_functions']))
-	return render_template('disassemble.jinja.html', filename=request.args['f'], functions=functions)
+	return render_template('disassemble.jinja.html', filename=request.args['f'])
 
-# expects {"filename": "", func_name: "", "offset": "", "size": ""}
+# expects {"filename": "", func_name: "", "st_value": "", "file_offset": "", "size": ""}
 @app.route('/disasm_function', methods=['POST'])
 def disasm_function():
 	file_path = app.config['UPLOAD_DIR'] + request.form['filename']
@@ -97,9 +96,10 @@ def disasm_function():
 	ex = get_executable(f)
 
 	# get sequence of bytes and offset, and pass into disasm
-	offset = int(request.form['offset'])
-	input_bytes = ex.get_bytes(offset, int(request.form['size']))
-	data = disasm(input_bytes, offset)	
+	file_offset = int(request.form['file_offset'])
+	input_bytes = ex.get_bytes(file_offset, int(request.form['size']))
+	memory_addr = int(request.form['st_value'])
+	data = disasm(input_bytes, memory_addr)	
 	return jsonify(jsonify_capstone(data))
 
 # expects {"substring": "", "start_index": <int>, "num_functions": <int>, "case_sensitive": <bool>}
