@@ -280,5 +280,39 @@ function collapseFunctionName(event, el) {
 	func.name = func.name.slice(0, first).concat([newPart], func.name.slice(last+1));
 }
 
+/*
 
+CMD+T
 
+Terms:
+- needle -- The string entered that you are trying to match
+- haystack -- The string you are searching through
+- score -- How highly the strings match. Higher scores are assigned for characters that appear at
+    after a space, after a hyphen, after an underscore, after a period, and for uppercase characters
+    that appear after a lowercase character (camelcase). Lower scores are assigned for characters
+    that are further away from the last matched character
+- memo -- 2D array. len(needle) x len(haystack). Stores the greatest score seen so far for a
+    pairing btwn a character in needle and a character in haystack
+
+Basic algo:
+match(needle_start, needle_len, haystack_start, haystack_end, last_index, score):
+    seen_score = 0
+    for i = needle_start to needle_len:
+        for j = haystack_start to haystack_end:
+            c = needle[i]
+            d = haystack[j]
+            if case_sensitive:
+                d = lower(d)
+            if c == d:
+                char_score = calculate_char_score()
+                sub_score = match(j+1, needle_len, i, haystack_end, last_index, score):
+                if (sub_score > seen_score):
+                    seen_score = sub_score
+                last_index = j
+                haystack_start = j + 1
+                score += char_score
+                if i == needle_len - 1:
+                    return seen_score > score ? seen_score : score
+    return score
+
+I think.... Maybe run through this on Monday to make sure it's right
