@@ -17,7 +17,7 @@
 var URL_DISASM_FUNCTION = "/disasm_function";
 var URL_LINE_INFO = "/get_line_info";
 
-var assembly = {contents : []};
+var assembly = {contents : [], line_info: []};
 var assembly_ctrl = {
 	instructionClicked: instructionClicked // in disassembly_analysis
 }
@@ -100,7 +100,7 @@ function functionClicked(event, model) {
 	// disassemble function
 	data_disassemble = {
 		filename: $('h2.filename').text().trim(),
-		funcname: el.innerText,
+		func_name: el.innerText,
 		st_value: el.attributes["data-st-value"].value,
 		file_offset: el.attributes["data-offset"].value,
 		size: el.attributes["data-size"].value
@@ -132,7 +132,8 @@ function functionClicked(event, model) {
 		url: URL_LINE_INFO + "?begin=" + begin + "&size=" + size,
 	})
 	.done(function(data) {
-		console.log(data)
+		assembly.line_info = data;
+		console.log(assembly.line_info)
 	})
 	.fail(function(data) {
 		console.log("something went wrong in getting line info")

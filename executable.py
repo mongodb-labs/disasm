@@ -62,10 +62,10 @@ class ElfExecutable(Executable):
         self.elff = ELFFile(self.f)
         if self.elff.has_dwarf_info():
             self.dwarff = self.elff.get_dwarf_info()
+            self.aranges = self.dwarff.get_aranges()
         else:
             self.dwarff = None
-
-        self.aranges = self.dwarff.get_aranges()
+            self.aranges = None
 
     def get_bytes(self, start, n):
         self.f.seek(start)

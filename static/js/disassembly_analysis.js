@@ -1,17 +1,9 @@
-URL_INSTRUC_TO_LINE = "/get_line_info"
-
+// assembly.line_info contains all the address to line info
 function instructionClicked(e, model) {
-	// get address from item
-	var addr = parseInt(model.i.address, 16);
+	var addr = model.i.address;
 
-	$.ajax({
-		type: "GET",
-		url: URL_INSTRUC_TO_LINE + "?addr=" + addr
-	})
-	.done(function(data) {
-		console.log(data); // returns filename, line
-	})
-	.fail(function(data) {
-		console.log("uhhh something went wrong");
+	var left_bisect = assembly.line_info.filter(function(entry) {
+		return parseInt(entry[0]) <= parseInt(addr)
 	});
+	console.log(left_bisect[left_bisect.length - 1]);
 }
