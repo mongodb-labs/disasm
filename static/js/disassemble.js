@@ -17,12 +17,13 @@
 var URL_DISASM_FUNCTION = "/disasm_function";
 var URL_LINE_INFO = "/get_line_info";
 
-var assembly = {contents : [], line_info: []};
+var assembly = {contents : [], line_info: [], func_name: ""};
 var assembly_ctrl = {
 	instructionClicked: instructionClicked // in disassembly_analysis
 }
 rivets.bind($("#function-disasm"), 
-	{assembly: assembly, ctrl: assembly_ctrl});
+	{assembly: assembly, ctrl: assembly_ctrl}
+);
 
 $(function() {
 	$.contextMenu({
@@ -96,6 +97,16 @@ function functionClicked(event, model) {
 		collapseFunctionName(event, model);
 		return;
 	}
+
+	// clear all info
+	assembly.func_name = "";
+	assembly.contents = [];
+	assembly.line_info = [];
+
+	// set class to active and indicate func name
+	$(".selected").removeClass("selected");
+	el.classList.add("selected");
+	assembly.func_name = el.innerText;
 
 	// disassemble function
 	data_disassemble = {

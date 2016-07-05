@@ -6,24 +6,32 @@
   <link rel="stylesheet" href="static/css/normalize.css">
   <link rel="stylesheet" href="static/css/jquery.contextMenu.css">
   {% assets "css_all" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
+  <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
   <title>Disassembler</title>
 </head>
 
 
 <body>
-  <h2 class='filename'> {{ filename }} </h2>
+  <h2 class='header'> 
+    <div class='title'>filename</div>
+    <div class='filename'>{{ filename }} </div>
+  </h2>
 
   <main>
+    <input type="text" placeholder="function name" id="function-name-input"/>
+
     <div class="row">
-      <button class="button-primary" id="button-prev">Previous 100 results</button>
-      <button class="button-primary" id="button-next">Next 100 results</button>
+
     </div>
-    <div class="row">
 
-      <input type="text" class="u-full-width" placeholder="function name" id="function-name-input"/>
-
+    <div class="row disasm-contents">
       {# all functions #}
       <div class='four columns' id='functions'>
+        <div class="nav-buttons">
+          <button id="button-prev"> < </button>
+          <button id="button-next"> > </button>
+        </div>
+
         <div rv-each-func="functions.contents"
           class="function"
           rv-data-st-value="func.st_value"
@@ -44,16 +52,22 @@
       </div>
 
       {# selected function's assembly #}
-      <div class='six columns' id='function-disasm'>
-        <span class='row instruction' 
-          rv-each-i="assembly.contents"
-          rv-on-click="ctrl.instructionClicked">
-          <div class='address two columns'>{i.address}</div>
-          <div class='mnemonic two columns'>{i.mnemonic}</div>
-          <div class='op_str eight columns' rv-html="i.op_str"></div>
+      <div class='eight columns' id='function-disasm'>
+        <span class="selected-func-name">
+        { assembly.func_name }
         </span>
-      </div>
 
+        <div class="instructions">
+          <span class='row instruction' 
+            rv-each-i="assembly.contents"
+            rv-on-click="ctrl.instructionClicked">
+            <div class='address two columns'>{i.address}</div>
+            <div class='mnemonic two columns'>{i.mnemonic}</div>
+            <div class='op_str eight columns' rv-html="i.op_str"></div>
+          </span>
+        </div> {# end instructions #}
+
+      </div>
     </div>
   </main>
 
