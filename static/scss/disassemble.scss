@@ -34,19 +34,29 @@ div.disasm-contents {
 }
 
 $button-width: 60px;
+$button-color: rgba(128,203,196, 0.8);
 .nav-buttons {
-	// position: absolute;
-
-	#button-prev {
+	.nav-button {
 		position: absolute;
 		width: $button-width;
 		padding: inherit;
+		border: none;
+		color: white;
+		background-color: $button-color;
+
+		font-size: 1.5em;
+		font-weight: bolder;
+	}
+	.nav-button:hover {
+		opacity: 0.8;
+	}
+
+	#button-prev {
+		@extend .nav-button;
 	}
 
 	#button-next {
-		position: absolute;
-		width: $button-width;
-		padding: inherit;
+		@extend .nav-button;
 
 		margin-left: $button-width + 30px;
 	}
@@ -62,7 +72,7 @@ $button-width: 60px;
 	margin-left: 0; // override skeleton.css
 
 	.function {
-		font-family: "Inconsolata", monospace;
+		font-family: "Space Mono", monospace;
 		cursor: pointer;
 		margin-bottom: 15px;
 
@@ -106,6 +116,15 @@ $button-width: 60px;
 	font-family: "Inconsolata", monospace;
 	max-height: $max-content-height;
 	overflow-y: scroll;
+
+	.instructions-loading {
+		position: relative;
+		img {
+			display: block;
+			margin: auto;
+			padding-top: 50px;
+		}
+	}
 
 	.selected-func-name {
 		background-color: rgba($func-bg, 0.3);

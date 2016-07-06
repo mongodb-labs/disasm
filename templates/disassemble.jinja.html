@@ -6,7 +6,7 @@
   <link rel="stylesheet" href="static/css/normalize.css">
   <link rel="stylesheet" href="static/css/jquery.contextMenu.css">
   {% assets "css_all" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
-  <link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet">
   <title>Disassembler</title>
 </head>
 
@@ -57,6 +57,15 @@
         { assembly.func_name }
         </span>
 
+{#         <span class="loading-line-info">
+          Loading line info
+        </span> #}
+
+        <div class="instructions-loading"
+          rv-show="assembly.instructions_loading">
+          <img src="static/img/pacman.gif"/>
+        </div>
+
         <div class="instructions">
           <span class='row instruction' 
             rv-each-i="assembly.contents"
@@ -66,8 +75,10 @@
             <div class='op_str eight columns' rv-html="i.op_str"></div>
           </span>
         </div> {# end instructions #}
+      </div> {# end assembly #}
 
-      </div>
+
+
     </div>
   </main>
 

@@ -18,7 +18,12 @@ var URL_DISASM_FUNCTION = "/disasm_function";
 var URL_LINE_INFO = "/get_line_info";
 var URL_DIE_INFO = "/get_die_info";
 
-var assembly = {contents : [], line_info: [], func_name: ""};
+var assembly = {
+	contents : [], 
+	line_info: [], 
+	func_name: "", 
+	instructions_loading: false
+};
 var assembly_ctrl = {
 	instructionClicked: instructionClicked // in disassembly_analysis
 }
@@ -110,6 +115,9 @@ function functionClicked(event, model) {
 	el.classList.add("selected");
 	assembly.func_name = el.innerText;
 
+	// activate loading icon
+	assembly.instructions_loading = true;
+	
 	// get function assembly from server
 	disassemble_function(el);
 
@@ -148,6 +156,9 @@ function disassemble_function(el) {
 			i.op_str =wrapHexAndDec(i.op_str);
 			return i;
 		});
+
+		// clear loading icon
+		assembly.instructions_loading = false;
 		assembly.contents = data;
 	})
 	.fail(function(data) {
