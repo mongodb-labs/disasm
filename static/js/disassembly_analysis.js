@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// init to hiding
+$("#function-analysis").hide();
 var analysis = {
 	stack_info: [],
 	show_stack_info: false

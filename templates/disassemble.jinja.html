@@ -80,11 +80,10 @@
     </div> {# end disasm-contents #}
 
     <div id="function-analysis" class="row">
-
-        <div class="stack-info four columns"
-          rv-show="analysis.show_stack_info">
+        <div class="stack-info four columns">
           <h6>Stack trace</h6>
           <div class="stack-info-frame"
+            rv-show="analysis.show_stack_info"
             rv-each-frame="analysis.stack_info">
               <span class="filename">{frame.0}</span>
               <span class="lineno">{frame.1}</span>

@@ -21,6 +21,20 @@
     </p>
 	</form>
 
+  <div id="uploaded-files">
+    <h3>Uploaded files</h3>
+    {% for filename, fileinfo in files.items() %}
+    <div class="file">
+      <div class="filename">
+        <a href="/disassemble?filename={{ filename }}">{{ filename }}</a>
+      </div>
+      {% for entry in fileinfo %}
+        <div class="{{ loop.cycle('size', 'timestamp') }}">{{ entry }}</div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 {% assets "js_index" %} <script src="{{ ASSET_URL }}"></script> {% endassets %}

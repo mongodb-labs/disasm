@@ -12,14 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
+import os, datetime
 from flask import Flask, render_template, request, redirect, url_for, jsonify, g
 from flask_assets import Environment, Bundle
 from werkzeug.utils import secure_filename
-import threading
+import hurry.filesize
 
 import disassemble as disasm
-import utils
 from function_store import storeFunctions, getFunctions, getFunctionsBySubstring
 from executable import *
 from disassemble import disasm, jsonify_capstone
@@ -56,18 +55,25 @@ ex = None
 # home and upload
 @app.route('/', methods=['GET', 'POST'])
 def index():
+	if not os.path.exists(app.config['UPLOAD_DIR']):
+		os.makedirs(app.config['UPLOAD_DIR'])
+	# uploading new file
 	if request.method == 'POST':
 		file = request.files['file']
 		filename = secure_filename(file.filename)
-		if not os.path.exists(app.config['UPLOAD_DIR']):
-			os.makedirs(app.config['UPLOAD_DIR'])
 		file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
-		# thread = threading.Thread(target=loadExec, args=(filename,))
-		# thread.start()
-		loadExec(filename)
-		return redirect(url_for('get_functions', f=filename, start_index=0, num_functions=100))
+		return redirect(url_for('disassemble', filename=filename))
 	else:
-		return render_template("index.jinja.html")
+		res = {}
+		files = os.listdir(app.config['UPLOAD_DIR'])
+		# display file info
+		for file in files:
+		    t = os.path.getmtime(app.config['UPLOAD_DIR'] + file)
+		    timestamp = datetime.datetime.fromtimestamp(t)
+		    size = os.path.getsize(app.config['UPLOAD_DIR'] + file)
+		    res[file] = [hurry.filesize.size(size), timestamp]
+		
+		return render_template("index.jinja.html", files=res)
 
 def loadExec(filename):
 	global ex
@@ -87,11 +93,10 @@ def get_executable(f):
 	else:
 		raise Exception("Couldn't find executable format")
 
-# disassemble into functions
-# expects {"f": "", "start_index": <int>, "num_functions": <int>}
-@app.route('/get_functions', methods=['GET'])
-def get_functions():
-	return render_template('disassemble.jinja.html', filename=request.args['f'])
+@app.route('/disassemble', methods=['GET'])
+def disassemble():
+	loadExec(request.args['filename'])
+	return render_template('disassemble.jinja.html', filename=request.args['filename'])	
 
 # expects {"filename": "", func_name: "", "st_value": "", "file_offset": "", "size": ""}
 @app.route('/disasm_function', methods=['POST'])
