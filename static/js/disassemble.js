@@ -16,6 +16,7 @@
 
 var URL_DISASM_FUNCTION = "/disasm_function";
 var URL_LINE_INFO = "/get_line_info";
+var URL_DIE_INFO = "/get_die_info";
 
 var assembly = {contents : [], line_info: [], func_name: ""};
 var assembly_ctrl = {
@@ -88,6 +89,7 @@ function contextMenuConvertBase(key, opt) {
 }
 
 function functionClicked(event, model) {
+	// handle expansion/collapse of <> in function name
 	var el = event.currentTarget;
 	if (event.target.classList.contains("expandable")) {
 		expandFunctionName(event, model);
@@ -108,6 +110,23 @@ function functionClicked(event, model) {
 	el.classList.add("selected");
 	assembly.func_name = el.innerText;
 
+	// get function assembly from server
+	disassemble_function(el);
+
+	// get addr -> line info from server
+	begin = el.attributes["data-st-value"].value;
+	size = el.attributes["data-size"].value;
+	get_function_line_info(begin, size);
+
+	// preload DIE info from server
+	$.ajax({
+		type: "GET",
+		url: URL_DIE_INFO + "?address=" + begin
+	});
+}
+
+// get assembly for given function, given as DOM element
+function disassemble_function(el) {
 	// disassemble function
 	data_disassemble = {
 		filename: $('h2.filename').text().trim(),
@@ -132,15 +151,15 @@ function functionClicked(event, model) {
 		assembly.contents = data;
 	})
 	.fail(function(data) {
-		$("#function-disasm").text("Sorry, something went wrong!");
+		console.log("Request failed");
 	});
+}
 
-	// get line info for function
-	begin = el.attributes["data-st-value"].value;
-	size = el.attributes["data-size"].value;
+// get line info for function
+function get_function_line_info(begin, size) {
 	$.ajax({
 		type:"GET",
-		url: URL_LINE_INFO + "?begin=" + begin + "&size=" + size,
+		url: URL_LINE_INFO + "?begin=" + begin + "&size=" + size
 	})
 	.done(function(data) {
 		assembly.line_info = data;
@@ -150,6 +169,7 @@ function functionClicked(event, model) {
 		console.log("something went wrong in getting line info")
 	});
 }
+
 
 function wrapHexAndDec(str) {
 	var outputStr = "";

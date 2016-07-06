@@ -138,7 +138,7 @@ function getNextPage(query, curr_index, num_functions) {
                 num_functions: num_functions, 
                 case_sensitive: case_sensitive 
         })
-          .done(function(funcs) {
+        .done(function(funcs) {
             functions.contents = format_functions(funcs);
         })
         .fail(function() {

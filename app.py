@@ -123,11 +123,11 @@ def get_line_info():
 	size = int(request.args['size'])
 	return jsonify(ex.get_function_line_info(begin, size))
 
-# @app.route('/get_line_info', methods=["GET"])
-# def get_line_info():
-# 	global ex
-# 	address = int(request.args['addr'])
-# 	return jsonify(ex.get_addr_line_info(address))
+@app.route('/get_die_info', methods=["GET"])
+def get_DIE_info():
+	global ex
+	address = int(request.args['address'])
+	return jsonify(ex.get_addr_stack_info(address))
 
 # debug=True auto reloads whenever server code changes
 app.run(debug=True)

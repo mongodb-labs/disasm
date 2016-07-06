@@ -14,6 +14,7 @@
 
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
+from elftools.dwarf.descriptions import describe_form_class
 from demangler import demangle
 
 """
@@ -67,6 +68,8 @@ class ElfExecutable(Executable):
             self.dwarff = None
             self.aranges = None
 
+        self.CU_offset_to_DIE = {}
+
     def get_bytes(self, start, n):
         self.f.seek(start)
         return self.f.read(n)
@@ -97,8 +100,8 @@ class ElfExecutable(Executable):
 
     # get the line info for a given function, whose addresses are
     # bound by begin and begin+size
+    # ret is a list of (addr, filename, line)
     def get_function_line_info(self, begin, size):
-        print hex(begin), hex(size)
         info = []
 
         CU_offset = self.aranges.cu_offset_at_addr(begin)
@@ -112,18 +115,45 @@ class ElfExecutable(Executable):
             # Looking for all addresses in [begin, begin + size]
             if begin <= entry.state.address <= (begin + size):
                 filename = lineprog['file_entry'][entry.state.file - 1].name
-                info.append((hex(entry.state.address), entry.state.line, filename))
+                info.append((hex(entry.state.address), filename, entry.state.line))
 
             elif entry.state.address > (begin + size):
                 return info
         return info
 
+    # is the given address contained in the given DIE?
+    def _addr_in_DIE(self, DIE, address):
+        lo = int(DIE.attributes["DW_AT_low_pc"].value)
+        high_pc = DIE.attributes["DW_AT_high_pc"]
+        highpc_attr_class = describe_form_class(high_pc.form)
+        if highpc_attr_class == 'address':
+            hi = int(high_pc.value)
+        elif highpc_attr_class == 'constant':
+            hi = lo + int(high_pc.value)       
+        else:
+            print('Error: invalid DW_AT_high_pc class:', highpc_attr_class)
+        return lo <= address <= hi
+
+    # helper function to get array of DIEs for given address
+    def _get_line_DIEs(self, parent, address, stack):
+        for child in parent.iter_children():
+            if "DW_AT_ranges" in child.attributes:
+                print ("ranges not implemented sry")
+            if "DW_AT_low_pc" in child.attributes and "DW_AT_high_pc" in child.attributes:
+                # proceed if child is in the right range
+                if self._addr_in_DIE(child, address):
+                    stack.append(child)
+                    return self._get_line_DIEs(child, address, stack)
+        return stack
+
     # get line info for given address
-    def get_addr_line_info(self, address):
-        CU_offset = self.aranges.cu_offset_at_addr(address)
-        CU = self.dwarff._parse_CU_at_offset(CU_offset)
-       
-        lineprog = self.dwarff.line_program_for_CU(CU)
+    # return (filename, line)
+    def _get_addr_line_info(self, address, lineprog=None):
+        if lineprog == None:
+            CU_offset = self.aranges.cu_offset_at_addr(address)
+            CU = self.dwarff._parse_CU_at_offset(CU_offset)
+            lineprog = self.dwarff.line_program_for_CU(CU)
+        
         prevstate = None
         for entry in lineprog.get_entries():
             # We're interested in those entries where a new state is assigned
@@ -134,10 +164,46 @@ class ElfExecutable(Executable):
             if prevstate and prevstate.address <= address < entry.state.address:
                 filename = lineprog['file_entry'][prevstate.file - 1].name
                 line = prevstate.line
-                return {"filename": filename, "line":line}
+                return (filename, line)
             prevstate = entry.state
+        return None
 
-        return {}
+
+    # get array of DIEs for given address
+    def get_addr_stack_info(self, address):
+        CU_offset = self.aranges.cu_offset_at_addr(address)
+        CU = self.dwarff._parse_CU_at_offset(CU_offset)
+        # preload tree of DIEs
+        if CU_offset in self.CU_offset_to_DIE:
+            top_DIE = self.CU_offset_to_DIE[CU_offset]
+        else:
+            top_DIE = CU.get_top_DIE()
+            self.CU_offset_to_DIE[CU_offset] = top_DIE
+
+        stack = self._get_line_DIEs(top_DIE, address, [])
+
+        # put in jsonifiable form of [{filename, line}, ...]
+        lineprog = self.dwarff.line_program_for_CU(CU)
+        res = []
+        for entry in stack:
+            if "DW_AT_decl_file" in entry.attributes:
+                file_AT = "DW_AT_decl_file"
+                line_AT = "DW_AT_decl_line"
+            elif "DW_AT_call_file" in entry.attributes:
+                file_AT = "DW_AT_call_file"
+                line_AT = "DW_AT_call_line"
+            else:
+                print "No valid file number"
+                continue
+            fileno = entry.attributes[file_AT].value
+            filename = lineprog['file_entry'][fileno - 1].name
+            res.append((filename, entry.attributes[line_AT].value))
+        
+        # append uppermost "level" of info
+        res.append(self._get_addr_line_info(address, lineprog))
+        return res
+
+
 
     # general helpers; may or may not be useful
     def get_all_sections(self):
