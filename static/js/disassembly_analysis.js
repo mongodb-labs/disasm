@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+var analysis = {
+	stack_info: [],
+	show_stack_info: false
+};
+
+rivets.bind($("#function-analysis"), 
+	{analysis: analysis}
+);
+
 // assembly.line_info contains all the address to line info
 function display_line_info(model) {
 	var addr = parseInt(model.i.address);
@@ -28,17 +37,32 @@ function display_line_info(model) {
 
 // get stack info from address
 function get_stack_info(addr) {
+	analysis.show_stack_info = false;
+
 	// info from DIE
 	$.ajax({
 		type: "GET",
 		url: URL_DIE_INFO + "?address=" + addr
 	})
 	.done(function(data) {
-		console.log(data)
+		analysis.stack_info = data
+		analysis.show_stack_info = true;
 	});
 }
 
 
 function instructionClicked(e, model) {
+	showAnalysis();
 	display_line_info(model);
+}
+
+// display functions: show and hide analysis panel
+function showAnalysis() {
+	$("#function-analysis").show();
+	$("#disasm-contents").height("50vh");
+}
+
+function hideAnalysis() {
+	$("#function-analysis").hide();
+	$("#disasm-contents").height("80vh");
 }

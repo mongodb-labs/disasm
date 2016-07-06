@@ -24,9 +24,10 @@
 
     </div>
 
-    <div class="row disasm-contents">
+    <div class="row" id="disasm-contents">
       {# all functions #}
       <div class='four columns' id='functions'>
+        <div class='spacer'></div>
         <div class="nav-buttons">
           <button id="button-prev"> < </button>
           <button id="button-next"> > </button>
@@ -76,10 +77,21 @@
           </span>
         </div> {# end instructions #}
       </div> {# end assembly #}
+    </div> {# end disasm-contents #}
 
+    <div id="function-analysis" class="row">
 
+        <div class="stack-info four columns"
+          rv-show="analysis.show_stack_info">
+          <h6>Stack trace</h6>
+          <div class="stack-info-frame"
+            rv-each-frame="analysis.stack_info">
+              <span class="filename">{frame.0}</span>
+              <span class="lineno">{frame.1}</span>
+            </div>
+        </div>
 
-    </div>
+    </div> {# end function analysis #}
   </main>
 
 

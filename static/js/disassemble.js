@@ -109,6 +109,7 @@ function functionClicked(event, model) {
 	assembly.func_name = "";
 	assembly.contents = [];
 	assembly.line_info = [];
+	hideAnalysis();
 
 	// set class to active and indicate func name
 	$(".selected").removeClass("selected");

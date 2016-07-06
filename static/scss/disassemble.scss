@@ -28,9 +28,13 @@ $expandable-color: rgb(77,182,172);
 $collapsable-color: rgb(240,98,146);
 $func-bg: rgb(178,223,219);
 
-div.disasm-contents {
+div#disasm-contents {
 	margin-top: 15px;
 	padding-left: 15px;
+}
+
+div#disasm-contents > div {
+	height: 100%;
 }
 
 $button-width: 60px;
@@ -62,7 +66,7 @@ $button-color: rgba(128,203,196, 0.8);
 	}
 }
 
-#functions div:nth-child(2) {
+#functions div:nth-child(3) {
 	margin-top: 50px;
 }
 
@@ -70,6 +74,10 @@ $button-color: rgba(128,203,196, 0.8);
 	max-height: $max-content-height;
 	overflow-y: scroll;
 	margin-left: 0; // override skeleton.css
+
+	.spacer{
+		width: 100%;
+	}
 
 	.function {
 		font-family: "Space Mono", monospace;
@@ -141,5 +149,12 @@ $button-color: rgba(128,203,196, 0.8);
 		}
 	}
 
-
 }
+
+#function-analysis {
+	height: 30vh;
+	width: 100%;
+	bottom: 0;
+	padding-top: 40px;
+}
+
