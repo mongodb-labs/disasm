@@ -6,24 +6,33 @@
   <link rel="stylesheet" href="static/css/normalize.css">
   <link rel="stylesheet" href="static/css/jquery.contextMenu.css">
   {% assets "css_all" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
+  <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet">
   <title>Disassembler</title>
 </head>
 
 
 <body>
-  <h2 class='filename'> {{ filename }} </h2>
+  <h2 class='header'> 
+    <div class='title'>filename</div>
+    <div class='filename'>{{ filename }} </div>
+  </h2>
 
   <main>
+    <input type="text" placeholder="function name" id="function-name-input"/>
+
     <div class="row">
-      <button class="button-primary" id="button-prev">Previous 100 results</button>
-      <button class="button-primary" id="button-next">Next 100 results</button>
+
     </div>
-    <div class="row">
 
-      <input type="text" class="u-full-width" placeholder="function name" id="function-name-input"/>
-
+    <div class="row" id="disasm-contents">
       {# all functions #}
       <div class='four columns' id='functions'>
+        <div class='spacer'></div>
+        <div class="nav-buttons">
+          <button id="button-prev"> < </button>
+          <button id="button-next"> > </button>
+        </div>
+
         <div rv-each-func="functions.contents"
           class="function"
           rv-data-st-value="func.st_value"
@@ -44,15 +53,45 @@
       </div>
 
       {# selected function's assembly #}
-      <div class='six columns' id='function-disasm'>
-        <span class='row' rv-each-i="assembly.contents">
-          <div class='address two columns'>{i.address}</div>
-          <div class='mnemonic two columns'>{i.mnemonic}</div>
-          <div class='op_str eight columns' rv-html="i.op_str"></div>
+      <div class='eight columns' id='function-disasm'>
+        <span class="selected-func-name">
+        { assembly.func_name }
         </span>
-      </div>
 
-    </div>
+{#         <span class="loading-line-info">
+          Loading line info
+        </span> #}
+
+        <div class="instructions-loading"
+          rv-show="assembly.instructions_loading">
+          <img src="static/img/pacman.gif"/>
+        </div>
+
+        <div class="instructions">
+          <span class='row instruction' 
+            rv-each-i="assembly.contents"
+            rv-on-click="ctrl.instructionClicked">
+            <div class='address two columns'>{i.address}</div>
+            <div class='mnemonic two columns'>{i.mnemonic}</div>
+            <div class='op_str eight columns' rv-html="i.op_str"></div>
+          </span>
+        </div> {# end instructions #}
+      </div> {# end assembly #}
+    </div> {# end disasm-contents #}
+
+    <div id="function-analysis" class="row">
+
+        <div class="stack-info four columns"
+          rv-show="analysis.show_stack_info">
+          <h6>Stack trace</h6>
+          <div class="stack-info-frame"
+            rv-each-frame="analysis.stack_info">
+              <span class="filename">{frame.0}</span>
+              <span class="lineno">{frame.1}</span>
+            </div>
+        </div>
+
+    </div> {# end function analysis #}
   </main>
 
 

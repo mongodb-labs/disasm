@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import os
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, g
 from flask_assets import Environment, Bundle
 from werkzeug.utils import secure_filename
 import threading
@@ -45,10 +45,14 @@ js_disassemble = Bundle('js/rivets.js',
 	'js/disassemble.js', 
 	'js/autocomplete.js',
 	'js/biginteger.js',
-    'js/jquery.contextMenu.js',
+	'js/disassembly_analysis.js',
+        'js/jquery.contextMenu.js',
 	'js/jquery.ui.position.js',
 	output='js/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
+
+## the executable we're looking at
+ex = None
 
 # home and upload
 @app.route('/', methods=['GET', 'POST'])
@@ -67,6 +71,7 @@ def index():
 		return render_template("index.jinja.html")
 
 def loadExec(filename):
+	global ex
 	path = app.config['UPLOAD_DIR'] + filename
 	f = open(path, 'rb')
 	ex = get_executable(f)
@@ -92,13 +97,12 @@ def get_functions():
 # expects {"filename": "", func_name: "", "st_value": "", "file_offset": "", "size": ""}
 @app.route('/disasm_function', methods=['POST'])
 def disasm_function():
-	file_path = app.config['UPLOAD_DIR'] + request.form['filename']
-	f = open(file_path, 'rb')
-	ex = get_executable(f)
-
+	global ex
 	# get sequence of bytes and offset, and pass into disasm
 	file_offset = int(request.form['file_offset'])
 	input_bytes = ex.get_bytes(file_offset, int(request.form['size']))
+	
+	# we want to display the addr in memory where the function is located
 	memory_addr = int(request.form['st_value'])
 	data = disasm(input_bytes, memory_addr)	
 	return jsonify(jsonify_capstone(data))
@@ -112,6 +116,19 @@ def get_substring_matches():
 		int(request.args['num_functions']), request.args['case_sensitive'] == 'True')
 	print "Finished processing substring"
 	return jsonify(functions)
+
+@app.route('/get_line_info', methods=["GET"])
+def get_line_info():
+	global ex
+	begin = int(request.args['begin'])
+	size = int(request.args['size'])
+	return jsonify(ex.get_function_line_info(begin, size))
+
+@app.route('/get_die_info', methods=["GET"])
+def get_DIE_info():
+	global ex
+	address = int(request.args['address'])
+	return jsonify(ex.get_addr_stack_info(address))
 
 # debug=True auto reloads whenever server code changes
 app.run(debug=True)

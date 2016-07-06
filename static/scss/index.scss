@@ -3,10 +3,23 @@ html, body {
 	margin: 0;
 }
 
-input[type="submit"]:disabled {
-	opacity: 0.8;
+h1 {
+	font-size: 4em;
+
+	width: 100%;
+	text-align: center;
 }
 
-input[type="submit"]:disabled:hover {
-	border-color: #bbb; // original border color
+#file-uploader {
+	text-align: center;
+	margin-top: 70px;
+
+	input[type="submit"]:disabled {
+		opacity: 0.8;
+	}
+
+	input[type="submit"]:disabled:hover {
+		border-color: #bbb; // original border color
+	}
 }
+

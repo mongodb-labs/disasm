@@ -28,7 +28,7 @@ var NUM_FUNCTIONS = 100;
 //  offset: "", size: "", sh_addr: ""
 // }
 var functions = {contents: []};
-var ctrl = {
+var functions_ctrl = {
 	functionClicked: functionClicked, // located in disassemble.js
 	hoverCollapsable: hoverCollapsable,
 	removeHoverCollapsable: removeHoverCollapsable
@@ -37,7 +37,7 @@ var ctrl = {
 rivets.bind($("#functions"), 
 	{ 
 		functions: functions, 
-		ctrl: ctrl 
+		ctrl: functions_ctrl 
 	}
 );
 
@@ -89,7 +89,7 @@ function chunk_str(str) {
 			lb_count++;
 		}
 		else if (c == '>' && STATE == "outer") {
-			console.log("this should never happen");
+			// pass
 		}
 		else if (c == '>' && STATE == "inner") {
 			lb_count--;
@@ -138,7 +138,7 @@ function getNextPage(query, curr_index, num_functions) {
                 num_functions: num_functions, 
                 case_sensitive: case_sensitive 
         })
-          .done(function(funcs) {
+        .done(function(funcs) {
             functions.contents = format_functions(funcs);
         })
         .fail(function() {
@@ -316,3 +316,5 @@ match(needle_start, needle_len, haystack_start, haystack_end, last_index, score)
     return score
 
 I think.... Maybe run through this on Monday to make sure it's right
+
+*/

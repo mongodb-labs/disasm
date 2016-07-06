@@ -14,10 +14,22 @@
  * limitations under the License.
  */
 
-var URL_DISASM_FUNCTION = "/disasm_function"
+var URL_DISASM_FUNCTION = "/disasm_function";
+var URL_LINE_INFO = "/get_line_info";
+var URL_DIE_INFO = "/get_die_info";
 
-var assembly = {contents : []};
-rivets.bind($("#function-disasm"), {assembly: assembly});
+var assembly = {
+	contents : [], 
+	line_info: [], 
+	func_name: "", 
+	instructions_loading: false
+};
+var assembly_ctrl = {
+	instructionClicked: instructionClicked // in disassembly_analysis
+}
+rivets.bind($("#function-disasm"), 
+	{assembly: assembly, ctrl: assembly_ctrl}
+);
 
 var hexToBinMap = {
 	"0": "0000",
@@ -72,15 +84,12 @@ $(function() {
 			},
 			unsignedDec64: {
 				name: "64-bit Unsigned Decimal"
-				//callback: contextMenuDec
 			},
 			twosCompDec64: {
 				name: "64-bit Signed 2's Complement Decimal"
-				//callback: contextMenuUnsignedBinary
 			},
 			binary: {
 				name: "Binary"
-				//callback: contextMenuSignedBinary
 			}
 		},
 		callback: contextMenuConvertBase
@@ -135,26 +144,6 @@ function contextMenuConvertBase(key, opt) {
 	}
 	opt.$trigger.context.innerHTML = newVal;
 	console.log("Converted " + base + " number " + startVal + " to binary number " + binString + " to " + key + " number " + newVal);
-	// var oldValue = parseInt(opt.$trigger.context.innerHTML, radix);
-	// switch(key) {
-	// 	case "hex": 
-	// 		radix = 16;
-	// 		break;
-	// 	case "decimal":
-	// 		radix = 10;
-	// 		break;
-	// 	case "signedBinary":
-	// 	case "unsignedBinary":
-	// 		radix = 2;
-	// 		break;
-	// }
-	// opt.$trigger.context.value = key;
-	// var newValue = oldValue.toString(radix);
-	// if (key == "hex") {
-	// 	newValue = "0x" + newValue;
-	// }
-	// opt.$trigger.context.innerHTML = newValue;
-	// console.log("Converted " + base + " number " + oldValue + " to " + key + " number " + newValue);
 }
 
 function hexToBin(val) {
@@ -178,11 +167,6 @@ function binToHex(val) {
 }
 
 function unsignedDecToBin(val, bits) {
-	// http://stackoverflow.com/questions/9939760/how-do-i-convert-an-integer-to-binary-in-javascript
-	// var binVal = (val >>> 0).toString(2);
-	// for (var i = bits -  binVal.length; i > 0; i--) {
-	// 	binVal = "0" + binVal;
-	// }
 	var decVal = BigInteger(val);
 	var divRem;
 	var binVal = "";
@@ -199,105 +183,58 @@ function binToUnsignedDec(val, bits) {
 	for (var i = bits - val.length; i > 0; i--) {
 		val = "0" + val;
 	}
-	// for (var i = 0; i < bits; i++) {
-	// 	if (val.charAt(bits-i-1) == '1') {
-	// 		decVal = decVal.add(Math.pow(2, i));
-	// 	}
-	// }
+	// http://stackoverflow.com/questions/10258828/how-to-convert-binary-string-to-decimal
 	return val.split('').reverse().reduce(function(x,y,i) {
 		return (y === '1') ? x.add(BigInteger(2).pow(i)) : x;
 	}, BigInteger.ZERO).toString();
-	// return decVal.toString();
 }
 
 function signedDecToBin(val, bits) {
-	// http://stackoverflow.com/questions/9939760/how-do-i-convert-an-integer-to-binary-in-javascript
-	// var binVal = (val >>> 0).toString(2);
-	// for (var i = val.length % 8; i < 8; i++) {
-	// 	binVal = "0" + binVal;
-	// }
-	// var signBit = binVal.charAt(0);
-	// for (var i = bits - binVal.length; i > 0; i--) {
-	// 	binVal = signBit + binVal;
-	// }
-	// return binVal;
 	var negative = false;
 	if (val.charAt(0) == '-') {
 		negative = true;
 		val = val.substring(1,substring.length);
 	}
 	var unsignedBinVal = unsignedDecToBin(val, bits);
-	var twosCompBin = negative ? unsignedBinToTwosCompBin(unsignedBinVal) : unsignedBinVal;
+	var twosCompBin = negative ? applyTwosCompConversion(unsignedBinVal) : unsignedBinVal;
 	return twosCompBin;
 }
 
 function binToSignedDec(val, bits) {
 	var signBit = val.charAt(0);
 	var unsignedBinVal = "";
-	// var decVal = BigInteger.ZERO;
 	for (var i = bits - val.length; i > 0; i--) {
 		val = signBit + val;
 	}
-	var unsignedBinVal = signBit == "1" ? twosCompBinToUnsignedBin(val) : val;
+	var unsignedBinVal = signBit == "1" ? applyTwosCompConversion(val) : val;
 	return (signBit == "1" ? "-" : "") + binToUnsignedDec(unsignedBinVal, bits);
-	// return parseInt(val,2).toString(10);
 }
 
-function twosCompBinToUnsignedBin(val) {
-	if (val.charAt(0) == "0") {
-		alert("This value is already unsigned");
-		return val;
-	}
+function applyTwosCompConversion(val) {
 	var i;
 	var carried = false;
-	var unsignedBinVal = "";
+	var converted = "";
 	for (i = val.length-1; i >= 0; i--) {
 		if (val.charAt(i) == "1") {
 			if (carried)
-				unsignedBinVal = "0" + unsignedBinVal;
+				converted = "0" + converted;
 			else {
-				unsignedBinVal = "1" + unsignedBinVal;
+				converted = "1" + converted;
 				carried = true;
 			}
 		} 
 		else {
 			if (carried)
-				unsignedBinVal = "1" + unsignedBinVal;
+				converted = "1" + converted;
 			else
-				unsignedBinVal = "0" + unsignedBinVal;
+				converted = "0" + converted;
 		}
 	}
-	return unsignedBinVal;
-}
-
-function unsignedBinToTwosCompBin(val) {
-	if (val.charAt(0) == "1") {
-		alert("This value is already signed");
-		return val;
-	}
-	var i;
-	var carried = false;
-	var signedBinVal = "";
-	for (i = val.length-1; i >= 0; i--) {
-		if (val.charAt(i) == "1") {
-			if (carried)
-				signedBinVal = "0" + signedBinVal;
-			else {
-				signedBinVal = "1" + signedBinVal;
-				carried = true;
-			}
-		} 
-		else {
-			if (carried)
-				signedBinVal = "1" + signedBinVal;
-			else
-				signedBinVal = "0" + signedBinVal;
-		}
-	}
-	return signedBinVal;
+	return converted;
 }
 
 function functionClicked(event, model) {
+	// handle expansion/collapse of <> in function name
 	var el = event.currentTarget;
 	if (event.target.classList.contains("expandable")) {
 		expandFunctionName(event, model);
@@ -308,9 +245,41 @@ function functionClicked(event, model) {
 		return;
 	}
 
-	data = {
+	// clear all info
+	assembly.func_name = "";
+	assembly.contents = [];
+	assembly.line_info = [];
+	hideAnalysis();
+
+	// set class to active and indicate func name
+	$(".selected").removeClass("selected");
+	el.classList.add("selected");
+	assembly.func_name = el.innerText;
+
+	// activate loading icon
+	assembly.instructions_loading = true;
+	
+	// get function assembly from server
+	disassemble_function(el);
+
+	// get addr -> line info from server
+	begin = el.attributes["data-st-value"].value;
+	size = el.attributes["data-size"].value;
+	get_function_line_info(begin, size);
+
+	// preload DIE info from server
+	$.ajax({
+		type: "GET",
+		url: URL_DIE_INFO + "?address=" + begin
+	});
+}
+
+// get assembly for given function, given as DOM element
+function disassemble_function(el) {
+	// disassemble function
+	data_disassemble = {
 		filename: $('h2.filename').text().trim(),
-		funcname: el.innerText,
+		func_name: el.innerText,
 		st_value: el.attributes["data-st-value"].value,
 		file_offset: el.attributes["data-offset"].value,
 		size: el.attributes["data-size"].value
@@ -319,7 +288,7 @@ function functionClicked(event, model) {
 	$.ajax({
 		type: "POST",
 		url: URL_DISASM_FUNCTION,
-		data: data
+		data: data_disassemble
 	})
 	.done(function(data) {
 		// change to hex
@@ -328,12 +297,31 @@ function functionClicked(event, model) {
 			i.op_str =wrapHexAndDec(i.op_str);
 			return i;
 		});
+
+		// clear loading icon
+		assembly.instructions_loading = false;
 		assembly.contents = data;
 	})
 	.fail(function(data) {
-		$("#function-disasm").text("Sorry, something went wrong!");
+		console.log("Request failed");
 	});
 }
+
+// get line info for function
+function get_function_line_info(begin, size) {
+	$.ajax({
+		type:"GET",
+		url: URL_LINE_INFO + "?begin=" + begin + "&size=" + size
+	})
+	.done(function(data) {
+		assembly.line_info = data;
+		console.log(assembly.line_info)
+	})
+	.fail(function(data) {
+		console.log("something went wrong in getting line info")
+	});
+}
+
 
 function wrapHexAndDec(str) {
 	var outputStr = "";
