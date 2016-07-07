@@ -52,6 +52,9 @@ function get_stack_info(addr) {
 }
 
 function instructionClicked(e, model) {
+	$(".instruc-selected").removeClass("instruc-selected");
+	e.currentTarget.classList.add("instruc-selected");
+
 	var addr = parseInt(model.i.address);
 	showAnalysis();
 	get_stack_info(addr);
@@ -63,11 +66,12 @@ var fullHeight = "97vh";
 var partialHeight = "50vh";
 $("#function-analysis").hide(); // init hide
 function showAnalysis() {
-	$("#function-analysis").show().height("30vh")
+	$("#function-analysis").show();
 	$("#top-half").height(partialHeight);
 }
 
 function hideAnalysis() {
+	$(".instruc-selected").removeClass("instruc-selected");
 	$("#function-analysis").hide();
 	$("#top-half").height(fullHeight);
 }

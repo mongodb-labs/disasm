@@ -5,6 +5,7 @@
   <link rel="stylesheet" href="static/css/skeleton.css">
   <link rel="stylesheet" href="static/css/normalize.css">
   <link rel="stylesheet" href="static/css/jquery.contextMenu.css">
+  <link rel="stylesheet" href="static/css/highlight.css">
   {% assets "css_all" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
   <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet">
   <title>Disassembler</title>
@@ -82,6 +83,7 @@
 
   {# bottom half, basically #}
   <div id="function-analysis" class="row">
+    <div class="exit" onclick="hideAnalysis()">&#215;</div>
       <div class="stack-info four columns">
         <h6>Stack trace</h6>
         <div class="stack-info-frame"

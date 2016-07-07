@@ -91,15 +91,20 @@ function disassemble_function(el) {
 	})
 	.done(function(data) {
 		// change to hex
-		data = data.map(function(i) {
+		assembly.data = data.map(function(i) {
 			i.address = "0x" + i.address.toString(16);
-			i.op_str =wrapHexAndDec(i.op_str);
+			i.op_str = wrapHexAndDec(i.op_str);
 			return i;
 		});
 
 		// clear loading icon
 		assembly.instructions_loading = false;
 		assembly.contents = data;
+
+		// syntax highlighting
+		$(".instructions span.row.instruction").each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
 	})
 	.fail(function(data) {
 		console.log("Request failed");

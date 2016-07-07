@@ -72,7 +72,7 @@ $button-color: rgba(128,203,196, 0.8);
 }
 
 #functions div:nth-child(3) {
-	margin-top: 50px;
+	margin-top: 60px;
 }
 
 #functions div:last-child {
@@ -132,6 +132,8 @@ $func-offsetTop: 161px;
 
 /****************** Assembly ******************/
 
+$instruc-color1: rgb(77,208,225); // darker
+$instruc-color2: rgb(128,222,234); // lighter
 #function-disasm {
 	font-family: "Inconsolata", monospace;
 
@@ -159,17 +161,29 @@ $func-offsetTop: 161px;
 			display: block;
 		}
 		.instruction.row:hover {
-			background-color: aliceblue;
+			background-color: rgba($instruc-color2, 0.3);
+		}
+		.instruction.row.instruc-selected {
+			background-color: rgba($instruc-color1, 0.5);
 		}
 	}
 
 }
 
 #function-analysis {
-	height: 30vh;
+	height: 45vh;
 	width: 100%;
 	bottom: 0;
-	padding-top: 40px;
+	margin-top: 30px;
+
+	.exit {
+		width: 0;
+		font-size: 2em;
+		cursor: pointer;
+	}
+	.exit:hover {
+
+	}
 
 	.stack-info {
 		.lineno {
