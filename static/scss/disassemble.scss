@@ -170,5 +170,11 @@ $func-offsetTop: 161px;
 	width: 100%;
 	bottom: 0;
 	padding-top: 40px;
+
+	.stack-info {
+		.lineno {
+			float: right;
+		}
+	}
 }
 

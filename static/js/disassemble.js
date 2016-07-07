@@ -263,9 +263,10 @@ function functionClicked(event, model) {
 	disassemble_function(el);
 
 	// get addr -> line info from server
+	// FOR NOW seems unnecessary? may need to bring it back if loading DIEs becomes excessively slow
 	begin = el.attributes["data-st-value"].value;
 	size = el.attributes["data-size"].value;
-	get_function_line_info(begin, size);
+	// get_function_line_info(begin, size);
 
 	// preload DIE info from server
 	$.ajax({
