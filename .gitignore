@@ -10,6 +10,8 @@ convert_func_list.py
 # Flask stuff:
 instance/
 .webassets-cache
+*all.css
+*all.js
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
