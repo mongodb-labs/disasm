@@ -123,27 +123,34 @@ class ElfExecutable(Executable):
 
     # is the given address contained in the given DIE?
     def _addr_in_DIE(self, DIE, address):
-        lo = int(DIE.attributes["DW_AT_low_pc"].value)
-        high_pc = DIE.attributes["DW_AT_high_pc"]
-        highpc_attr_class = describe_form_class(high_pc.form)
-        if highpc_attr_class == 'address':
-            hi = int(high_pc.value)
-        elif highpc_attr_class == 'constant':
-            hi = lo + int(high_pc.value)       
-        else:
-            print('Error: invalid DW_AT_high_pc class:', highpc_attr_class)
-        return lo <= address <= hi
+        if "DW_AT_ranges" in DIE.attributes:
+            offset = DIE.attributes["DW_AT_ranges"].value
+            range_lists = self.dwarff.range_lists()
+            ranges = range_lists.get_range_list_at_offset(offset)
+            for entry in ranges:
+                # RangeEntry = (begin_offset, end_offset)
+                if entry[0] <= address <= entry[1]:
+                    return True
+            return False
+        elif "DW_AT_low_pc" in DIE.attributes and "DW_AT_high_pc" in DIE.attributes:
+            lo = int(DIE.attributes["DW_AT_low_pc"].value)
+            high_pc = DIE.attributes["DW_AT_high_pc"]
+            highpc_attr_class = describe_form_class(high_pc.form)
+            if highpc_attr_class == 'address':
+                hi = int(high_pc.value)
+            elif highpc_attr_class == 'constant':
+                hi = lo + int(high_pc.value)       
+            else:
+                print('Error: invalid DW_AT_high_pc class:', highpc_attr_class)
+            return lo <= address <= hi
 
     # helper function to get array of DIEs for given address
     def _get_line_DIEs(self, parent, address, stack):
         for child in parent.iter_children():
-            if "DW_AT_ranges" in child.attributes:
-                print ("ranges not implemented sry")
-            if "DW_AT_low_pc" in child.attributes and "DW_AT_high_pc" in child.attributes:
-                # proceed if child is in the right range
-                if self._addr_in_DIE(child, address):
-                    stack.append(child)
-                    return self._get_line_DIEs(child, address, stack)
+            # proceed if child is in the right range
+            if self._addr_in_DIE(child, address):
+                stack.append(child)
+                return self._get_line_DIEs(child, address, stack)
         return stack
 
     # get line info for given address
