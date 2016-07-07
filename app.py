@@ -47,6 +47,7 @@ js_disassemble = Bundle('js/rivets.js',
 	'js/disassembly_analysis.js',
     'js/jquery.contextMenu.js',
 	'js/jquery.ui.position.js',
+	'js/highlight.pack.js',
 	output='js/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
 
