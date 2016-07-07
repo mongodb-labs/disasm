@@ -93,7 +93,7 @@ function disassemble_function(el) {
 		// change to hex
 		assembly.data = data.map(function(i) {
 			i.address = "0x" + i.address.toString(16);
-			i.op_str = wrapHexAndDec(i.op_str);
+			// i.op_str = wrapHexAndDec(i.op_str);
 			return i;
 		});
 
@@ -104,6 +104,22 @@ function disassemble_function(el) {
 		// syntax highlighting
 		$(".instructions span.row.instruction").each(function(i, block) {
 			hljs.highlightBlock(block);
+		});
+
+		$('.hljs-number').each(function(index, elem) {
+			// console.log($(this));
+			var charOne = elem.innerHTML.charAt(0);
+			var charTwo = elem.innerHTML.charAt(1);
+			if (charOne == '0' && charTwo == 'x') {
+				// elem.className += ' hex';
+				elem.setAttribute('value', 'hex');
+			}
+			else if (charOne >= '0' && charTwo <= '9') {
+				elem.setAttribute('value', 'twosCompDec64');
+			}
+			else {
+				console.log("Unknown data type: " + elem);
+			}
 		});
 	})
 	.fail(function(data) {
