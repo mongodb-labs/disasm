@@ -12,21 +12,18 @@
 
 
 <body>
-  <h2 class='header'> 
-    <div class='title'>filename</div>
-    <div class='filename'>{{ filename }} </div>
-  </h2>
-
   <main>
-    <input type="text" placeholder="function name" id="function-name-input"/>
+  <div id="top-half" class="row">
+    <div id="functions-column" class="four columns">
+      <h2 class='header'> 
+        <div class='title'>filename</div>
+        <div class='filename'>{{ filename }} </div>
+      </h2>
 
-    <div class="row">
+      <input type="text" placeholder="function name" id="function-name-input"/>
 
-    </div>
-
-    <div class="row" id="disasm-contents">
       {# all functions #}
-      <div class='four columns' id='functions'>
+      <div id='functions'>
         <div class='spacer'></div>
         <div class="nav-buttons">
           <button id="button-prev"> < </button>
@@ -51,9 +48,11 @@
             </span>
         </div>
       </div>
+    </div> {# end of functions column #}
 
+    <div id="assembly-column" class="eight columns">
       {# selected function's assembly #}
-      <div class='eight columns' id='function-disasm'>
+      <div id='function-disasm'>
         <span class="selected-func-name">
         { assembly.func_name }
         </span>
@@ -77,20 +76,23 @@
           </span>
         </div> {# end instructions #}
       </div> {# end assembly #}
-    </div> {# end disasm-contents #}
+    </div> {# end of assembly column #}
+  </div> {# end of top half #}
 
-    <div id="function-analysis" class="row">
-        <div class="stack-info four columns">
-          <h6>Stack trace</h6>
-          <div class="stack-info-frame"
-            rv-show="analysis.show_stack_info"
-            rv-each-frame="analysis.stack_info">
-              <span class="filename">{frame.0}</span>
-              <span class="lineno">{frame.1}</span>
-            </div>
-        </div>
 
-    </div> {# end function analysis #}
+  {# bottom half, basically #}
+  <div id="function-analysis" class="row">
+      <div class="stack-info four columns">
+        <h6>Stack trace</h6>
+        <div class="stack-info-frame"
+          rv-show="analysis.show_stack_info"
+          rv-each-frame="analysis.stack_info">
+            <span class="filename">{frame.0}</span>
+            <span class="lineno">{frame.1}</span>
+          </div>
+      </div>
+
+  </div> {# end function analysis #}
   </main>
 
 

@@ -123,31 +123,43 @@ class ElfExecutable(Executable):
 
     # is the given address contained in the given DIE?
     def _addr_in_DIE(self, DIE, address):
-        lo = int(DIE.attributes["DW_AT_low_pc"].value)
-        high_pc = DIE.attributes["DW_AT_high_pc"]
-        highpc_attr_class = describe_form_class(high_pc.form)
-        if highpc_attr_class == 'address':
-            hi = int(high_pc.value)
-        elif highpc_attr_class == 'constant':
-            hi = lo + int(high_pc.value)       
-        else:
-            print('Error: invalid DW_AT_high_pc class:', highpc_attr_class)
-        return lo <= address <= hi
+        if "DW_AT_ranges" in DIE.attributes:
+            offset = DIE.attributes["DW_AT_ranges"].value
+            range_lists = self.dwarff.range_lists()
+            ranges = range_lists.get_range_list_at_offset(offset)
+            for entry in ranges:
+                # RangeEntry = (begin_offset, end_offset)
+                if entry[0] <= address <= entry[1]:
+                    return True
+            return False
+        elif "DW_AT_low_pc" in DIE.attributes and "DW_AT_high_pc" in DIE.attributes:
+            lo = int(DIE.attributes["DW_AT_low_pc"].value)
+            high_pc = DIE.attributes["DW_AT_high_pc"]
+            highpc_attr_class = describe_form_class(high_pc.form)
+            if highpc_attr_class == 'address':
+                hi = int(high_pc.value)
+            elif highpc_attr_class == 'constant':
+                hi = lo + int(high_pc.value)       
+            else:
+                print('Error: invalid DW_AT_high_pc class:', highpc_attr_class)
+            return lo <= address <= hi
 
     # helper function to get array of DIEs for given address
-    def _get_line_DIEs(self, parent, address, stack):
+    def _get_addr_DIEs(self, parent, address, stack):
+        # die = parent
+        # while "DW_AT_name" not in die.attributes:
+        #     die = die._parent
+        # print die.attributes["DW_AT_name"].value
+
         for child in parent.iter_children():
-            if "DW_AT_ranges" in child.attributes:
-                print ("ranges not implemented sry")
-            if "DW_AT_low_pc" in child.attributes and "DW_AT_high_pc" in child.attributes:
-                # proceed if child is in the right range
-                if self._addr_in_DIE(child, address):
-                    stack.append(child)
-                    return self._get_line_DIEs(child, address, stack)
+            # proceed if child is in the right range
+            if self._addr_in_DIE(child, address):
+                stack.append(child)
+                return self._get_addr_DIEs(child, address, stack)
         return stack
 
     # get line info for given address
-    # return (filename, line)
+    # return (filepath, line)
     def _get_addr_line_info(self, address, lineprog=None):
         if lineprog == None:
             CU_offset = self.aranges.cu_offset_at_addr(address)
@@ -162,10 +174,13 @@ class ElfExecutable(Executable):
             # Looking for a range of addresses in two consecutive states that
             # contain the required address.
             if prevstate and prevstate.address <= address < entry.state.address:
-                filename = lineprog['file_entry'][prevstate.file - 1].name
-                line = prevstate.line
-                return (filename, line)
+                file_entry = lineprog['file_entry'][prevstate.file - 1]
+                filepath = (lineprog["include_directory"][file_entry.dir_index - 1] 
+                    + "/" 
+                    + file_entry.name)
+                return (filepath, prevstate.line)
             prevstate = entry.state
+        # addr not found in lineprog
         return None
 
 
@@ -178,11 +193,11 @@ class ElfExecutable(Executable):
             top_DIE = self.CU_offset_to_DIE[CU_offset]
         else:
             top_DIE = CU.get_top_DIE()
-            self.CU_offset_to_DIE[CU_offset] = top_DIE
+            self.CU_offset_to_DIE[CU_offset] = top_DIE # save
 
-        stack = self._get_line_DIEs(top_DIE, address, [])
+        stack = self._get_addr_DIEs(top_DIE, address, [])
 
-        # put in jsonifiable form of [{filename, line}, ...]
+        # put in jsonifiable form of [{filepath, line}, ...]
         lineprog = self.dwarff.line_program_for_CU(CU)
         res = []
         for entry in stack:
@@ -196,9 +211,12 @@ class ElfExecutable(Executable):
                 print "No valid file number"
                 continue
             fileno = entry.attributes[file_AT].value
-            filename = lineprog['file_entry'][fileno - 1].name
-            res.append((filename, entry.attributes[line_AT].value))
-        
+            file_entry = lineprog['file_entry'][fileno - 1]
+            filepath = (lineprog["include_directory"][file_entry.dir_index - 1] 
+                    + "/" 
+                    + file_entry.name)
+            res.append((filepath, entry.attributes[line_AT].value))
+    
         # append uppermost "level" of info
         res.append(self._get_addr_line_info(address, lineprog))
         return res

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// init to hiding
-$("#function-analysis").hide();
 var analysis = {
 	stack_info: [],
 	show_stack_info: false
@@ -26,15 +24,11 @@ rivets.bind($("#function-analysis"),
 );
 
 // assembly.line_info contains all the address to line info
-function display_line_info(model) {
-	var addr = parseInt(model.i.address);
-
+function display_line_info(addr) {
 	var left_bisect = assembly.line_info.filter(function(entry) {
 		return parseInt(entry[0]) <= addr
 	});
 	console.log(left_bisect[left_bisect.length - 1]);
-
-	get_stack_info(addr);
 }
 
 // get stack info from address
@@ -47,24 +41,33 @@ function get_stack_info(addr) {
 		url: URL_DIE_INFO + "?address=" + addr
 	})
 	.done(function(data) {
-		analysis.stack_info = data
+		if (data[0] == null) {
+			analysis.stack_info = [["No stack info for this instruction", ""]]
+		}
+		else {
+			analysis.stack_info = data
+		}
 		analysis.show_stack_info = true;
 	});
 }
 
-
 function instructionClicked(e, model) {
+	var addr = parseInt(model.i.address);
 	showAnalysis();
-	display_line_info(model);
+	get_stack_info(addr);
+	// display_line_info(model);
 }
 
 // display functions: show and hide analysis panel
+var fullHeight = "97vh";
+var partialHeight = "50vh";
+$("#function-analysis").hide(); // init hide
 function showAnalysis() {
-	$("#function-analysis").show();
-	$("#disasm-contents").height("50vh");
+	$("#function-analysis").show().height("30vh")
+	$("#top-half").height(partialHeight);
 }
 
 function hideAnalysis() {
 	$("#function-analysis").hide();
-	$("#disasm-contents").height("80vh");
+	$("#top-half").height(fullHeight);
 }
