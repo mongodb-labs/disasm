@@ -1,8 +1,29 @@
 $body-left: 50px;
 
+main {
+	padding-left: $body-left;
+	padding-right: $body-left;
+}
+
+$max-content-height: 80vh;
+$expandable-color: rgb(77,182,172);
+$collapsable-color: rgb(240,98,146);
+$func-bg: rgb(178,223,219);
+
+/****************** Functions ******************/
+$top-half-height: 97vh;
+div#top-half {
+	height: $top-half-height;
+	
+}
+
+div#top-half > div {
+	height: 100%;
+	overflow: hidden;
+}
+
 h2.header {
   padding-top: 30px;
-  padding-left: $body-left;
 
   .title {
   	font-size: .6em;
@@ -14,32 +35,16 @@ h2.header {
   }
 }
 
-main {
-	padding-left: $body-left;
-	padding-right: $body-left;
-}
 
 #function-name-input {
-	width: 80%;
-}
-
-$max-content-height: 80vh;
-$expandable-color: rgb(77,182,172);
-$collapsable-color: rgb(240,98,146);
-$func-bg: rgb(178,223,219);
-
-div#disasm-contents {
-	margin-top: 15px;
-	padding-left: 15px;
-}
-
-div#disasm-contents > div {
-	height: 100%;
+	width: 100%;
 }
 
 $button-width: 60px;
 $button-color: rgba(128,203,196, 0.8);
 .nav-buttons {
+	margin-top: 10px;
+
 	.nav-button {
 		position: absolute;
 		width: $button-width;
@@ -70,8 +75,13 @@ $button-color: rgba(128,203,196, 0.8);
 	margin-top: 50px;
 }
 
+#functions div:last-child {
+	padding-bottom: 15px;
+}
+
+$func-offsetTop: 161px;
 #functions {
-	max-height: $max-content-height;
+	height: calc(100% - 161px);
 	overflow-y: scroll;
 	margin-left: 0; // override skeleton.css
 
@@ -120,9 +130,13 @@ $button-color: rgba(128,203,196, 0.8);
 	}
 }
 
+/****************** Assembly ******************/
+
 #function-disasm {
 	font-family: "Inconsolata", monospace;
-	max-height: $max-content-height;
+
+	margin-top: 120px; // seems to line up with search bar
+	height: 100%;
 	overflow-y: scroll;
 
 	.instructions-loading {

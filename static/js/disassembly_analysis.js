@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-// init to hiding
-$("#function-analysis").hide();
 var analysis = {
 	stack_info: [],
 	show_stack_info: false
@@ -52,19 +50,21 @@ function get_stack_info(addr) {
 	});
 }
 
-
 function instructionClicked(e, model) {
 	showAnalysis();
 	display_line_info(model);
 }
 
 // display functions: show and hide analysis panel
+var fullHeight = "97vh";
+var partialHeight = "50vh";
+$("#function-analysis").hide(); // init hide
 function showAnalysis() {
-	$("#function-analysis").show();
-	$("#disasm-contents").height("50vh");
+	$("#function-analysis").show().height("30vh")
+	$("#top-half").height(partialHeight);
 }
 
 function hideAnalysis() {
 	$("#function-analysis").hide();
-	$("#disasm-contents").height("80vh");
+	$("#top-half").height(fullHeight);
 }
