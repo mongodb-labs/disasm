@@ -132,6 +132,8 @@ $func-offsetTop: 161px;
 
 /****************** Assembly ******************/
 
+$instruc-color1: rgb(79,195,247);
+$instruc-color2: rgb(129,212,250);
 #function-disasm {
 	font-family: "Inconsolata", monospace;
 
@@ -159,17 +161,29 @@ $func-offsetTop: 161px;
 			display: block;
 		}
 		.instruction.row:hover {
-			background-color: aliceblue;
+			background-color: rgba($instruc-color2, 0.4);
+		}
+		.instruction.row.instruc-selected {
+			background-color: rgba($instruc-color1, 0.6);
 		}
 	}
 
 }
 
 #function-analysis {
-	height: 30vh;
+	height: 45vh;
 	width: 100%;
 	bottom: 0;
-	padding-top: 40px;
+	margin-top: 30px;
+
+	.exit {
+		width: 0;
+		font-size: 2em;
+		cursor: pointer;
+	}
+	.exit:hover {
+
+	}
 
 	.stack-info {
 		.lineno {

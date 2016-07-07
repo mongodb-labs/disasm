@@ -23,6 +23,11 @@
 
   <div id="uploaded-files">
     <h3>Uploaded files</h3>
+    <div class="title">
+      <div class="filename">Filename</div>
+      <div class="size">Size</div>
+      <div class="timestamp">Uploaded</div>
+    </div>
     {% for filename, fileinfo in files.items() %}
     <div class="file">
       <div class="filename">

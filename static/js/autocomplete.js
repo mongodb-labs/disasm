@@ -139,7 +139,9 @@ function getNextPage(query, curr_index, num_functions) {
                 case_sensitive: case_sensitive 
         })
         .done(function(funcs) {
-            functions.contents = format_functions(funcs);
+        	// remove highlighted function
+      		$(".selected").removeClass("selected");
+          functions.contents = format_functions(funcs);
         })
         .fail(function() {
             alert("Unable to contact server.");
