@@ -11,6 +11,19 @@ $collapsable-color: rgb(240,98,146);
 $func-bg: rgb(178,223,219);
 
 /****************** Functions ******************/
+@mixin wrap-text {
+		/* wrap long functions */
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+
+  /* Adds a hyphen where the word breaks, if supported (No Blink) */
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+
+
 $top-half-height: 97vh;
 div#top-half {
 	height: $top-half-height;
@@ -93,16 +106,7 @@ $func-offsetTop: 161px;
 		font-family: "Space Mono", monospace;
 		cursor: pointer;
 		margin-bottom: 15px;
-
-		/* wrap long functions */
-	  overflow-wrap: break-word;
-	  word-wrap: break-word;
-
-	  /* Adds a hyphen where the word breaks, if supported (No Blink) */
-	  -ms-hyphens: auto;
-	  -moz-hyphens: auto;
-	  -webkit-hyphens: auto;
-	  hyphens: auto;
+		@include wrap-text;
 
 		span.expandable {
 			color: rgba($expandable-color, 1);
@@ -132,13 +136,13 @@ $func-offsetTop: 161px;
 
 /****************** Assembly ******************/
 
-$instruc-color1: rgb(77,208,225); // darker
-$instruc-color2: rgb(128,222,234); // lighter
+$instruc-color1: rgb(128,222,234); // darker
+$instruc-color2: rgb(178,235,242); // lighter
 #function-disasm {
 	font-family: "Inconsolata", monospace;
 
 	margin-top: 120px; // seems to line up with search bar
-	height: 100%;
+	height: calc(100% - 120px); // to keep height consistent
 	overflow-y: scroll;
 
 	.instructions-loading {
@@ -151,13 +155,14 @@ $instruc-color2: rgb(128,222,234); // lighter
 	}
 
 	.selected-func-name {
-		background-color: rgba($func-bg, 0.3);
+		font-size: 1.2em;
+		@include wrap-text;
 	}
-
 	.instructions {
 		margin-top: 15px;
 
 		.instruction.row {
+			padding: 0 !important; // override highlight.js
 			display: block;
 		}
 		.instruction.row:hover {
@@ -167,14 +172,14 @@ $instruc-color2: rgb(128,222,234); // lighter
 			background-color: rgba($instruc-color1, 0.5);
 		}
 	}
-
 }
 
 #function-analysis {
 	height: 45vh;
 	width: 100%;
 	bottom: 0;
-	margin-top: 30px;
+
+	border-top-style: outset;
 
 	.exit {
 		width: 0;
@@ -182,7 +187,7 @@ $instruc-color2: rgb(128,222,234); // lighter
 		cursor: pointer;
 	}
 	.exit:hover {
-
+		font-weight: bold;
 	}
 
 	.stack-info {
