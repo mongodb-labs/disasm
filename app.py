@@ -45,7 +45,8 @@ js_disassemble = Bundle('js/rivets.js',
 	'js/autocomplete.js',
 	'js/biginteger.js',
 	'js/disassembly_analysis.js',
-        'js/jquery.contextMenu.js',
+	'js/number_conversion.js',
+    'js/jquery.contextMenu.js',
 	'js/jquery.ui.position.js',
 	output='js/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
