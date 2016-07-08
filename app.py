@@ -24,12 +24,11 @@ from executable import *
 from disassemble import disasm, jsonify_capstone
 
 app = Flask(__name__)
-app.config['UPLOAD_DIR'] = './uploads/'
+app.config.from_object('config')
 
 assets = Environment(app)
 
 # relative to static dir
-
 scss = Bundle('scss/index.scss', 
 	'scss/disassemble.scss', 
 	filters='pyscss', 
@@ -46,6 +45,7 @@ js_disassemble = Bundle('js/rivets.js',
 	'js/biginteger.js',
 	'js/disassembly_analysis.js',
 	'js/number_conversion.js',
+	'js/jquery.contextMenu.js',
 	'js/jquery.contextMenu.js',
 	'js/jquery.ui.position.js',
 	'js/highlight.pack.js',
@@ -136,6 +136,33 @@ def get_DIE_info():
 	global ex
 	address = int(request.args['address'])
 	return jsonify(ex.get_addr_stack_info(address))
+
+# expects {"src_path": "", "lineno": "", "width": ""}
+@app.route('/source_code_from_path', methods=["POST"])
+def source_code_from_path():
+	global ex
+	path = app.config['SRC_DIR'] + request.form['src_path']
+	lineno = int(request.form['lineno'])
+	width = int(request.form['width'])
+
+	before = ""
+	target = ""
+	after = ""
+	with open(path) as fp:
+		for fake_index, line in enumerate(fp):
+			# because of how enumerate numbers lines
+			i = fake_index - 1 
+			if i - width <= lineno <= i + width:
+				if i < lineno:
+					before += line
+				elif i == lineno:
+					target += line
+				elif i >= lineno:
+					after += line
+			elif i > lineno + width:
+				break
+	return jsonify({"before": before, "target": target, "after": after})
+
 
 # debug=True auto reloads whenever server code changes
 app.run(debug=True)
