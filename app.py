@@ -150,7 +150,7 @@ def source_code_from_path():
 	with open(path) as fp:
 		for fake_index, line in enumerate(fp):
 			# because of how enumerate numbers lines
-			i = fake_index - 1 
+			i = fake_index + 1 
 			if i - width <= lineno <= i + width:
 				if i < lineno:
 					before += line
