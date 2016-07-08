@@ -18,6 +18,7 @@ var URL_SOURCE_CODE = "/source_code_from_path";
 
 var analysis = {
 	stack_info: [],
+	selected_frame: 1,
 	show_stack_info: false,
 	source_code: {}
 };
@@ -30,14 +31,6 @@ rivets.bind($("#function-analysis"),
 	{analysis: analysis, ctrl: analysis_ctrl}
 );
 
-// assembly.line_info contains all the address to line info
-function display_line_info(addr) {
-	var left_bisect = assembly.line_info.filter(function(entry) {
-		return parseInt(entry[0]) <= addr
-	});
-	console.log(left_bisect[left_bisect.length - 1]);
-}
-
 // get stack info from address
 function get_stack_info(addr) {
 	analysis.show_stack_info = false;
@@ -49,12 +42,16 @@ function get_stack_info(addr) {
 	})
 	.done(function(data) {
 		if (data[0] == null) {
-			analysis.stack_info = [["No stack info for this instruction", ""]]
+			analysis.stack_info = [["No stack info for this instruction", ""]];
 		}
 		else {
-			analysis.stack_info = data
+			analysis.stack_info = data;
 		}
 		analysis.show_stack_info = true;
+
+		// default to selecting first frame
+		var first_frame = document.getElementsByClassName("stack-info-frame")[0];
+		_filepathClicked(first_frame, analysis.stack_info[0][0], analysis.stack_info[0][1]);
 	});
 }
 
@@ -70,7 +67,6 @@ function instructionClicked(e, model) {
 	var addr = parseInt(model.i.address);
 	showAnalysis();
 	get_stack_info(addr);
-	// display_line_info(model);
 }
 
 // display functions: show and hide analysis panel
@@ -89,16 +85,20 @@ function hideAnalysis() {
 }
 
 function filepathClicked(e, model) {
+	_filepathClicked(e.currentTarget, model.frame[0], model.frame[1])
+}
+
+function _filepathClicked(element, src_path, lineno) {
 	var width = 10;
 	$(".file-selected").removeClass("file-selected");
-	e.currentTarget.classList.add("file-selected");
+	element.classList.add("file-selected");
 
 	$.ajax({
 		type: "POST",
 		url: URL_SOURCE_CODE,
 		data: {
-			"src_path": model.frame[0],
-			"lineno": model.frame[1],
+			"src_path": src_path,
+			"lineno": lineno,
 			"width": width
 		}
 	})
@@ -116,11 +116,11 @@ function filepathClicked(e, model) {
 	})
 	// invoked when src path is absolute
 	.fail(function() { 
-			analysis.source_code = {
-				"before": "Sorry, cannot get source code from this path",
-				"target": "",
-				"after": ""
-			}
-		});;
+		analysis.source_code = {
+			"before": "Sorry, cannot get source code from this path",
+			"target": "",
+			"after": ""
+		}
+	});
 }
 

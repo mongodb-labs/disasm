@@ -91,9 +91,13 @@
           rv-show="analysis.show_stack_info"
           rv-each-frame="analysis.stack_info"
           rv-on-click="ctrl.filepathClicked">
-            <span class="filename"> {frame.0} </span>
-            <span class="lineno"> {frame.1} </span>
-            <span class="function-name"> {frame.2} </span>
+            <div class='row'>
+              <span class="filename"> {frame.0} </span>
+              <span class="lineno"> {frame.1} </span>
+            </div>
+            <div class='row'>
+              <span class="function-name"> {frame.2} </span>
+            </div>
           </div>
       </div>
 
