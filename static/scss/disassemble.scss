@@ -163,6 +163,7 @@ $instruc-color2: rgb(178,235,242); // lighter
 	.selected-func-name {
 		font-size: 1.2em;
 		@include wrap-text;
+		
 	}
 	.instructions {
 		margin-top: 15px;
@@ -177,6 +178,10 @@ $instruc-color2: rgb(178,235,242); // lighter
 			background-color: rgba($instruc-color1, 0.5);
 		}
 	}
+}
+
+.hljs {
+	padding: 0 !important;
 }
 
 $file-selected-bg: aquamarine;

@@ -61,7 +61,7 @@ var binToHexMap = {
 // TODO: Add conversions for 8-bit, 16-bit, and 32-bit values
 $(function() {
     $.contextMenu({
-        selector: '.number',
+        selector: '.hljs-number',
         items: {
             hex: {
                 name: "Hexadecimal"

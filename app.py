@@ -24,7 +24,7 @@ from executable import *
 from disassemble import disasm, jsonify_capstone
 
 app = Flask(__name__)
-app.config.from_object('config')
+app.config.from_pyfile('config.py')
 
 assets = Environment(app)
 
@@ -45,7 +45,8 @@ js_disassemble = Bundle('js/rivets.js',
 	'js/biginteger.js',
 	'js/disassembly_analysis.js',
 	'js/number_conversion.js',
-    'js/jquery.contextMenu.js',
+	'js/jquery.contextMenu.js',
+	'js/jquery.contextMenu.js',
 	'js/jquery.ui.position.js',
 	'js/highlight.pack.js',
 	output='js/disassemble_all.js')
