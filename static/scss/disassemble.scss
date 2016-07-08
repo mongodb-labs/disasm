@@ -10,6 +10,12 @@ $expandable-color: rgb(77,182,172);
 $collapsable-color: rgb(240,98,146);
 $func-bg: rgb(178,223,219);
 
+// override highlight.js
+.hljs {
+	padding: 0 !important; 
+	margin: 0 !important; 
+}
+
 /****************** Functions ******************/
 @mixin wrap-text {
 		/* wrap long functions */
@@ -163,7 +169,6 @@ $instruc-color2: rgb(178,235,242); // lighter
 		margin-top: 15px;
 
 		.instruction.row {
-			padding: 0 !important; // override highlight.js
 			display: block;
 		}
 		.instruction.row:hover {
@@ -179,6 +184,8 @@ $instruc-color2: rgb(178,235,242); // lighter
 	padding: 0 !important;
 }
 
+$file-selected-bg: aquamarine;
+$source-code-bg1: aquamarine; // highlight relevant line
 #function-analysis {
 	height: 45vh;
 	width: 100%;
@@ -195,14 +202,27 @@ $instruc-color2: rgb(178,235,242); // lighter
 		font-weight: bold;
 	}
 
+	// left side
 	.stack-info {
-		.lineno {
-			float: right;
+		.stack-info-frame.file-selected {
+			background-color: rgba($file-selected-bg, 0.8);
+		}
+		.stack-info-frame {
+			padding-left: 15px;
+			padding-right: 15px;
+
+			.lineno {
+				float: right;
+			}
 		}
 	}
 
+	// right side
 	.source-code {
 		font-size: 0.8em;
+		.target {
+			background-color: rgba($source-code-bg1, 0.9);
+		}
 	}
 }
 

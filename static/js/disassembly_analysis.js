@@ -59,8 +59,13 @@ function get_stack_info(addr) {
 }
 
 function instructionClicked(e, model) {
+	// reset instruction highlighting
 	$(".instruc-selected").removeClass("instruc-selected");
 	e.currentTarget.classList.add("instruc-selected");
+
+	// clear any selected filepaths and source code
+	$(".file-selected").removeClass("file-selected");
+	analysis.source_code = {};
 
 	var addr = parseInt(model.i.address);
 	showAnalysis();
@@ -85,6 +90,8 @@ function hideAnalysis() {
 
 function filepathClicked(e, model) {
 	var width = 10;
+	$(".file-selected").removeClass("file-selected");
+	e.currentTarget.classList.add("file-selected");
 
 	$.ajax({
 		type: "POST",
@@ -106,6 +113,14 @@ function filepathClicked(e, model) {
 		$(".source-code pre").each(function(i, block) {
 			hljs.highlightBlock(block);
 		});
-	});
+	})
+	// invoked when src path is absolute
+	.fail(function() { 
+			analysis.source_code = {
+				"before": "Sorry, cannot get source code from this path",
+				"target": "",
+				"after": ""
+			}
+		});;
 }
 

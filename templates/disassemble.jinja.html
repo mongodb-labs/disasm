@@ -89,19 +89,17 @@
         <h6>Stack trace</h6>
         <div class="stack-info-frame"
           rv-show="analysis.show_stack_info"
-          rv-each-frame="analysis.stack_info">
-            <span class="filename"
-              rv-on-click="ctrl.filepathClicked">
-              {frame.0}
-            </span>
-            <span class="lineno">{frame.1}</span>
+          rv-each-frame="analysis.stack_info"
+          rv-on-click="ctrl.filepathClicked">
+            <span class="filename"> {frame.0} </span>
+            <span class="lineno"> {frame.1} </span>
           </div>
       </div>
 
       <div class="source-code seven columns">
         <pre class='before C++' rv-html="analysis.source_code.before"></pre>
-        <pre class='before C++' rv-html="analysis.source_code.target"></pre>
-        <pre class='before C++' rv-html="analysis.source_code.after"></pre>
+        <pre class='target C++' rv-html="analysis.source_code.target"></pre>
+        <pre class='after C++' rv-html="analysis.source_code.after"></pre>
       </div>
 
   </div> {# end function analysis #}
