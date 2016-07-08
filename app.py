@@ -24,7 +24,7 @@ from executable import *
 from disassemble import disasm, jsonify_capstone
 
 app = Flask(__name__)
-app.config.from_object('config')
+app.config.from_pyfile('config.py')
 
 assets = Environment(app)
 

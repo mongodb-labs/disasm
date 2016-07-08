@@ -24,15 +24,56 @@ $(function() {
                 	var ripBlock = opt.$trigger.context;
                 	var values = ripBlock.getAttribute("value");
                 	var offset = values.substring(0,values.indexOf(','));
-                	ripBlock.innerHTML = 'rip + ' + offset;
-                	hljs.highlightBlock(ripBlock);
+                	// This is the string we want, but we also need the hljs parsing.
+                	ripBlock.innerHTML = '[rip + ' + offset + ']';
+                	// Strip out the hljs elements in this instruction
+                	$(ripBlock.parentElement.parentElement).find('[class^=hljs]').each(function(i, elem) {
+                		$(elem).replaceWith($(elem).contents());
+                	});
+                	// Reprocess this line of assembly with hljs and the number-wrapping
+                	hljs.highlightBlock(ripBlock.parentElement.parentElement);
+                	wrapAllNumbers();
+                	// There's a weird bug where the context-menu-active class doesn't get removed,
+                	// even though the menu is gone, causing it to not be able to be right clicked
+                	// again. Easy fix. Just remove the class.
+                	$('.context-menu-active').removeClass('context-menu-active');
                 }
             },
             decoded: {
-                name: "Resolved Address"
+                name: "Resolved Address",
+                callback: function(key, opt) {
+                	var ripBlock = opt.$trigger.context;
+                	var values = ripBlock.getAttribute("value");
+                	var address = values.substring(values.indexOf(',')+1, values.length);
+                	// This is the string we want, but we also need the hljs parsing.
+                	ripBlock.innerHTML = '[' + address + ']';
+                	// Strip out the hljs elements in this instruction
+                	$(ripBlock.parentElement.parentElement).find('[class^=hljs]').each(function(i, elem) {
+                		$(elem).replaceWith($(elem).contents());
+                	});
+                	// Reprocess this line of assembly with hljs and the number-wrapping
+                	hljs.highlightBlock(ripBlock.parentElement.parentElement);
+                	wrapAllNumbers();
+                	// There's a weird bug where the context-menu-active class doesn't get removed,
+                	// even though the menu is gone, causing it to not be able to be right clicked
+                	// again. Easy fix. Just remove the class.
+                	$('.context-menu-active').removeClass('context-menu-active');
+                }
             },
             symbol: {
-                name: "Referenced Symbol"
+                name: "Referenced Symbol",
+                callback: function(key, opt) {
+                	// This one's a bit more complicated. In order to 
+                	// var ripBlock = opt.$trigger.context;
+                	// var values = ripBlock.getAttribute("value");
+                	// // var address = values.substring(values.indexOf(','), values.length);
+                	// // ripBlock.innerHTML = address;
+                	// console.log("Haaaa memes!");
+                	// hljs.highlightBlock(ripBlock.parentElement.parentElement);
+                	// wrapNumbers();
+
+                	// $('.context-menu-active').removeClass('context-menu-active');
+                }
             }
         }
         // callback: contextMenuConvertBase
@@ -132,41 +173,49 @@ function disassemble_function(el) {
 			hljs.highlightBlock(block);
 		});
 
-		$('.hljs-number').each(function(index, elem) {
-			// console.log($(this));
-			var charOne = elem.innerHTML.charAt(0);
-			var charTwo = elem.innerHTML.charAt(1);
-			if (charOne == '0' && charTwo == 'x') {
-				// elem.className += ' hex';
-				elem.setAttribute('value', 'hex');
-			}
-			else if (charOne >= '0' && charTwo <= '9') {
-				elem.setAttribute('value', 'twosCompDec64');
-			}
-			else {
-				console.log("Unknown data type: " + elem);
-			}
-		});
+		wrapAllNumbers();
 
 		$('.hljs-built_in').each(function(index, elem) {
 			if (elem.innerHTML === "rip") {
 				console.log("Memes!");
 				var line = elem.parentElement;
 				// Brackets that contain "rip" and the offset, eg. "[rip + 0x123456]"
-				var ripBlock = line.innerHTML.substring(line.innerHTML.indexOf('[')+1, line.innerHTML.indexOf(']'));
+				var ripBlock = line.innerHTML.substring(line.innerHTML.indexOf('['), line.innerHTML.indexOf(']')+1);
 				// Address of the following instruction
 				var rip = elem.parentElement.parentElement.nextSibling.children[0].children[0].innerHTML;
 				// Offset from rip
 				var offset = elem.nextSibling.nextSibling.innerHTML;
 				// Actual value referred to in ripBlock. Obtained by adding offset to rip
-				var value = (parseInt(rip, 16) + parseInt(offset, 16)).toString(16);
-				line.innerHTML = line.innerHTML.replace(/\[.*\]/, '[<span class="rip" value="' + offset + ',' + value + '">' + ripBlock + '</span>]');
+				var value = '0x' + (parseInt(rip, 16) + parseInt(offset, 16)).toString(16);
+				line.innerHTML = line.innerHTML.replace(/\[.*\]/, '<span class="rip" value="' + offset + ',' + value + '">' + ripBlock + '</span>');
 			}
 		});
 	})
 	.fail(function(data) {
 		console.log("Request failed");
 	});
+}
+
+function wrapAllNumbers() {
+	$('.hljs-number').each(function(index, elem) {
+		wrapNumbersInElem(elem);
+	});
+}
+
+function wrapNumbersInElem(elem) {
+	var charOne = elem.innerHTML.charAt(0);
+	var charTwo = elem.innerHTML.charAt(1);
+	if (charOne == '0' && charTwo == 'x') {
+		// elem.className += ' hex';
+		elem.setAttribute('value', 'hex');
+	}
+	else if (charOne >= '0' && charTwo <= '9') {
+		elem.setAttribute('value', 'twosCompDec64');
+	}
+	else {
+		console.log("Unknown data type:");
+		console.log(elem);
+	}
 }
 
 // get line info for function
