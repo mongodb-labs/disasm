@@ -15,6 +15,7 @@
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
 from elftools.dwarf.descriptions import describe_form_class
+from elftools.dwarf.die import DIE
 from demangler import demangle
 
 """
@@ -146,11 +147,6 @@ class ElfExecutable(Executable):
 
     # helper function to get array of DIEs for given address
     def _get_addr_DIEs(self, parent, address, stack):
-        # die = parent
-        # while "DW_AT_name" not in die.attributes:
-        #     die = die._parent
-        # print die.attributes["DW_AT_name"].value
-
         for child in parent.iter_children():
             # proceed if child is in the right range
             if self._addr_in_DIE(child, address):
@@ -168,11 +164,9 @@ class ElfExecutable(Executable):
         
         prevstate = None
         for entry in lineprog.get_entries():
-            # We're interested in those entries where a new state is assigned
             if entry.state is None or entry.state.end_sequence:
                 continue
-            # Looking for a range of addresses in two consecutive states that
-            # contain the required address.
+            # prev and cur states encompass the address we're looking for
             if prevstate and prevstate.address <= address < entry.state.address:
                 file_entry = lineprog['file_entry'][prevstate.file - 1]
                 filepath = (lineprog["include_directory"][file_entry.dir_index - 1] 
@@ -180,9 +174,23 @@ class ElfExecutable(Executable):
                     + file_entry.name)
                 return (filepath, prevstate.line)
             prevstate = entry.state
-        # addr not found in lineprog
-        return None
+        return None # addr not found in lineprog
 
+    def _die_to_function(self, die):
+        while "DW_AT_name" not in die.attributes:
+            if "DW_AT_abstract_origin" in die.attributes:
+                ref_attr = "DW_AT_abstract_origin"
+            elif "DW_AT_specification" in die.attributes:
+                ref_attr = "DW_AT_specification"
+            else:
+                break
+            new_offset = (int(die.attributes[ref_attr].value) + die.cu.cu_offset)
+            die = DIE(cu=die.cu, stream=die.stream, offset=new_offset)
+        print die
+        if "DW_AT_name" in die.attributes:
+            return die.attributes["DW_AT_name"].value
+        else:
+            return None
 
     # get array of DIEs for given address
     def get_addr_stack_info(self, address):
@@ -197,7 +205,7 @@ class ElfExecutable(Executable):
 
         stack = self._get_addr_DIEs(top_DIE, address, [])
 
-        # put in jsonifiable form of [{filepath, line}, ...]
+        # put in jsonifiable form of [{filepath, line, function name}, ...]
         lineprog = self.dwarff.line_program_for_CU(CU)
         res = []
         for entry in stack:
@@ -215,7 +223,8 @@ class ElfExecutable(Executable):
             filepath = (lineprog["include_directory"][file_entry.dir_index - 1] 
                     + "/" 
                     + file_entry.name)
-            res.append((filepath, entry.attributes[line_AT].value))
+            filename = self._die_to_function(entry)
+            res.append((filepath, entry.attributes[line_AT].value, filename))
     
         # append uppermost "level" of info
         res.append(self._get_addr_line_info(address, lineprog))
