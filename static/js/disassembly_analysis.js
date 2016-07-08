@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
+var URL_SOURCE_CODE = "/source_code_from_path";
+
 var analysis = {
 	stack_info: [],
-	show_stack_info: false
+	show_stack_info: false,
+	source_code: {}
+};
+
+var analysis_ctrl = {
+	filepathClicked: filepathClicked
 };
 
 rivets.bind($("#function-analysis"), 
-	{analysis: analysis}
+	{analysis: analysis, ctrl: analysis_ctrl}
 );
 
 // assembly.line_info contains all the address to line info
@@ -75,3 +82,30 @@ function hideAnalysis() {
 	$("#function-analysis").hide();
 	$("#top-half").height(fullHeight);
 }
+
+function filepathClicked(e, model) {
+	var width = 10;
+
+	$.ajax({
+		type: "POST",
+		url: URL_SOURCE_CODE,
+		data: {
+			"src_path": model.frame[0],
+			"lineno": model.frame[1],
+			"width": width
+		}
+	})
+	.done(function(data) {
+		analysis.source_code = {
+			"before": data['before'],
+			"target": data['target'],
+			"after": data['after']
+		}
+
+		// source code syntax highlighting
+		$(".source-code pre").each(function(i, block) {
+			hljs.highlightBlock(block);
+		});
+	});
+}
+
