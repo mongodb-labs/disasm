@@ -14,6 +14,32 @@
  * limitations under the License.
  */
 
+$(function() {
+    $.contextMenu({
+        selector: '.rip',
+        items: {
+            rip: {
+                name: "Rip Relative",
+                callback: function(key, opt) {
+                	var ripBlock = opt.$trigger.context;
+                	var values = ripBlock.getAttribute("value");
+                	var offset = values.substring(0,values.indexOf(','));
+                	ripBlock.innerHTML = 'rip + ' + offset;
+                	hljs.highlightBlock(ripBlock);
+                }
+            },
+            decoded: {
+                name: "Resolved Address"
+            },
+            symbol: {
+                name: "Referenced Symbol"
+            }
+        }
+        // callback: contextMenuConvertBase
+    });
+});
+
+
 var URL_DISASM_FUNCTION = "/disasm_function";
 var URL_LINE_INFO = "/get_line_info";
 var URL_DIE_INFO = "/get_die_info";
@@ -119,6 +145,22 @@ function disassemble_function(el) {
 			}
 			else {
 				console.log("Unknown data type: " + elem);
+			}
+		});
+
+		$('.hljs-built_in').each(function(index, elem) {
+			if (elem.innerHTML === "rip") {
+				console.log("Memes!");
+				var line = elem.parentElement;
+				// Brackets that contain "rip" and the offset, eg. "[rip + 0x123456]"
+				var ripBlock = line.innerHTML.substring(line.innerHTML.indexOf('[')+1, line.innerHTML.indexOf(']'));
+				// Address of the following instruction
+				var rip = elem.parentElement.parentElement.nextSibling.children[0].children[0].innerHTML;
+				// Offset from rip
+				var offset = elem.nextSibling.nextSibling.innerHTML;
+				// Actual value referred to in ripBlock. Obtained by adding offset to rip
+				var value = (parseInt(rip, 16) + parseInt(offset, 16)).toString(16);
+				line.innerHTML = line.innerHTML.replace(/\[.*\]/, '[<span class="rip" value="' + offset + ',' + value + '">' + ripBlock + '</span>]');
 			}
 		});
 	})
