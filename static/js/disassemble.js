@@ -182,6 +182,10 @@ function disassemble_function(el) {
 				replacementStr += ']</span>';
 				i.op_str = i.op_str.replace(/\[.*\]/, replacementStr);
 			}
+			if ("nop" in i) {
+				// Ask Mathias if 10-byte NOPs exist
+				i.op_str = i.size + " bytes";
+			}
 
 			return i;
 		});
