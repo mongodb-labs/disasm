@@ -23,25 +23,10 @@ $(function() {
                 callback: function(key, opt) {
                 	var $rip = $(opt.$trigger.context);
                 	$rip.find(".rip-default").removeAttr("hidden");
-                	// Add hidden attribute to this. Will it make a duplicate???
                 	$rip.find(".rip-resolved").attr("hidden", "hidden");
-                	$rip.find(".rip-symbol").attr("hidden", "hidden");
-                	// var ripBlock = opt.$trigger.context;
-                	// var values = ripBlock.getAttribute("value");
-                	// var offset = values.substring(0,values.indexOf(','));
-                	// // This is the string we want, but we also need the hljs parsing.
-                	// ripBlock.innerHTML = '[rip + ' + offset + ']';
-                	// // Strip out the hljs elements in this instruction
-                	// $(ripBlock.parentElement.parentElement).find('[class^=hljs]').each(function(i, elem) {
-                	// 	$(elem).replaceWith($(elem).contents());
-                	// });
-                	// // Reprocess this line of assembly with hljs and the number-wrapping
-                	// hljs.highlightBlock(ripBlock.parentElement.parentElement);
-                	// wrapAllNumbers();
-                	// // There's a weird bug where the context-menu-active class doesn't get removed,
-                	// // even though the menu is gone, causing it to not be able to be right clicked
-                	// // again. Easy fix. Just remove the class.
-                	// $('.context-menu-active').removeClass('context-menu-active');
+                	$rip.find(".rip-symbol-ascii").attr("hidden", "hidden");
+                	$rip.find(".rip-symbol-hex").attr("hidden", "hidden");
+
                 }
             },
             decoded: {
@@ -50,43 +35,31 @@ $(function() {
                 	var $rip = $(opt.$trigger.context);
                 	$rip.find(".rip-default").attr("hidden", "hidden");
                 	$rip.find(".rip-resolved").removeAttr("hidden");
-                	$rip.find(".rip-symbol").attr("hidden", "hidden");
-                	// var ripBlock = opt.$trigger.context;
-                	// var values = ripBlock.getAttribute("value");
-                	// var address = values.substring(values.indexOf(',')+1, values.length);
-                	// // This is the string we want, but we also need the hljs parsing.
-                	// ripBlock.innerHTML = '[' + address + ']';
-                	// // Strip out the hljs elements in this instruction
-                	// $(ripBlock.parentElement.parentElement).find('[class^=hljs]').each(function(i, elem) {
-                	// 	$(elem).replaceWith($(elem).contents());
-                	// });
-                	// // Reprocess this line of assembly with hljs and the number-wrapping
-                	// hljs.highlightBlock(ripBlock.parentElement.parentElement);
-                	// wrapAllNumbers();
-                	// // There's a weird bug where the context-menu-active class doesn't get removed,
-                	// // even though the menu is gone, causing it to not be able to be right clicked
-                	// // again. Easy fix. Just remove the class.
-                	// $('.context-menu-active').removeClass('context-menu-active');
+                	$rip.find(".rip-symbol-ascii").attr("hidden", "hidden");
+                	$rip.find(".rip-symbol-hex").attr("hidden", "hidden");
+
                 }
             },
-            symbol: {
-                name: "Referenced Symbol",
+            symbol_ascii: {
+                name: "Referenced Symbol (ASCII)",
                 callback: function(key, opt) {
                 	var $rip = $(opt.$trigger.context);
                 	$rip.find(".rip-default").attr("hidden", "hidden");
                 	$rip.find(".rip-resolved").attr("hidden", "hidden");
-                	$rip.find(".rip-symbol").removeAttr("hidden");
-                	// This one's a bit more complicated. In order to 
-                	// var ripBlock = opt.$trigger.context;
-                	// var values = ripBlock.getAttribute("value");
-                	// // var address = values.substring(values.indexOf(','), values.length);
-                	// // ripBlock.innerHTML = address;
-                	// console.log("Haaaa memes!");
-                	// hljs.highlightBlock(ripBlock.parentElement.parentElement);
-                	// wrapNumbers();
+                	$rip.find(".rip-symbol-ascii").removeAttr("hidden");
+                	$rip.find(".rip-symbol-hex").attr("hidden", "hidden");
 
-                	// $('.context-menu-active').removeClass('context-menu-active');
                 }
+            },
+            symbol_hex: {
+            	name: "References Symbol (Hex)",
+            	callback: function(key, opt) {
+            		var $rip = $(opt.$trigger.context);
+            		$rip.find(".rip-default").attr("hidden", "hidden");
+                	$rip.find(".rip-resolved").attr("hidden", "hidden");
+                	$rip.find(".rip-symbol-ascii").attr("hidden", "hidden");
+                	$rip.find(".rip-symbol-hex").removeAttr("hidden");
+            	}
             }
         }
         // callback: contextMenuConvertBase
@@ -178,7 +151,8 @@ function disassemble_function(el) {
 				replacementStr += '<span class="rip">[';
 				replacementStr += '<span class="rip-default">rip + ' + i['rip-offset'] + '</span>';
 				replacementStr += '<span class="rip-resolved" hidden>' + i['rip-resolved'] + '</span>';
-				replacementStr += '<span class="rip-symbol" hidden>"' + i['rip-symbol'] + '"</span>';
+				replacementStr += '<span class="rip-symbol-ascii" hidden>"' + i['rip-symbol-ascii'] + '"</span>';
+				replacementStr += '<span class="rip-symbol-hex" hidden>' + i['rip-symbol-hex'] + '</span>';
 				replacementStr += ']</span>';
 				i.op_str = i.op_str.replace(/\[.*\]/, replacementStr);
 			}

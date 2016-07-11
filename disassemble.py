@@ -20,9 +20,26 @@ def disasm(bytes, offset=0):
             for op in instr.operands:
                 if op.type == x86.X86_OP_MEM and op.mem.base == x86.X86_REG_RIP:
                     instr.rip = True
-                    instr.offset = op.mem.disp
-                    instr.resolved = disassembled[i+1].address + instr.offset
-                    instr.symbol = executable.ex.get_bytes(instr.resolved, op.size)
+                    instr.rip_offset = op.mem.disp
+                    instr.rip_resolved = disassembled[i+1].address + instr.rip_offset
+                    bytes = executable.ex.get_bytes(instr.rip_resolved, op.size)
+                    instr.rip_symbol_hex = ""
+                    space = ""
+                    for char in bytes:
+                        instr.rip_symbol_hex += space + hex(ord(char))
+                        space = " "
+                    # HTML collapses consecutive spaces. For presentation purposes, convert spaces
+                    # to &nbsp (non-breaking space)
+                    nbsp_str = []
+                    if op.size == 16:
+                        for char in bytes:
+                            if char == ' ':
+                                nbsp_str.append('&nbsp')
+                            else:
+                                nbsp_str.append(char)
+                        instr.rip_symbol_ascii = ''.join(nbsp_str)
+                    else:
+                        instr.rip_symbol_ascii = "under construction..."
         return disassembled
 
     except CsError as e:
@@ -44,9 +61,10 @@ def jsonify_capstone(data):
         # If this instruction contains a rip-relative address, then assign the relevant data
         if i.rip:
             row['rip'] = True
-            row['rip-offset'] = i.offset
-            row['rip-resolved'] = i.resolved
-            row['rip-symbol'] = i.symbol
+            row['rip-offset'] = i.rip_offset
+            row['rip-resolved'] = i.rip_resolved
+            row['rip-symbol-ascii'] = i.rip_symbol_ascii
+            row['rip-symbol-hex'] = i.rip_symbol_hex
         if i.nop:
             row['nop'] = True
         ret.append(row)
