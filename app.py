@@ -21,6 +21,7 @@ import hurry.filesize
 import disassemble as disasm
 from function_store import storeFunctions, getFunctions, getFunctionsBySubstring
 from executable import *
+import executable
 from disassemble import disasm, jsonify_capstone
 
 app = Flask(__name__)
@@ -52,9 +53,6 @@ js_disassemble = Bundle('js/rivets.js',
 	output='js/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
 
-## the executable we're looking at
-ex = None
-
 # home and upload
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -79,11 +77,11 @@ def index():
 		return render_template("index.jinja.html", files=res)
 
 def loadExec(filename):
-	global ex
 	path = app.config['UPLOAD_DIR'] + filename
 	f = open(path, 'rb')
-	ex = get_executable(f)
-	functions = ex.get_all_functions()
+	a = get_executable(f)
+	executable.ex = a
+	functions = executable.ex.get_all_functions()
 	storeFunctions(functions)
 	print "Done loading the executable"
 
@@ -104,15 +102,18 @@ def disassemble():
 # expects {"filename": "", func_name: "", "st_value": "", "file_offset": "", "size": ""}
 @app.route('/disasm_function', methods=['POST'])
 def disasm_function():
-	global ex
 	# get sequence of bytes and offset, and pass into disasm
 	file_offset = int(request.form['file_offset'])
-	input_bytes = ex.get_bytes(file_offset, int(request.form['size']))
+	input_bytes = executable.ex.get_bytes(file_offset, int(request.form['size']))
 	
 	# we want to display the addr in memory where the function is located
 	memory_addr = int(request.form['st_value'])
 	data = disasm(input_bytes, memory_addr)	
 	return jsonify(jsonify_capstone(data))
+
+@app.route('/value_at_addr', methods=['GET'])
+def value_at_addr():
+	return executable.ex.get_bytes(int(request.args['addr'], 16), request.args['len'])
 
 # expects {"substring": "", "start_index": <int>, "num_functions": <int>, "case_sensitive": <bool>}
 @app.route('/get_substring_matches', methods=['GET'])
@@ -126,21 +127,18 @@ def get_substring_matches():
 
 @app.route('/get_line_info', methods=["GET"])
 def get_line_info():
-	global ex
 	begin = int(request.args['begin'])
 	size = int(request.args['size'])
-	return jsonify(ex.get_function_line_info(begin, size))
+	return jsonify(eecutable.ex.get_function_line_info(begin, size))
 
 @app.route('/get_die_info', methods=["GET"])
 def get_DIE_info():
-	global ex
 	address = int(request.args['address'])
-	return jsonify(ex.get_addr_stack_info(address))
+	return jsonify(executable.ex.get_addr_stack_info(address))
 
 # expects {"src_path": "", "lineno": "", "width": ""}
 @app.route('/source_code_from_path', methods=["POST"])
 def source_code_from_path():
-	global ex
 	path = app.config['SRC_DIR'] + request.form['src_path']
 	lineno = int(request.form['lineno'])
 	width = int(request.form['width'])

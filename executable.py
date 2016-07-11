@@ -18,6 +18,9 @@ from elftools.dwarf.descriptions import describe_form_class
 from elftools.dwarf.die import DIE
 from demangler import demangle
 
+## the (global) executable we're looking at
+ex = None
+
 """
 Base class for executables
 """

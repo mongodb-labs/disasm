@@ -7,6 +7,7 @@ convert_func_list.py
 *.lprof
 *.swp
 fix_config.sh
+static/css/all.css
 
 # Flask stuff:
 instance/

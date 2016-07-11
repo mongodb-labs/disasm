@@ -21,48 +21,61 @@ $(function() {
             rip: {
                 name: "Rip Relative",
                 callback: function(key, opt) {
-                	var ripBlock = opt.$trigger.context;
-                	var values = ripBlock.getAttribute("value");
-                	var offset = values.substring(0,values.indexOf(','));
-                	// This is the string we want, but we also need the hljs parsing.
-                	ripBlock.innerHTML = '[rip + ' + offset + ']';
-                	// Strip out the hljs elements in this instruction
-                	$(ripBlock.parentElement.parentElement).find('[class^=hljs]').each(function(i, elem) {
-                		$(elem).replaceWith($(elem).contents());
-                	});
-                	// Reprocess this line of assembly with hljs and the number-wrapping
-                	hljs.highlightBlock(ripBlock.parentElement.parentElement);
-                	wrapAllNumbers();
-                	// There's a weird bug where the context-menu-active class doesn't get removed,
-                	// even though the menu is gone, causing it to not be able to be right clicked
-                	// again. Easy fix. Just remove the class.
-                	$('.context-menu-active').removeClass('context-menu-active');
+                	var $rip = $(opt.$trigger.context);
+                	$rip.find(".rip-default").removeAttr("hidden");
+                	// Add hidden attribute to this. Will it make a duplicate???
+                	$rip.find(".rip-resolved").attr("hidden", "hidden");
+                	$rip.find(".rip-symbol").attr("hidden", "hidden");
+                	// var ripBlock = opt.$trigger.context;
+                	// var values = ripBlock.getAttribute("value");
+                	// var offset = values.substring(0,values.indexOf(','));
+                	// // This is the string we want, but we also need the hljs parsing.
+                	// ripBlock.innerHTML = '[rip + ' + offset + ']';
+                	// // Strip out the hljs elements in this instruction
+                	// $(ripBlock.parentElement.parentElement).find('[class^=hljs]').each(function(i, elem) {
+                	// 	$(elem).replaceWith($(elem).contents());
+                	// });
+                	// // Reprocess this line of assembly with hljs and the number-wrapping
+                	// hljs.highlightBlock(ripBlock.parentElement.parentElement);
+                	// wrapAllNumbers();
+                	// // There's a weird bug where the context-menu-active class doesn't get removed,
+                	// // even though the menu is gone, causing it to not be able to be right clicked
+                	// // again. Easy fix. Just remove the class.
+                	// $('.context-menu-active').removeClass('context-menu-active');
                 }
             },
             decoded: {
                 name: "Resolved Address",
                 callback: function(key, opt) {
-                	var ripBlock = opt.$trigger.context;
-                	var values = ripBlock.getAttribute("value");
-                	var address = values.substring(values.indexOf(',')+1, values.length);
-                	// This is the string we want, but we also need the hljs parsing.
-                	ripBlock.innerHTML = '[' + address + ']';
-                	// Strip out the hljs elements in this instruction
-                	$(ripBlock.parentElement.parentElement).find('[class^=hljs]').each(function(i, elem) {
-                		$(elem).replaceWith($(elem).contents());
-                	});
-                	// Reprocess this line of assembly with hljs and the number-wrapping
-                	hljs.highlightBlock(ripBlock.parentElement.parentElement);
-                	wrapAllNumbers();
-                	// There's a weird bug where the context-menu-active class doesn't get removed,
-                	// even though the menu is gone, causing it to not be able to be right clicked
-                	// again. Easy fix. Just remove the class.
-                	$('.context-menu-active').removeClass('context-menu-active');
+                	var $rip = $(opt.$trigger.context);
+                	$rip.find(".rip-default").attr("hidden", "hidden");
+                	$rip.find(".rip-resolved").removeAttr("hidden");
+                	$rip.find(".rip-symbol").attr("hidden", "hidden");
+                	// var ripBlock = opt.$trigger.context;
+                	// var values = ripBlock.getAttribute("value");
+                	// var address = values.substring(values.indexOf(',')+1, values.length);
+                	// // This is the string we want, but we also need the hljs parsing.
+                	// ripBlock.innerHTML = '[' + address + ']';
+                	// // Strip out the hljs elements in this instruction
+                	// $(ripBlock.parentElement.parentElement).find('[class^=hljs]').each(function(i, elem) {
+                	// 	$(elem).replaceWith($(elem).contents());
+                	// });
+                	// // Reprocess this line of assembly with hljs and the number-wrapping
+                	// hljs.highlightBlock(ripBlock.parentElement.parentElement);
+                	// wrapAllNumbers();
+                	// // There's a weird bug where the context-menu-active class doesn't get removed,
+                	// // even though the menu is gone, causing it to not be able to be right clicked
+                	// // again. Easy fix. Just remove the class.
+                	// $('.context-menu-active').removeClass('context-menu-active');
                 }
             },
             symbol: {
                 name: "Referenced Symbol",
                 callback: function(key, opt) {
+                	var $rip = $(opt.$trigger.context);
+                	$rip.find(".rip-default").attr("hidden", "hidden");
+                	$rip.find(".rip-resolved").attr("hidden", "hidden");
+                	$rip.find(".rip-symbol").removeAttr("hidden");
                 	// This one's a bit more complicated. In order to 
                 	// var ripBlock = opt.$trigger.context;
                 	// var values = ripBlock.getAttribute("value");
@@ -160,7 +173,16 @@ function disassemble_function(el) {
 		// change to hex
 		assembly.data = data.map(function(i) {
 			i.address = "0x" + i.address.toString(16);
-			// i.op_str = wrapHexAndDec(i.op_str);
+			if ("rip" in i) {
+				var replacementStr =  "";
+				replacementStr += '<span class="rip">[';
+				replacementStr += '<span class="rip-default">rip + ' + i['rip-offset'] + '</span>';
+				replacementStr += '<span class="rip-resolved" hidden>' + i['rip-resolved'] + '</span>';
+				replacementStr += '<span class="rip-symbol" hidden>"' + i['rip-symbol'] + '"</span>';
+				replacementStr += ']</span>';
+				i.op_str = i.op_str.replace(/\[.*\]/, replacementStr);
+			}
+
 			return i;
 		});
 
@@ -175,21 +197,21 @@ function disassemble_function(el) {
 
 		wrapAllNumbers();
 
-		$('.hljs-built_in').each(function(index, elem) {
-			if (elem.innerHTML === "rip") {
-				console.log("Memes!");
-				var line = elem.parentElement;
-				// Brackets that contain "rip" and the offset, eg. "[rip + 0x123456]"
-				var ripBlock = line.innerHTML.substring(line.innerHTML.indexOf('['), line.innerHTML.indexOf(']')+1);
-				// Address of the following instruction
-				var rip = elem.parentElement.parentElement.nextSibling.children[0].children[0].innerHTML;
-				// Offset from rip
-				var offset = elem.nextSibling.nextSibling.innerHTML;
-				// Actual value referred to in ripBlock. Obtained by adding offset to rip
-				var value = '0x' + (parseInt(rip, 16) + parseInt(offset, 16)).toString(16);
-				line.innerHTML = line.innerHTML.replace(/\[.*\]/, '<span class="rip" value="' + offset + ',' + value + '">' + ripBlock + '</span>');
-			}
-		});
+		// $('.hljs-built_in').each(function(index, elem) {
+		// 	if (elem.innerHTML === "rip") {
+		// 		console.log("Memes!");
+		// 		var line = elem.parentElement;
+		// 		// Brackets that contain "rip" and the offset, eg. "[rip + 0x123456]"
+		// 		var ripBlock = line.innerHTML.substring(line.innerHTML.indexOf('['), line.innerHTML.indexOf(']')+1);
+		// 		// Address of the following instruction
+		// 		var rip = elem.parentElement.parentElement.nextSibling.children[0].children[0].innerHTML;
+		// 		// Offset from rip
+		// 		var offset = elem.nextSibling.nextSibling.innerHTML;
+		// 		// Actual value referred to in ripBlock. Obtained by adding offset to rip
+		// 		var value = '0x' + (parseInt(rip, 16) + parseInt(offset, 16)).toString(16);
+		// 		line.innerHTML = line.innerHTML.replace(/\[.*\]/, '<span class="rip" value="' + offset + ',' + value + '">' + ripBlock + '</span>');
+		// 	}
+		// });
 	})
 	.fail(function(data) {
 		console.log("Request failed");
