@@ -68,12 +68,10 @@ $(function() {
 
 
 var URL_DISASM_FUNCTION = "/disasm_function";
-var URL_LINE_INFO = "/get_line_info";
 var URL_DIE_INFO = "/get_die_info";
 
 var assembly = {
 	contents : [], 
-	line_info: [], 
 	func_name: "", 
 	instructions_loading: false
 };
@@ -99,7 +97,6 @@ function functionClicked(event, model) {
 	// clear all info
 	assembly.func_name = "";
 	assembly.contents = [];
-	assembly.line_info = [];
 	hideAnalysis();
 
 	// set class to active and indicate func name
@@ -117,7 +114,6 @@ function functionClicked(event, model) {
 	// FOR NOW seems unnecessary? may need to bring it back if loading DIEs becomes excessively slow
 	begin = el.attributes["data-st-value"].value;
 	size = el.attributes["data-size"].value;
-	// get_function_line_info(begin, size);
 
 	// preload DIE info from server
 	$.ajax({
@@ -217,22 +213,6 @@ function wrapNumbersInElem(elem) {
 		console.log(elem);
 	}
 }
-
-// get line info for function
-function get_function_line_info(begin, size) {
-	$.ajax({
-		type:"GET",
-		url: URL_LINE_INFO + "?begin=" + begin + "&size=" + size
-	})
-	.done(function(data) {
-		assembly.line_info = data;
-		console.log(assembly.line_info)
-	})
-	.fail(function(data) {
-		console.log("something went wrong in getting line info")
-	});
-}
-
 
 function wrapHexAndDec(str) {
 	var outputStr = "";
