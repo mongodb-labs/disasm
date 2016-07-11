@@ -169,6 +169,31 @@ function disassemble_function(el) {
 			hljs.highlightBlock(block);
 		});
 
+		// load jump info
+		var reverseJumps = {}
+		for (var i = 0; i < assembly.contents.length; i++) {
+			var line = assembly.contents[i];
+			if (line.mnemonic.charAt(0) == 'j' && line.op_str in reverseJumps) {
+				reverseJumps[line.op_str].push(line.address)
+			}
+			else if (line.mnemonic.charAt(0) == 'j' && !(line.op_str in reverseJumps)) {
+				reverseJumps[line.op_str] = [line.address]
+			}
+		}
+
+		assembly.contents.map(function(line) {
+			if (line.mnemonic.charAt(0) == 'j') {
+				line['jumpTo'] = line.op_str;
+			}
+			if (line.address in reverseJumps) {
+				line['jumpFrom'] = reverseJumps[line.address]
+			}
+			return line
+		});
+
+
+		console.log(assembly.contents)
+
 		wrapAllNumbers();
 
 		// $('.hljs-built_in').each(function(index, elem) {
