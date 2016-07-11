@@ -214,6 +214,10 @@ $source-code-bg1: aquamarine; // highlight relevant line
 			.lineno {
 				float: right;
 			}
+
+			.function-name {
+				font-weight: bold;
+			}
 		}
 	}
 

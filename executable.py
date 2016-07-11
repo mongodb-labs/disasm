@@ -170,7 +170,7 @@ class ElfExecutable(Executable):
             if entry.state is None or entry.state.end_sequence:
                 continue
             # prev and cur states encompass the address we're looking for
-            if prevstate and prevstate.address <= address < entry.state.address:
+            if prevstate and prevstate.address <= address <= entry.state.address:
                 file_entry = lineprog['file_entry'][prevstate.file - 1]
                 filepath = (lineprog["include_directory"][file_entry.dir_index - 1] 
                     + "/" 
@@ -189,7 +189,6 @@ class ElfExecutable(Executable):
                 break
             new_offset = (int(die.attributes[ref_attr].value) + die.cu.cu_offset)
             die = DIE(cu=die.cu, stream=die.stream, offset=new_offset)
-        print die
         if "DW_AT_name" in die.attributes:
             return die.attributes["DW_AT_name"].value
         else:
@@ -205,13 +204,17 @@ class ElfExecutable(Executable):
         else:
             top_DIE = CU.get_top_DIE()
             self.CU_offset_to_DIE[CU_offset] = top_DIE # save
-
+        print top_DIE
+        # stack[0] is the parent-est
         stack = self._get_addr_DIEs(top_DIE, address, [])
 
         # put in jsonifiable form of [{filepath, line, function name}, ...]
+        # function info is offset by one entry (because we want enclosing function)
         lineprog = self.dwarff.line_program_for_CU(CU)
+
         res = []
-        for entry in stack:
+        prev = stack[0]
+        for entry in stack[1:]:
             if "DW_AT_decl_file" in entry.attributes:
                 file_AT = "DW_AT_decl_file"
                 line_AT = "DW_AT_decl_line"
@@ -226,13 +229,17 @@ class ElfExecutable(Executable):
             filepath = (lineprog["include_directory"][file_entry.dir_index - 1] 
                     + "/" 
                     + file_entry.name)
-            filename = self._die_to_function(entry)
-            res.append((filepath, entry.attributes[line_AT].value, filename))
-    
-        # append uppermost "level" of info
-        res.append(self._get_addr_line_info(address, lineprog))
-        return res
+            function_name = self._die_to_function(prev)
+            res.append((filepath, entry.attributes[line_AT].value, function_name))
+            prev = entry
 
+        # append uppermost "level" of info if not already included in DIE stack
+        filepath_last, fileno_last = self._get_addr_line_info(address, lineprog)
+        if len(res) > 0 and fileno_last == fileno and filepath_last == filepath:
+            return res
+        function_name_last = self._die_to_function(prev)
+        res.append((filepath_last, fileno_last, function_name_last))
+        return res
 
 
     # general helpers; may or may not be useful
