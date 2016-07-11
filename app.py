@@ -50,7 +50,7 @@ js_disassemble = Bundle('js/rivets.js',
 	'js/jquery.contextMenu.js',
 	'js/jquery.ui.position.js',
 	'js/highlight.pack.js',
-	'js/d3.min.js'
+	'js/d3.min.js',
 	output='js/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
 
