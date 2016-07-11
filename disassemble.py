@@ -12,8 +12,10 @@ def disasm(bytes, offset=0):
         md.detail = True
         disassembled = list(md.disasm(bytes, offset))
         for i, instr in enumerate(disassembled):
-            # if instr.address == 11524206:
+            # if instr.address == 11523750:
             #     pdb.set_trace()
+            if instr.mnemonic == 'nop':
+                instr.nop = True
             print "0x%x:\t%s\t%s" % (instr.address, instr.mnemonic, instr.op_str)
             for op in instr.operands:
                 if op.type == x86.X86_OP_MEM and op.mem.base == x86.X86_REG_RIP:
@@ -26,7 +28,7 @@ def disasm(bytes, offset=0):
     except CsError as e:
         print("ERROR: %s" %e)
 
-# class CsInsn exposes all the internal information about the disassembled 
+# class CsInsn exposes all the internal informaion about the disassembled 
 # instruction that we want to access to
 def jsonify_capstone(data):
     ret = []
@@ -45,5 +47,7 @@ def jsonify_capstone(data):
             row['rip-offset'] = i.offset
             row['rip-resolved'] = i.resolved
             row['rip-symbol'] = i.symbol
+        if i.nop:
+            row['nop'] = True
         ret.append(row)
     return ret
