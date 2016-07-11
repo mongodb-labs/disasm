@@ -88,6 +88,8 @@ function filepathClicked(e, model) {
 	_filepathClicked(e.currentTarget, model.frame[0], model.frame[1])
 }
 
+// when a particular filepath is clicked, triggering an api call
+// to get the source code
 function _filepathClicked(element, src_path, lineno) {
 	var width = 10;
 	$(".file-selected").removeClass("file-selected");
@@ -103,18 +105,28 @@ function _filepathClicked(element, src_path, lineno) {
 		}
 	})
 	.done(function(data) {
-		analysis.source_code = {
-			"before": data['before'],
-			"target": data['target'],
-			"after": data['after']
-		}
+		if (data.hasOwnProperty("target")) {
+			analysis.source_code = {
+				"before": data['before'],
+				"target": data['target'],
+				"after": data['after']
+			}
 
-		// source code syntax highlighting
-		$(".source-code pre").each(function(i, block) {
-			hljs.highlightBlock(block);
-		});
+			// source code syntax highlighting
+			$(".source-code pre").each(function(i, block) {
+				hljs.highlightBlock(block);
+			});
+		}
+		// sent a filepath from root /
+		else {
+			analysis.source_code = {
+				"before": "Sorry, cannot get source code from this path",
+				"target": "",
+				"after": ""
+			};
+		}
 	})
-	// invoked when src path is absolute
+	// should never happen, but exists as a placeholder
 	.fail(function() { 
 		analysis.source_code = {
 			"before": "Sorry, cannot get source code from this path",

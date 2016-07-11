@@ -204,13 +204,18 @@ class ElfExecutable(Executable):
         else:
             top_DIE = CU.get_top_DIE()
             self.CU_offset_to_DIE[CU_offset] = top_DIE # save
-        print top_DIE
+        
         # stack[0] is the parent-est
         stack = self._get_addr_DIEs(top_DIE, address, [])
 
         # put in jsonifiable form of [{filepath, line, function name}, ...]
         # function info is offset by one entry (because we want enclosing function)
-        lineprog = self.dwarff.line_program_for_CU(CU)
+        # we're not using dwarfinfo.line_program_for_CU because it re-parses all DIEs
+        if 'DW_AT_stmt_list' in top_DIE.attributes:
+            lineprog = self.dwarff._parse_line_program_at_offset(
+                top_DIE.attributes['DW_AT_stmt_list'].value, CU.structs)
+        else:
+            return None
 
         res = []
         prev = stack[0]
