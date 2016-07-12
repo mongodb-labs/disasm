@@ -77,7 +77,10 @@ def getFunctionsBySubstring(substring, start_index, num_functions, case_sensitiv
     #         score = match(substring, 0, function["name"], 0, 0, 0.0, True, memo, rightmost_match)
     #         heapq.heappush(functions, FunctionMatch(function['name'], score))
     # elif ALGO == "RE":
-    prog = re.compile(substring, re.IGNORECASE)
+    if case_sensitive:
+        prog = re.compile(substring)
+    else:
+        prog = re.compile(substring, re.IGNORECASE)
     for function in functionsList:
         # haystack = filterName(function['name'])
         haystack = function['name']
