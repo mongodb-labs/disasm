@@ -117,7 +117,7 @@ class ElfExecutable(Executable):
                 continue
 
             # Looking for all addresses in [begin, begin + size]
-            if begin <= entry.state.address <= (begin + size):
+            if begin <= entry.state.address < (begin + size):
                 filename = lineprog['file_entry'][entry.state.file - 1].name
                 info.append((hex(entry.state.address), filename, entry.state.line))
 
@@ -133,7 +133,7 @@ class ElfExecutable(Executable):
             ranges = range_lists.get_range_list_at_offset(offset)
             for entry in ranges:
                 # RangeEntry = (begin_offset, end_offset)
-                if entry[0] <= address <= entry[1]:
+                if entry[0] <= address < entry[1]:
                     return True
             return False
         elif "DW_AT_low_pc" in DIE.attributes and "DW_AT_high_pc" in DIE.attributes:
@@ -146,7 +146,7 @@ class ElfExecutable(Executable):
                 hi = lo + int(high_pc.value)       
             else:
                 print('Error: invalid DW_AT_high_pc class:', highpc_attr_class)
-            return lo <= address <= hi
+            return lo <= address < hi
 
     # helper function to get array of DIEs for given address
     def _get_addr_DIEs(self, parent, address, stack):
@@ -170,7 +170,7 @@ class ElfExecutable(Executable):
             if entry.state is None or entry.state.end_sequence:
                 continue
             # prev and cur states encompass the address we're looking for
-            if prevstate and prevstate.address <= address <= entry.state.address:
+            if prevstate and prevstate.address <= address < entry.state.address:
                 file_entry = lineprog['file_entry'][prevstate.file - 1]
                 filepath = (lineprog["include_directory"][file_entry.dir_index - 1] 
                     + "/" 

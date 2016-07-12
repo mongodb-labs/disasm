@@ -10,7 +10,7 @@ itsdangerous==0.24
 Jinja2==2.8
 MarkupSafe==0.23
 pathlib==1.0.1
--e git+https://github.com/dorothychen/pyelftools.git@d70e84117dbbc3e6fc5a1575bdc73ad9dfd1f681#egg=pyelftools
+-e git+https://github.com/dorothychen/pyelftools.git@f2a027f9228f0f0efd3fe3d71e3aa3e2ba8c0f94#egg=pyelftools
 pyparsing==2.1.5
 pyScss==1.3.5
 six==1.10.0
