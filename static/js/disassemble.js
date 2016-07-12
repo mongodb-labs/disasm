@@ -66,7 +66,6 @@ $(function() {
     });
 });
 
-
 var URL_DISASM_FUNCTION = "/disasm_function";
 var URL_DIE_INFO = "/get_die_info";
 
@@ -81,6 +80,25 @@ var assembly_ctrl = {
 rivets.bind($("#function-disasm"), 
 	{assembly: assembly, ctrl: assembly_ctrl}
 );
+
+// for arrows (jump highlighting)
+var svg = d3.select('#function-disasm .jump-arrows')
+	.append('svg:svg')
+	.attr('width', '100%');
+
+svg.append('svg:defs').selectAll('marker')
+	// create arrowhead
+	.data(['arrow'])
+	.attr('id', String)
+	.enter().append('svg:marker')
+	.attr('viewBox', "0 0 10 10")
+	.attr('markerWidth', 13)
+	.attr('markerHeight', 13)
+	.attr('orient', 'auto')
+	.attr('refX', 10)
+	.attr('refY', 10)
+	.append('svg:path')
+	.attr('d', "M0,-5L10,0L0,5");
 
 function functionClicked(event, model) {
 	// handle expansion/collapse of <> in function name
@@ -109,13 +127,9 @@ function functionClicked(event, model) {
 	
 	// get function assembly from server
 	disassemble_function(el);
-
-	// get addr -> line info from server
-	// FOR NOW seems unnecessary? may need to bring it back if loading DIEs becomes excessively slow
-	begin = el.attributes["data-st-value"].value;
-	size = el.attributes["data-size"].value;
-
+	
 	// preload DIE info from server
+	begin = el.attributes["data-st-value"].value;
 	$.ajax({
 		type: "GET",
 		url: URL_DIE_INFO + "?address=" + begin
@@ -170,29 +184,7 @@ function disassemble_function(el) {
 		});
 
 		// load jump info
-		var reverseJumps = {}
-		for (var i = 0; i < assembly.contents.length; i++) {
-			var line = assembly.contents[i];
-			if (line.mnemonic.charAt(0) == 'j' && line.op_str in reverseJumps) {
-				reverseJumps[line.op_str].push(line.address)
-			}
-			else if (line.mnemonic.charAt(0) == 'j' && !(line.op_str in reverseJumps)) {
-				reverseJumps[line.op_str] = [line.address]
-			}
-		}
-
-		assembly.contents.map(function(line) {
-			if (line.mnemonic.charAt(0) == 'j') {
-				line['jumpTo'] = line.op_str;
-			}
-			if (line.address in reverseJumps) {
-				line['jumpFrom'] = reverseJumps[line.address]
-			}
-			return line
-		});
-
-
-		console.log(assembly.contents)
+		handleJumpHighlighting();
 
 		wrapAllNumbers();
 
@@ -217,6 +209,69 @@ function disassemble_function(el) {
 	});
 }
 
+// display jump arrows
+function handleJumpHighlighting() {
+	// load jump info
+	var reverseJumps = {}
+	for (var i = 0; i < assembly.contents.length; i++) {
+		var line = assembly.contents[i];
+		if (line.mnemonic.charAt(0) == 'j' && line.op_str in reverseJumps) {
+			reverseJumps[line.op_str].push(line.address)
+		}
+		else if (line.mnemonic.charAt(0) == 'j' && !(line.op_str in reverseJumps)) {
+			reverseJumps[line.op_str] = [line.address]
+		}
+	}
+
+	// load into assembly.contents
+	assembly.contents = assembly.contents.map(function(line) {
+		if (line.mnemonic.charAt(0) == 'j') {
+			line['jumpTo'] = line.op_str;
+		}
+		if (line.address in reverseJumps) {
+			line['jumpFrom'] = reverseJumps[line.address]
+		}
+		return line
+	});
+
+	// build array of { from: <addr>, to: <addr> }
+	var jumps = [];
+	assembly.contents.map(function(line) {
+		var vert_offset = 12;
+		if (line.mnemonic.charAt(0) == 'j') {
+			jumps.push({
+				"from": line.address,
+				"fromY": document.getElementById(line.address).offsetTop + vert_offset,
+				"to": line.op_str,
+				"toY": document.getElementById(line.op_str).offsetTop + vert_offset
+			});
+		}
+	});
+
+	// actually draw arrows
+	var instructions = document.getElementsByClassName('instructions')[0];
+	svg.attr('height', instructions.clientHeight);
+	var arrow = svg.append('svg:g')
+		.attr('transform', function(jump, i) {
+			var width = document.getElementsByClassName('jump-arrows')[0].clientWidth;
+			return 'scale(-1, 1) translate(-' + width + ', 0)';
+		})
+		.selectAll('path')
+		.data(jumps)
+		// create curved lines
+		.enter().append('svg:path')
+		.attr('d', function(jump, i) {
+			var x = 2;
+			var command = "M" + x + " " + jump.fromY + " " +
+				"C " + (x+15) + " " + jump.fromY + ", " +
+		 		(x+15) + " " + jump.toY + ", " +
+		 		x + " " + jump.toY;
+		 	return command;
+		})
+		.attr('marker-end', "url(#arrow)");
+}
+
+// wrap numbers for base changes etc.
 function wrapAllNumbers() {
 	$('.hljs-number').each(function(index, elem) {
 		wrapNumbersInElem(elem);

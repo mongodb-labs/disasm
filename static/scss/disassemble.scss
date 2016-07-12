@@ -144,6 +144,7 @@ $func-offsetTop: 161px;
 
 $instruc-color1: rgb(128,222,234); // darker
 $instruc-color2: rgb(178,235,242); // lighter
+$arrow-color: rgb(255,87,34);
 #function-disasm {
 	font-family: "Inconsolata", monospace;
 
@@ -162,12 +163,33 @@ $instruc-color2: rgb(178,235,242); // lighter
 
 	.selected-func-name {
 		font-size: 1.2em;
-		@include wrap-text;
-		
+		@include wrap-text;	
 	}
-	.instructions {
-		margin-top: 15px;
 
+	.instructions, .jump-arrows {
+		margin-top: 15px;
+	}
+
+	.jump-arrows {
+		position: relative;
+		float: left;
+		width: 10%;
+		g {
+			path {
+				fill: none;
+				stroke: $arrow-color;
+				stroke-width: 3px;
+			}
+			marker {
+				fill: $arrow-color;
+			}
+		}
+	}
+
+	.instructions {
+		position: relative;
+		float: left;
+		width: 90%;
 		.instruction.row {
 			display: block;
 		}

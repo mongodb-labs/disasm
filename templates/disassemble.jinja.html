@@ -2,6 +2,7 @@
 <html>
 
 <head>
+  <meta charset="UTF-8">
   <link rel="stylesheet" href="static/css/skeleton.css">
   <link rel="stylesheet" href="static/css/normalize.css">
   <link rel="stylesheet" href="static/css/jquery.contextMenu.css">
@@ -54,21 +55,21 @@
     <div id="assembly-column" class="eight columns">
       {# selected function's assembly #}
       <div id='function-disasm'>
-        <span class="selected-func-name">
+        <div class="selected-func-name">
         { assembly.func_name }
-        </span>
-
-{#         <span class="loading-line-info">
-          Loading line info
-        </span> #}
+        </div>
 
         <div class="instructions-loading"
           rv-show="assembly.instructions_loading">
           <img src="static/img/pacman.gif"/>
         </div>
 
+        <div class='jump-arrows'>
+        </div>
+
         <div class="instructions">
-          <span class='row instruction' 
+          <span class='row instruction'
+            rv-id='i.address'
             rv-each-i="assembly.contents"
             rv-on-click="ctrl.instructionClicked">
             <div class='address two columns'>{i.address}</div>
@@ -111,8 +112,10 @@
   </main>
 
 
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 {% assets "js_disassemble" %} <script src="{{ ASSET_URL }}"></script> {% endassets %}
+
 </body>
 
 </html>
