@@ -17,6 +17,7 @@ from elftools.elf.sections import SymbolTableSection
 from elftools.dwarf.descriptions import describe_form_class
 from elftools.dwarf.die import DIE
 from demangler import demangle
+from bisect import bisect_right
 
 ## the (global) executable we're looking at
 ex = None
@@ -27,6 +28,7 @@ Base class for executables
 class Executable(object):
     def __init__(self, f):
         self.f = f
+        self._symbol_addr_map = None
 
     @staticmethod
     def isElf(f):
@@ -55,6 +57,9 @@ class Executable(object):
     # return list of all functions in executable in the form
     # { "offset": "", "size": "", "name": "" }
     def get_all_functions(self):
+        self.raise_not_implemented()
+
+    def get_symbol_by_addr(self, addr):
         self.raise_not_implemented()
 
 
@@ -252,6 +257,24 @@ class ElfExecutable(Executable):
         for sec in self.elff.iter_sections():
             print sec["sh_type"] + ", name: " + str(sec["sh_name"])
 
+    def get_symbol_by_addr(self, addr):
+        symtab = self.elff.get_section_by_name('.symtab')
+        if self._symbol_addr_map is None:
+            self._symbol_addr_map = list(symtab.iter_symbols())
+            self._symbol_addr_map.sort(key=lambda symbol: symbol.entry['st_value'])
+            self._symbol_addr_map_keys = [symbol.entry['st_value'] for symbol in self._symbol_addr_map]
+        index = bisect_right(self._symbol_addr_map_keys, addr) - 1
+        sym = self._symbol_addr_map[index]
+        print addr
+        print sym.entry['st_value']
+        print sym.entry['st_size']
+        print [symbol.entry['st_value'] for symbol in self._symbol_addr_map[index-3:index+3]]
+        if sym.entry['st_value'] <= addr < (sym.entry['st_value'] + sym.entry['st_size']):
+            print "Returning", sym.name, "as matched symbol"
+            return demangle(sym.name)
+        else:
+            print "Could not match address"
+            return None
 
 """
 Mach-o executable

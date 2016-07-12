@@ -21,50 +21,49 @@ $(function() {
             rip: {
                 name: "Rip Relative",
                 callback: function(key, opt) {
-                	var $rip = $(opt.$trigger.context);
-                	$rip.find(".rip-default").removeAttr("hidden");
-                	$rip.find(".rip-resolved").attr("hidden", "hidden");
-                	$rip.find(".rip-symbol-ascii").attr("hidden", "hidden");
-                	$rip.find(".rip-symbol-hex").attr("hidden", "hidden");
-
+                	ripCallback(key, opt, '.rip-default');
                 }
             },
             decoded: {
                 name: "Resolved Address",
                 callback: function(key, opt) {
-                	var $rip = $(opt.$trigger.context);
-                	$rip.find(".rip-default").attr("hidden", "hidden");
-                	$rip.find(".rip-resolved").removeAttr("hidden");
-                	$rip.find(".rip-symbol-ascii").attr("hidden", "hidden");
-                	$rip.find(".rip-symbol-hex").attr("hidden", "hidden");
+                	ripCallback(key, opt, '.rip-resolved');
 
                 }
             },
-            symbol_ascii: {
-                name: "Referenced Symbol (ASCII)",
+            value_ascii: {
+                name: "Referenced Value (ASCII)",
                 callback: function(key, opt) {
-                	var $rip = $(opt.$trigger.context);
-                	$rip.find(".rip-default").attr("hidden", "hidden");
-                	$rip.find(".rip-resolved").attr("hidden", "hidden");
-                	$rip.find(".rip-symbol-ascii").removeAttr("hidden");
-                	$rip.find(".rip-symbol-hex").attr("hidden", "hidden");
+                	ripCallback(key, opt, '.rip-value-ascii');
 
                 }
             },
-            symbol_hex: {
-            	name: "References Symbol (Hex)",
+            value_hex: {
+            	name: "References Value (Hex)",
             	callback: function(key, opt) {
-            		var $rip = $(opt.$trigger.context);
-            		$rip.find(".rip-default").attr("hidden", "hidden");
-                	$rip.find(".rip-resolved").attr("hidden", "hidden");
-                	$rip.find(".rip-symbol-ascii").attr("hidden", "hidden");
-                	$rip.find(".rip-symbol-hex").removeAttr("hidden");
+            		ripCallback(key, opt, '.rip-value-hex');
+            	}
+            },
+            symbol: {
+            	name: "Symbol",
+            	callback: function(key, opt) {
+            		ripCallback(key, opt, '.rip-symbol');
+            	},
+            	disabled: function(key, opt) {
+            		// We want to show this item iff the rip-symbol element exists
+            		console.log($(opt.$trigger.context).find('.rip-symbol').length);
+            		return $(opt.$trigger.context).find('.rip-symbol').length == 0;
             	}
             }
         }
-        // callback: contextMenuConvertBase
     });
 });
+
+function ripCallback(key, opt, classToShow) {
+	var $rip = $(opt.$trigger.context);
+	$rip.find("[class^='rip-']").attr("hidden", "hidden");
+	$rip.find(classToShow).removeAttr("hidden");
+}
 
 
 var URL_DISASM_FUNCTION = "/disasm_function";
@@ -151,8 +150,11 @@ function disassemble_function(el) {
 				replacementStr += '<span class="rip">[';
 				replacementStr += '<span class="rip-default">rip + ' + i['rip-offset'] + '</span>';
 				replacementStr += '<span class="rip-resolved" hidden>' + i['rip-resolved'] + '</span>';
-				replacementStr += '<span class="rip-symbol-ascii" hidden>"' + i['rip-symbol-ascii'] + '"</span>';
-				replacementStr += '<span class="rip-symbol-hex" hidden>' + i['rip-symbol-hex'] + '</span>';
+				replacementStr += '<span class="rip-value-ascii" hidden>"' + i['rip-value-ascii'] + '"</span>';
+				replacementStr += '<span class="rip-value-hex" hidden>' + i['rip-value-hex'] + '</span>';
+				if (i['rip-symbol']) {
+					replacementStr += '<span class="rip-symbol" hidden>' + i['rip-symbol'] + '</span>';
+				}
 				replacementStr += ']</span>';
 				i.op_str = i.op_str.replace(/\[.*\]/, replacementStr);
 			}

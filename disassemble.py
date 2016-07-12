@@ -14,19 +14,20 @@ def disasm(bytes, offset=0):
         for i, instr in enumerate(disassembled):
             # if instr.address == 11523750:
             #     pdb.set_trace()
+            print "0x%x:\t%s\t%s" % (instr.address, instr.mnemonic, instr.op_str)
             if instr.mnemonic == 'nop':
                 instr.nop = True
-            print "0x%x:\t%s\t%s" % (instr.address, instr.mnemonic, instr.op_str)
             for op in instr.operands:
                 if op.type == x86.X86_OP_MEM and op.mem.base == x86.X86_REG_RIP:
                     instr.rip = True
                     instr.rip_offset = op.mem.disp
                     instr.rip_resolved = disassembled[i+1].address + instr.rip_offset
+                    instr.rip_symbol = executable.ex.get_symbol_by_addr(instr.rip_resolved)
                     bytes = executable.ex.get_bytes(instr.rip_resolved, op.size)
-                    instr.rip_symbol_hex = ""
+                    instr.rip_value_hex = ""
                     space = ""
                     for char in bytes:
-                        instr.rip_symbol_hex += space + hex(ord(char))
+                        instr.rip_value_hex += space + hex(ord(char))
                         space = " "
                     # HTML collapses consecutive spaces. For presentation purposes, convert spaces
                     # to &nbsp (non-breaking space)
@@ -37,9 +38,9 @@ def disasm(bytes, offset=0):
                                 nbsp_str.append('&nbsp')
                             else:
                                 nbsp_str.append(char)
-                        instr.rip_symbol_ascii = ''.join(nbsp_str)
+                        instr.rip_value_ascii = ''.join(nbsp_str)
                     else:
-                        instr.rip_symbol_ascii = "under construction..."
+                        instr.rip_value_ascii = "under construction..."
         return disassembled
 
     except CsError as e:
@@ -63,8 +64,10 @@ def jsonify_capstone(data):
             row['rip'] = True
             row['rip-offset'] = i.rip_offset
             row['rip-resolved'] = i.rip_resolved
-            row['rip-symbol-ascii'] = i.rip_symbol_ascii
-            row['rip-symbol-hex'] = i.rip_symbol_hex
+            row['rip-value-ascii'] = i.rip_value_ascii
+            row['rip-value-hex'] = i.rip_value_hex
+            row['rip-symbol'] = i.rip_symbol
+            print row['rip-symbol']
         if i.nop:
             row['nop'] = True
         ret.append(row)
