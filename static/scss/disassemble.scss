@@ -252,3 +252,12 @@ $source-code-bg1: aquamarine; // highlight relevant line
 	}
 }
 
+.comment {
+	color: #999 !important; 
+}
+
+/****************** Context Menu ******************/
+
+.context-menu-item.disabled {
+	color: #BBB;
+}
