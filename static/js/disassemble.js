@@ -138,7 +138,7 @@ function disassemble_function(el) {
 		data: data_disassemble
 	})
 	.done(function(data) {
-		// change to hex
+		// Process each line of assembly
 		assembly.data = data.map(function(i) {
 			i.address = "0x" + i.address.toString(16);
 			if ("rip" in i) {
@@ -148,17 +148,16 @@ function disassemble_function(el) {
 				replacementStr += '<span class="rip-resolved" hidden>' + i['rip-resolved'] + '</span>';
 				replacementStr += '<span class="rip-value-ascii" hidden>"' + i['rip-value-ascii'] + '"</span>';
 				replacementStr += '<span class="rip-value-hex" hidden>' + i['rip-value-hex'] + '</span>';
-				if (i['rip-symbol']) {
-					replacementStr += '<span class="rip-symbol" hidden>' + i['rip-symbol'] + '</span>';
-				}
 				replacementStr += ']</span>';
 				i.op_str = i.op_str.replace(/\[.*\]/, replacementStr);
 			}
-			if ("nop" in i) {
-				// Ask Mathias if 10-byte NOPs exist
+			else if ("nop" in i) {
 				i.op_str = i.size + " bytes";
 			}
 
+			if (i['comment']) {
+				i.op_str += '<span class="comment"> # ' + i['comment'] + '</span>';
+			}
 			return i;
 		});
 
@@ -171,23 +170,8 @@ function disassemble_function(el) {
 			hljs.highlightBlock(block);
 		});
 
+		// Adds a "hex" or "twosCompDec64" class to all numbers
 		wrapAllNumbers();
-
-		// $('.hljs-built_in').each(function(index, elem) {
-		// 	if (elem.innerHTML === "rip") {
-		// 		console.log("Memes!");
-		// 		var line = elem.parentElement;
-		// 		// Brackets that contain "rip" and the offset, eg. "[rip + 0x123456]"
-		// 		var ripBlock = line.innerHTML.substring(line.innerHTML.indexOf('['), line.innerHTML.indexOf(']')+1);
-		// 		// Address of the following instruction
-		// 		var rip = elem.parentElement.parentElement.nextSibling.children[0].children[0].innerHTML;
-		// 		// Offset from rip
-		// 		var offset = elem.nextSibling.nextSibling.innerHTML;
-		// 		// Actual value referred to in ripBlock. Obtained by adding offset to rip
-		// 		var value = '0x' + (parseInt(rip, 16) + parseInt(offset, 16)).toString(16);
-		// 		line.innerHTML = line.innerHTML.replace(/\[.*\]/, '<span class="rip" value="' + offset + ',' + value + '">' + ripBlock + '</span>');
-		// 	}
-		// });
 	})
 	.fail(function(data) {
 		console.log("Request failed");
@@ -214,37 +198,4 @@ function wrapNumbersInElem(elem) {
 		console.log("Unknown data type:");
 		console.log(elem);
 	}
-}
-
-function wrapHexAndDec(str) {
-	var outputStr = "";
-	// http://stackoverflow.com/questions/1966476/javascript-process-each-letter-of-text
-	for(var i = 0, c=''; c = str.charAt(i); i++){ 
-		// Hex string located
- 		if (c == '0' && str.charAt(i+1) == 'x') {
- 			var hexString = '0x';
- 			for (i += 2; (c = str.charAt(i)) && isHexChar(c); i++) {
- 				hexString += c;
- 			}
- 			outputStr += '<span class="number" value="hex">' + hexString + '</span>';
- 			i--;
- 		}
- 		// Decimal string located
- 		else if (c >= '1' && c <= '9') {
- 			var decimalString = "";
- 			for (; (c = str.charAt(i)) && ( c >= '0' && c <= '9' ); i++) {
- 				decimalString += c;
- 			}
- 			outputStr += '<span class="number" value="twosCompDec64">' + decimalString + '</span>';
- 			i--;
- 		}
- 		else {
- 			outputStr += c;
- 		}
- 	}
-	return outputStr;
-}
-
-function isHexChar(char) {
-	return (char >= '0' && char <= '9') || (char >= 'a' && char <= 'f') || (char >= 'A' && char <= 'F');
 }

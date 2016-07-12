@@ -265,15 +265,9 @@ class ElfExecutable(Executable):
             self._symbol_addr_map_keys = [symbol.entry['st_value'] for symbol in self._symbol_addr_map]
         index = bisect_right(self._symbol_addr_map_keys, addr) - 1
         sym = self._symbol_addr_map[index]
-        print addr
-        print sym.entry['st_value']
-        print sym.entry['st_size']
-        print [symbol.entry['st_value'] for symbol in self._symbol_addr_map[index-3:index+3]]
         if sym.entry['st_value'] <= addr < (sym.entry['st_value'] + sym.entry['st_size']):
-            print "Returning", sym.name, "as matched symbol"
             return demangle(sym.name)
         else:
-            print "Could not match address"
             return None
 
 """
