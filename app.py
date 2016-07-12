@@ -50,6 +50,7 @@ js_disassemble = Bundle('js/rivets.js',
 	'js/jquery.contextMenu.js',
 	'js/jquery.ui.position.js',
 	'js/highlight.pack.js',
+	'js/d3.min.js',
 	output='js/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
 
@@ -129,7 +130,7 @@ def get_substring_matches():
 def get_line_info():
 	begin = int(request.args['begin'])
 	size = int(request.args['size'])
-	return jsonify(eecutable.ex.get_function_line_info(begin, size))
+	return jsonify(executable.ex.get_function_line_info(begin, size))
 
 @app.route('/get_die_info', methods=["GET"])
 def get_DIE_info():

@@ -18,7 +18,6 @@ var URL_SOURCE_CODE = "/source_code_from_path";
 
 var analysis = {
 	stack_info: [],
-	selected_frame: 1,
 	show_stack_info: false,
 	source_code: {}
 };
