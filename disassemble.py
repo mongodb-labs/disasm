@@ -3,11 +3,6 @@ from capstone import Cs, CsError, CS_ARCH_X86, CS_MODE_64, x86
 import pdb
 import executable
 
-jump_instrs = [
-    'jo', 'jno', 'js', 'jns', 'je', 'jz', 'jne', 'jnz', 'jb', 'jnae', 'jc', 'jnb', 'jae', 'jnc', 
-    'jbe', 'jna', 'ja', 'jnbe', 'jl', 'jnge', 'jge', 'jnl', 'jle', 'jng', 'jg', 'jnle', 'jp', 'jpe',
-    'jnp', 'jpo', 'jcxz', 'jecxz', 'jmp', 'call']
-
 # given a sequence of bytes and an optional offset within the file (for display
 # purposes) return assembly for those bytes
 def disasm(bytes, offset=0):
@@ -21,7 +16,7 @@ def disasm(bytes, offset=0):
             #     pdb.set_trace()
             print "0x%x:\t%s\t%s" % (instr.address, instr.mnemonic, instr.op_str)
             # Check to see if it's a no-op instruction
-            if instr.mnemonic == 'nop':
+            if instr.id == x86.X86_INS_NOP:
                 instr.nop = True
             # Check to see if it's a jump/call instruction
             if instr.mnemonic in jump_instrs:
@@ -34,6 +29,10 @@ def disasm(bytes, offset=0):
                     if not func_start_addr <= dest_addr <= func_end_addr:
                         symbol = executable.ex.get_symbol_by_addr(instr.operands[0].mem.segment)
                         if symbol:
+                            print symbol
+                            instr.jump = True
+                            instr.jump_address = dest_addr
+                            instr.jump_function = symbol
                             instr.comment = symbol
             for op in instr.operands:
                 if op.type == x86.X86_OP_MEM and op.mem.base == x86.X86_REG_RIP:
@@ -61,7 +60,7 @@ def disasm(bytes, offset=0):
                         instr.rip_value_ascii = ''.join(nbsp_str)
                     # TODO: there's a bug involving ASCII that cannot be jsonified. To get around
                     # it, we're temporarily pretending they don't exist. Those edge cases need to be
-                    # handled
+                    # handled.
                     # see typeName(
                     else:
                         instr.rip_value_ascii = "under construction..."
@@ -90,6 +89,10 @@ def jsonify_capstone(data):
             row['rip-resolved'] = i.rip_resolved
             row['rip-value-ascii'] = i.rip_value_ascii
             row['rip-value-hex'] = i.rip_value_hex
+        if i.jump:
+            row['jump'] = True
+            row['jump-function'] = i.jump_function
+            row['jump-address'] = i.jump_address
         if i.comment:
             row['comment'] = i.comment
         if i.nop:
