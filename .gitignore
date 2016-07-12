@@ -7,7 +7,7 @@ convert_func_list.py
 *.lprof
 *.swp
 fix_config.sh
-static/css/all.css
+all.css
 
 # Flask stuff:
 instance/
@@ -56,3 +56,6 @@ pip-delete-this-directory.txt
 .env/
 venv/
 ENV/
+bin/
+include/
+myenv/

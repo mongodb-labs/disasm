@@ -25,9 +25,13 @@ def disasm(bytes, offset=0):
                 instr.nop = True
             # Check to see if it's a jump/call instruction
             if instr.mnemonic in jump_instrs:
-                # Ignore if it's a jump/call to an address within this function
-                if not disassembled[0].address <= instr.operands[0].mem.segment <= disassembled[len(disassembled)-1].address:
-                    if instr.operands[0].type == x86.X86_OP_MEM:
+                # We can only decode the destination if it's a memory address
+                if instr.operands[0].type == x86.X86_OP_MEM:
+                    # Ignore if it's a jump/call to an address within this function
+                    func_start_addr = disassembled[0].address
+                    func_end_addr = disassembled[len(disassembled)-1].address
+                    dest_addr = instr.operands[0].mem.segment
+                    if not func_start_addr <= dest_addr <= func_end_addr:
                         symbol = executable.ex.get_symbol_by_addr(instr.operands[0].mem.segment)
                         if symbol:
                             instr.comment = symbol
