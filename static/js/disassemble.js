@@ -71,7 +71,8 @@ var URL_DIE_INFO = "/get_die_info";
 
 var assembly = {
 	contents : [], 
-	func_name: "", 
+	func_name: "",
+	active_instruction: "",
 	instructions_loading: false
 };
 
@@ -207,18 +208,18 @@ function handleJumpHighlighting() {
 	var reverseJumps = {}
 	for (var i = 0; i < assembly.contents.length; i++) {
 		var line = assembly.contents[i];
-		if (line.is_jump && line.op_str in reverseJumps) {
-			reverseJumps[line.op_str].push(line.address)
+		if (line['internal-jump'] && line['jump-address'] in reverseJumps) {
+			reverseJumps[line['jump-address']].push(line.address)
 		}
-		else if (line.is_jump && !(line.op_str in reverseJumps)) {
-			reverseJumps[line.op_str] = [line.address]
+		else if (line['internal-jump'] && !(line['jump-address'] in reverseJumps)) {
+			reverseJumps[line['jump-address']] = [line.address]
 		}
 	}
 
 	// load into assembly.contents
 	assembly.contents = assembly.contents.map(function(line) {
-		if (line.is_jump) {
-			line['jumpTo'] = [line.op_str]; // arr to future-proof
+		if (line['internal-jump']) {
+			line['jumpTo'] = [line['jump-address']]; // arr to future-proof
 		}
 		if (line.address in reverseJumps) {
 			line['jumpFrom'] = reverseJumps[line.address]
@@ -230,15 +231,12 @@ function handleJumpHighlighting() {
 	var jumps = [];
 	assembly.contents.map(function(line) {
 		var vert_offset = 12;
-		if (line.is_jump) {
-			if (!document.getElementById(line.op_str)) {
-				return;
-			}
+		if (line['internal-jump'] && document.getElementById(line['jump-address'])) {
 			jumps.push({
 				"from": line.address,
 				"fromY": document.getElementById(line.address).offsetTop + vert_offset,
-				"to": line.op_str,
-				"toY": document.getElementById(line.op_str).offsetTop + vert_offset
+				"to": line['jump-address'],
+				"toY": document.getElementById(line['jump-address']).offsetTop + vert_offset
 			});
 		}
 	});
@@ -272,37 +270,53 @@ function handleJumpHighlighting() {
 		.attr('stroke', "gray");
 		
 
-		attachInstructionHoverHandler(jumps);
+		attachInstructionHandlers(jumps);
 }
 
-// highlight the mouseover-ed jump
-function attachInstructionHoverHandler(jumps) {
+// highlight the mouseover-ed or clicked jump
+function attachInstructionHandlers(jumps) {
 	$(".row.instruction").on("mouseenter", function(event) {
 		var instruc = event.currentTarget;
+		highlightJumpArrows(jumps, instruc.id);
+	});
 
-		// highlight if has jump
-		svg.selectAll('g path')
-			.data(jumps)
-			.attr('opacity', function(jump, b) {
-				if (jump['from'] == instruc.id || jump['to'] == instruc.id) {
-					return 1;
-				}
-				else {
-					return 0.3;
-				}
-			})
-			.attr('stroke', function(jump, b) {
-				if (jump['from'] == instruc.id || jump['to'] == instruc.id) {
-					return "rgb(41,182,246)";
-				}
-				else {
-					return "gray";
-				}
-			});
-
+	$(".row.instruction").on("click", function(event) {
+		var instruc = event.currentTarget;
+		assembly.active_instruction = event.currentTarget.id;
+		highlightJumpArrows(jumps, instruc.id);
 	});
 }
 
+
+function highlightJumpArrows(jumps, instruc_id) {
+	var instr_active = assembly.active_instruction;
+
+	// highlight if has jump
+	svg.selectAll('g path')
+		.data(jumps)
+		.attr('opacity', function(jump, b) {
+			if (jump['from'] == instr_active || jump['to'] == instr_active) {
+				return 1;
+			}
+			else if (jump['from'] == instruc_id || jump['to'] == instruc_id) {
+				return 1;
+			}
+			else {
+				return 0.3;
+			}
+		})
+		.attr('stroke', function(jump, b) {
+			if (jump['from'] == instr_active || jump['to'] == instr_active) {
+				return "rgb(3,169,244)";
+			}
+			if (jump['from'] == instruc_id || jump['to'] == instruc_id) {
+				return "rgb(41,182,246)";
+			}
+			else {
+				return "gray";
+			}
+		});
+}
 
 // wrap numbers for base changes etc.
 function wrapAllNumbers() {

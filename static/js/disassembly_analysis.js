@@ -78,6 +78,8 @@ function instructionClicked(e, model) {
 	analysis.source_code = {};
 
 	var addr = parseInt(model.i.address);
+
+	assembly.active_instruction = model.i.address;
 	showAnalysis();
 	get_stack_info(addr);
 }
@@ -96,6 +98,7 @@ function hideAnalysis() {
 	$(".instruc-selected").removeClass("instruc-selected");
 	$("#function-analysis").hide();
 	$("#top-half").height(fullHeight);
+	assembly.active_instruction = "";
 }
 
 function filepathClicked(e, model) {

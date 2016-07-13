@@ -19,7 +19,7 @@
  }
 
  function opStrClicked(event, model) {
- 	if (model.i.is_jump) {
+ 	if (model.i['internal-jump']) {
  		jumpTo(model, model.i.jumpTo);
  	}
  }
@@ -49,4 +49,5 @@
 
 	// add back highlighting
 	jumpToDiv.classList.add("instruc-selected");
+	assembly.active_instruction = addr;
  }

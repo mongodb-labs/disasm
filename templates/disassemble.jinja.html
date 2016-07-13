@@ -69,8 +69,8 @@
 
         <div class="instructions">
           <span class='row instruction'
-            rv-id='i.address'
             rv-each-i="assembly.contents"
+            rv-id='i.address'
             rv-on-click="ctrl.instructionClicked">
             <div class='address two columns'>{i.address}</div>
             <div class='mnemonic two columns'>{i.mnemonic}</div>
