@@ -165,6 +165,9 @@ class ElfExecutable(Executable):
     # get line info for given address
     # return (filepath, line)
     def _get_addr_line_info(self, address, lineprog=None):
+        if not self.dwarff:
+            return None
+        
         if lineprog == None:
             CU_offset = self.aranges.cu_offset_at_addr(address)
             CU = self.dwarff._parse_CU_at_offset(CU_offset)
@@ -201,6 +204,9 @@ class ElfExecutable(Executable):
 
     # get array of DIEs for given address
     def get_addr_stack_info(self, address):
+        if not self.dwarff:
+            return None
+            
         CU_offset = self.aranges.cu_offset_at_addr(address)
         CU = self.dwarff._parse_CU_at_offset(CU_offset)
         # preload tree of DIEs

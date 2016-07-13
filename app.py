@@ -141,7 +141,7 @@ def get_DIE_info():
 @app.route('/source_code_from_path', methods=["POST"])
 def source_code_from_path():
 	# discard requests that ask for a root path
-	if request.form['src_path'][0] == '/':
+	if request.form['src_path'][0] == '/' or request.form['lineno'] == "":
 		return jsonify({})
 
 	path = app.config['SRC_DIR'] + request.form['src_path']
