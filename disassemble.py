@@ -2,6 +2,7 @@ import sys, os
 from capstone import Cs, CsError, CS_ARCH_X86, CS_MODE_64, x86
 import pdb
 import executable
+from demangler import demangle
 
 # given a sequence of bytes and an optional offset within the file (for display
 # purposes) return assembly for those bytes
@@ -19,21 +20,28 @@ def disasm(bytes, offset=0):
             if instr.id == x86.X86_INS_NOP:
                 instr.nop = True
             # Check to see if it's a jump/call instruction
-            if instr.mnemonic in jump_instrs:
-                # We can only decode the destination if it's a memory address
-                if instr.operands[0].type == x86.X86_OP_MEM:
+            if instr.group(x86.X86_GRP_JUMP) or instr.group(x86.X86_GRP_CALL):
+                # We can only decode the destination if it's an immediate value
+                if instr.operands[0].type == x86.X86_OP_IMM:
                     # Ignore if it's a jump/call to an address within this function
                     func_start_addr = disassembled[0].address
                     func_end_addr = disassembled[len(disassembled)-1].address
-                    dest_addr = instr.operands[0].mem.segment
+                    dest_addr = instr.operands[0].imm
                     if not func_start_addr <= dest_addr <= func_end_addr:
-                        symbol = executable.ex.get_symbol_by_addr(instr.operands[0].mem.segment)
+                        symbol = executable.ex.get_symbol_by_addr(dest_addr)
                         if symbol:
-                            print symbol
+                            text_sect = executable.ex.elff.get_section_by_name(".text")
+                            sect_addr = text_sect["sh_addr"]
+                            sect_offset = text_sect["sh_offset"]
+                            func_addr = symbol['st_value']
+
                             instr.jump = True
                             instr.jump_address = dest_addr
-                            instr.jump_function = symbol
-                            instr.comment = symbol
+                            instr.jump_function_name = demangle(symbol.name)
+                            instr.jump_function_address = func_addr
+                            instr.jump_function_offset = func_addr - sect_addr + sect_offset
+                            instr.jump_function_size = symbol['st_size']
+                            instr.comment = demangle(symbol.name)
             for op in instr.operands:
                 if op.type == x86.X86_OP_MEM and op.mem.base == x86.X86_REG_RIP:
                     instr.rip = True
@@ -41,7 +49,7 @@ def disasm(bytes, offset=0):
                     instr.rip_resolved = disassembled[i+1].address + instr.rip_offset
                     symbol = executable.ex.get_symbol_by_addr(instr.rip_resolved)
                     if symbol:
-                        instr.comment = symbol
+                        instr.comment = demangle(symbol.name)
                     bytes = executable.ex.get_bytes(instr.rip_resolved, op.size)
                     instr.rip_value_hex = ""
                     space = ""
@@ -91,8 +99,11 @@ def jsonify_capstone(data):
             row['rip-value-hex'] = i.rip_value_hex
         if i.jump:
             row['jump'] = True
-            row['jump-function'] = i.jump_function
             row['jump-address'] = i.jump_address
+            row['jump-function-name'] = i.jump_function_name
+            row['jump-function-address'] = i.jump_function_address
+            row['jump-function-offset'] = i.jump_function_offset
+            row['jump-function-size'] = i.jump_function_size
         if i.comment:
             row['comment'] = i.comment
         if i.nop:
