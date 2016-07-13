@@ -133,6 +133,10 @@ function _filepathClicked(element, src_path, lineno) {
 			$(".source-code pre").each(function(i, block) {
 				hljs.highlightBlock(block);
 			});
+
+			// scroll to relevant line
+			var offsetTop = $('.source-code .target').height() * lineno - $('.source-code').height()/2;
+			$('.source-code').scrollTop(offsetTop);
 		}
 		// sent a filepath from root /
 		else {

@@ -240,6 +240,8 @@ $source-code-bg1: aquamarine; // highlight relevant line
 	// right side
 	.source-code {
 		font-size: 0.8em;
+		height: 100%;
+		overflow: scroll;
 		.target {
 			background-color: rgba($source-code-bg1, 0.9);
 		}

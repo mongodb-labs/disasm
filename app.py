@@ -146,7 +146,7 @@ def source_code_from_path():
 
 	path = app.config['SRC_DIR'] + request.form['src_path']
 	lineno = int(request.form['lineno'])
-	width = int(request.form['width'])
+	# width = int(request.form['width'])
 
 	before = ""
 	target = ""
@@ -155,15 +155,12 @@ def source_code_from_path():
 		for fake_index, line in enumerate(fp):
 			# because of how enumerate numbers lines
 			i = fake_index + 1 
-			if i - width <= lineno <= i + width:
-				if i < lineno:
-					before += line
-				elif i == lineno:
-					target += line
-				elif i >= lineno:
-					after += line
-			elif i > lineno + width:
-				break
+			if i < lineno:
+				before += line
+			elif i == lineno:
+				target += line
+			elif i >= lineno:
+				after += line
 	return jsonify({"before": before, "target": target, "after": after})
 
 
