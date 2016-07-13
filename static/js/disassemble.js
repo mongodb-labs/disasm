@@ -207,18 +207,18 @@ function handleJumpHighlighting() {
 	var reverseJumps = {}
 	for (var i = 0; i < assembly.contents.length; i++) {
 		var line = assembly.contents[i];
-		if (line.jump && line.op_str in reverseJumps) {
+		if (line.is_jump && line.op_str in reverseJumps) {
 			reverseJumps[line.op_str].push(line.address)
 		}
-		else if (line.jump && !(line.op_str in reverseJumps)) {
+		else if (line.is_jump && !(line.op_str in reverseJumps)) {
 			reverseJumps[line.op_str] = [line.address]
 		}
 	}
 
 	// load into assembly.contents
 	assembly.contents = assembly.contents.map(function(line) {
-		if (line.jump) {
-			line['jumpTo'] = [line.op_str]; // to future-proof
+		if (line.is_jump) {
+			line['jumpTo'] = [line.op_str]; // arr to future-proof
 		}
 		if (line.address in reverseJumps) {
 			line['jumpFrom'] = reverseJumps[line.address]
@@ -230,7 +230,10 @@ function handleJumpHighlighting() {
 	var jumps = [];
 	assembly.contents.map(function(line) {
 		var vert_offset = 12;
-		if (line.jump) {
+		if (line.is_jump) {
+			if (!document.getElementById(line.op_str)) {
+				return;
+			}
 			jumps.push({
 				"from": line.address,
 				"fromY": document.getElementById(line.address).offsetTop + vert_offset,

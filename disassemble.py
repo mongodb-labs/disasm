@@ -18,6 +18,8 @@ def disasm(bytes, offset=0):
             # Check to see if it's a no-op instruction
             if instr.id == x86.X86_INS_NOP:
                 instr.nop = True
+            if instr.group(x86.X86_GRP_JUMP):
+                instr.is_jump = True
             # Check to see if it's a jump/call instruction
             if instr.group(x86.X86_GRP_JUMP) or instr.group(x86.X86_GRP_CALL):
                 # We can only decode the destination if it's an immediate value
@@ -89,6 +91,8 @@ def jsonify_capstone(data):
             row['rip-resolved'] = i.rip_resolved
             row['rip-value-ascii'] = i.rip_value_ascii
             row['rip-value-hex'] = i.rip_value_hex
+        if i.is_jump: # just jump (as opposed to jump or call)
+            row['is_jump'] = True
         if i.jump:
             row['jump'] = True
             row['jump-function'] = i.jump_function
