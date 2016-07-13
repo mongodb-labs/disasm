@@ -2,6 +2,7 @@ import sys, os
 from capstone import Cs, CsError, CS_ARCH_X86, CS_MODE_64, x86
 import pdb
 import executable
+from demangler import demangle
 
 # given a sequence of bytes and an optional offset within the file (for display
 # purposes) return assembly for those bytes
@@ -32,11 +33,17 @@ def disasm(bytes, offset=0):
                     else:
                         symbol = executable.ex.get_symbol_by_addr(dest_addr)
                         if symbol:
-                            print symbol
+                            text_sect = executable.ex.elff.get_section_by_name('.text')
+                            sect_addr = text_sect['sh_addr']
+                            sect_offset = text_sect['sh_offset']
+                            
                             instr.external_jump = True
                             instr.jump_address = dest_addr
-                            instr.jump_function = symbol
-                            instr.comment = symbol
+                            instr.jump_function_name = demangle(symbol.name)
+                            instr.jump_function_address = dest_addr
+                            instr.jump_function_offset = dest_addr - sect_addr + sect_offset
+                            instr.jump_function_size = symbol['st_size']
+                            instr.comment = demangle(symbol.name)
             for op in instr.operands:
                 if op.type == x86.X86_OP_MEM and op.mem.base == x86.X86_REG_RIP:
                     instr.rip = True
@@ -44,7 +51,7 @@ def disasm(bytes, offset=0):
                     instr.rip_resolved = disassembled[i+1].address + instr.rip_offset
                     symbol = executable.ex.get_symbol_by_addr(instr.rip_resolved)
                     if symbol:
-                        instr.comment = symbol
+                        instr.comment = demangle(symbol.name)
                     bytes = executable.ex.get_bytes(instr.rip_resolved, op.size)
                     instr.rip_value_hex = ""
                     space = ""
@@ -99,6 +106,10 @@ def jsonify_capstone(data):
             row['external-jump'] = True
             row['jump-function'] = i.jump_function
             row['jump-address'] = i.jump_address
+            row['jump-function-name'] = i.jump_function_name
+            row['jump-function-address'] = i.jump_function_address
+            row['jump-function-offset'] = i.jump_function_offset
+            row['jump-function-size'] = i.jump_function_size
         if i.comment:
             row['comment'] = i.comment
         if i.nop:
