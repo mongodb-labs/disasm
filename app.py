@@ -33,11 +33,11 @@ assets = Environment(app)
 scss = Bundle('scss/index.scss', 
 	'scss/disassemble.scss', 
 	filters='pyscss', 
-	output='css/all.css')
+	output='generated/all.css')
 assets.register('css_all', scss)
 
 js_index = Bundle('js/index.js', 
-	output='js/index_all.js')
+	output='generated/index_all.js')
 assets.register('js_index', js_index)
 
 js_disassemble = Bundle('js/rivets.js', 
@@ -51,7 +51,7 @@ js_disassemble = Bundle('js/rivets.js',
 	'js/jquery.contextMenu.js',
 	'js/jquery.ui.position.js',
 	'js/highlight.pack.js',
-	output='js/disassemble_all.js')
+	output='generated/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
 
 # home and upload
