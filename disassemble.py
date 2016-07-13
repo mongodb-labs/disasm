@@ -27,7 +27,10 @@ def disasm(bytes, offset=0):
                     func_start_addr = disassembled[0].address
                     func_end_addr = disassembled[len(disassembled)-1].address
                     dest_addr = instr.operands[0].imm
-                    if not func_start_addr <= dest_addr <= func_end_addr:
+                    if func_start_addr <= dest_addr <= func_end_addr:
+                        instr.internal_jump = True
+                        instr.jump_address = dest_addr
+                    else:
                         symbol = executable.ex.get_symbol_by_addr(dest_addr)
                         if symbol:
                             text_sect = executable.ex.elff.get_section_by_name(".text")
@@ -35,13 +38,15 @@ def disasm(bytes, offset=0):
                             sect_offset = text_sect["sh_offset"]
                             func_addr = symbol['st_value']
 
-                            instr.jump = True
+                            instr.external_jump = True
                             instr.jump_address = dest_addr
                             instr.jump_function_name = demangle(symbol.name)
                             instr.jump_function_address = func_addr
                             instr.jump_function_offset = func_addr - sect_addr + sect_offset
                             instr.jump_function_size = symbol['st_size']
                             instr.comment = demangle(symbol.name)
+                        else:
+                            print "Could not find symbol associated with address", dest_addr
             for op in instr.operands:
                 if op.type == x86.X86_OP_MEM and op.mem.base == x86.X86_REG_RIP:
                     instr.rip = True
@@ -97,8 +102,12 @@ def jsonify_capstone(data):
             row['rip-resolved'] = i.rip_resolved
             row['rip-value-ascii'] = i.rip_value_ascii
             row['rip-value-hex'] = i.rip_value_hex
-        if i.jump:
-            row['jump'] = True
+        if i.internal_jump: 
+            row['internal-jump'] = True
+            row['jump-address'] = hex(i.jump_address)
+        if i.external_jump:
+            row['external-jump'] = True
+            row['jump-function'] = i.jump_function
             row['jump-address'] = i.jump_address
             row['jump-function-name'] = i.jump_function_name
             row['jump-function-address'] = i.jump_function_address

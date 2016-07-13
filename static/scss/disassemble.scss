@@ -162,12 +162,28 @@ $instruc-color2: rgb(178,235,242); // lighter
 
 	.selected-func-name {
 		font-size: 1.2em;
-		@include wrap-text;
-		
+		@include wrap-text;	
 	}
-	.instructions {
-		margin-top: 15px;
 
+	.instructions, .jump-arrows {
+		margin-top: 15px;
+	}
+
+	.jump-arrows {
+		position: relative;
+		float: left;
+		width: 10%;
+
+		g path {
+			fill: none;
+			stroke-width: 3px;
+		}
+	}
+
+	.instructions {
+		position: relative;
+		float: left;
+		width: 90%;
 		.instruction.row {
 			display: block;
 		}

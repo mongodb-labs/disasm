@@ -71,15 +71,39 @@ var URL_DIE_INFO = "/get_die_info";
 
 var assembly = {
 	contents : [], 
-	func_name: "", 
+	func_name: "",
+	active_instruction: "",
 	instructions_loading: false
 };
+
 var assembly_ctrl = {
 	instructionClicked: instructionClicked // in disassembly_analysis
 }
+
 rivets.bind($("#function-disasm"), 
 	{assembly: assembly, ctrl: assembly_ctrl}
 );
+
+// for arrows (jump highlighting)
+var svg = d3.select('#function-disasm .jump-arrows')
+	.append('svg:svg')
+	.attr('width', '100%');
+
+svg.append('svg:defs')
+	// create arrowhead
+	.append('svg:marker')
+	.attr({
+		'id': 'arrow',
+    "viewBox": "0 -5 10 10",
+    "refX": 8,
+    "refY": 0,
+    "markerWidth": 4,
+    "markerHeight": 4,
+    "orient": "auto",
+    "fill": "gray",
+	})
+	.append('svg:path')
+	.attr("d", "M0,-5L10,0L0,5");
 
 function functionClicked(event, model) {
 	// handle expansion/collapse of <> in function name
@@ -96,6 +120,7 @@ function functionClicked(event, model) {
 	// clear all info
 	assembly.func_name = "";
 	assembly.contents = [];
+	svg.selectAll('g').remove();
 	hideAnalysis();
 
 	// set class to active and indicate func name
@@ -105,12 +130,14 @@ function functionClicked(event, model) {
 
 	// activate loading icon
 	assembly.instructions_loading = true;
-
-	// get addr -> line info from server
-	// FOR NOW seems unnecessary? may need to bring it back if loading DIEs becomes excessively slow
-	begin = el.attributes["data-st-value"].value;
-	size = el.attributes["data-size"].value;
 	
+	// preload DIE info from server
+	begin = el.attributes["data-st-value"].value;
+	$.ajax({
+		type: "GET",
+		url: URL_DIE_INFO + "?address=" + begin
+	});
+
 	// get function assembly from server
 	return _disassemble_function(el);
 }
@@ -181,6 +208,9 @@ function disassemble_function(func_name, st_value, file_offset, size) {
 			hljs.highlightBlock(block);
 		});
 
+		// load jump info
+		handleJumpHighlighting();
+
 		// Adds a "hex" or "twosCompDec64" class to all numbers
 		wrapAllNumbers();
 
@@ -197,6 +227,123 @@ function disassemble_function(func_name, st_value, file_offset, size) {
 	return false;
 }
 
+// display jump arrows
+function handleJumpHighlighting() {
+	// load jump info
+	var reverseJumps = {}
+	for (var i = 0; i < assembly.contents.length; i++) {
+		var line = assembly.contents[i];
+		if (line['internal-jump'] && line['jump-address'] in reverseJumps) {
+			reverseJumps[line['jump-address']].push(line.address)
+		}
+		else if (line['internal-jump'] && !(line['jump-address'] in reverseJumps)) {
+			reverseJumps[line['jump-address']] = [line.address]
+		}
+	}
+
+	// load into assembly.contents
+	assembly.contents = assembly.contents.map(function(line) {
+		if (line['internal-jump']) {
+			line['jumpTo'] = [line['jump-address']]; // arr to future-proof
+		}
+		if (line.address in reverseJumps) {
+			line['jumpFrom'] = reverseJumps[line.address]
+		}
+		return line
+	});
+
+	// build array of { from: <addr>, to: <addr> }
+	var jumps = [];
+	assembly.contents.map(function(line) {
+		var vert_offset = 12;
+		if (line['internal-jump'] && document.getElementById(line['jump-address'])) {
+			jumps.push({
+				"from": line.address,
+				"fromY": document.getElementById(line.address).offsetTop + vert_offset,
+				"to": line['jump-address'],
+				"toY": document.getElementById(line['jump-address']).offsetTop + vert_offset
+			});
+		}
+	});
+
+	// actually draw arrows
+	var instructions = document.getElementsByClassName('instructions')[0];
+	var svg_height = instructions.clientHeight;
+	var svg_width = document.getElementsByClassName('jump-arrows')[0].clientWidth;
+	
+	svg.attr('height', svg_height);
+	svg.append('svg:g')
+		.attr('transform', function(jump, i) {
+			return 'scale(-1, 1) translate(-' + svg_width + ', 0)';
+		})
+		.selectAll('path')
+		.data(jumps)
+		.enter().append('svg:path')
+		.attr('d', function(jump, i) {
+			var x = 5;
+			var ext = (svg_width - x - 5) * (Math.abs(jump.fromY - jump.toY)/svg_height);
+			ext = Math.max(5, ext);
+
+			var command = "M" + x + " " + jump.fromY + " " +
+				"h " + (x+ext) + " " + 			// diff horizontally
+				"V " + jump.toY + " " + 		// vertical location
+				"h " + (-(x+ext)) + " " 		// diff horizontally
+		 	return command;
+		})
+		.attr('marker-end', "url(#arrow)")
+		.attr('opacity', 0.3)
+		.attr('stroke', "gray");
+		
+
+		attachInstructionHandlers(jumps);
+}
+
+// highlight the mouseover-ed or clicked jump
+function attachInstructionHandlers(jumps) {
+	$(".row.instruction").on("mouseenter", function(event) {
+		var instruc = event.currentTarget;
+		highlightJumpArrows(jumps, instruc.id);
+	});
+
+	$(".row.instruction").on("click", function(event) {
+		var instruc = event.currentTarget;
+		assembly.active_instruction = event.currentTarget.id;
+		highlightJumpArrows(jumps, instruc.id);
+	});
+}
+
+
+function highlightJumpArrows(jumps, instruc_id) {
+	var instr_active = assembly.active_instruction;
+
+	// highlight if has jump
+	svg.selectAll('g path')
+		.data(jumps)
+		.attr('opacity', function(jump, b) {
+			if (jump['from'] == instr_active || jump['to'] == instr_active) {
+				return 1;
+			}
+			else if (jump['from'] == instruc_id || jump['to'] == instruc_id) {
+				return 1;
+			}
+			else {
+				return 0.3;
+			}
+		})
+		.attr('stroke', function(jump, b) {
+			if (jump['from'] == instr_active || jump['to'] == instr_active) {
+				return "rgb(3,169,244)";
+			}
+			if (jump['from'] == instruc_id || jump['to'] == instruc_id) {
+				return "rgb(41,182,246)";
+			}
+			else {
+				return "gray";
+			}
+		});
+}
+
+// wrap numbers for base changes etc.
 function wrapAllNumbers() {
 	$('.hljs-number').each(function(index, elem) {
 		wrapNumbersInElem(elem);

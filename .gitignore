@@ -15,6 +15,7 @@ instance/
 *all.css
 *all.js
 config.py
+static/generated
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
