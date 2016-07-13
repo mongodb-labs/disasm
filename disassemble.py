@@ -25,6 +25,9 @@ def disasm(bytes, offset=0):
                 instr.nop = True
             # Check to see if it's a jump/call instruction
             if instr.mnemonic in jump_instrs:
+                # this will probably change !!!! 
+                if instr.mnemonic != 'call':
+                    instr.jump = True
                 # We can only decode the destination if it's a memory address
                 if instr.operands[0].type == x86.X86_OP_MEM:
                     # Ignore if it's a jump/call to an address within this function
@@ -94,5 +97,7 @@ def jsonify_capstone(data):
             row['comment'] = i.comment
         if i.nop:
             row['nop'] = True
+        if i.jump:
+            row['jump'] = True
         ret.append(row)
     return ret

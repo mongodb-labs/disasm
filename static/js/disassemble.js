@@ -74,9 +74,11 @@ var assembly = {
 	func_name: "", 
 	instructions_loading: false
 };
+
 var assembly_ctrl = {
 	instructionClicked: instructionClicked // in disassembly_analysis
 }
+
 rivets.bind($("#function-disasm"), 
 	{assembly: assembly, ctrl: assembly_ctrl}
 );
@@ -86,19 +88,21 @@ var svg = d3.select('#function-disasm .jump-arrows')
 	.append('svg:svg')
 	.attr('width', '100%');
 
-svg.append('svg:defs').selectAll('marker')
+svg.append('svg:defs')
 	// create arrowhead
-	.data(['arrow'])
-	.attr('id', String)
-	.enter().append('svg:marker')
-	.attr('viewBox', "0 0 10 10")
-	.attr('markerWidth', 13)
-	.attr('markerHeight', 13)
-	.attr('orient', 'auto')
-	.attr('refX', 10)
-	.attr('refY', 10)
+	.append('svg:marker')
+	.attr({
+		'id': 'arrow',
+    "viewBox": "0 -5 10 10",
+    "refX": 8,
+    "refY": 0,
+    "markerWidth": 4,
+    "markerHeight": 4,
+    "orient": "auto",
+    "fill": "gray",
+	})
 	.append('svg:path')
-	.attr('d', "M0,-5L10,0L0,5");
+	.attr("d", "M0,-5L10,0L0,5");
 
 function functionClicked(event, model) {
 	// handle expansion/collapse of <> in function name
@@ -115,6 +119,7 @@ function functionClicked(event, model) {
 	// clear all info
 	assembly.func_name = "";
 	assembly.contents = [];
+	svg.selectAll('g').remove();
 	hideAnalysis();
 
 	// set class to active and indicate func name
@@ -202,18 +207,18 @@ function handleJumpHighlighting() {
 	var reverseJumps = {}
 	for (var i = 0; i < assembly.contents.length; i++) {
 		var line = assembly.contents[i];
-		if (line.mnemonic.charAt(0) == 'j' && line.op_str in reverseJumps) {
+		if (line.jump && line.op_str in reverseJumps) {
 			reverseJumps[line.op_str].push(line.address)
 		}
-		else if (line.mnemonic.charAt(0) == 'j' && !(line.op_str in reverseJumps)) {
+		else if (line.jump && !(line.op_str in reverseJumps)) {
 			reverseJumps[line.op_str] = [line.address]
 		}
 	}
 
 	// load into assembly.contents
 	assembly.contents = assembly.contents.map(function(line) {
-		if (line.mnemonic.charAt(0) == 'j') {
-			line['jumpTo'] = line.op_str;
+		if (line.jump) {
+			line['jumpTo'] = [line.op_str]; // to future-proof
 		}
 		if (line.address in reverseJumps) {
 			line['jumpFrom'] = reverseJumps[line.address]
@@ -225,7 +230,7 @@ function handleJumpHighlighting() {
 	var jumps = [];
 	assembly.contents.map(function(line) {
 		var vert_offset = 12;
-		if (line.mnemonic.charAt(0) == 'j') {
+		if (line.jump) {
 			jumps.push({
 				"from": line.address,
 				"fromY": document.getElementById(line.address).offsetTop + vert_offset,
@@ -237,26 +242,64 @@ function handleJumpHighlighting() {
 
 	// actually draw arrows
 	var instructions = document.getElementsByClassName('instructions')[0];
-	svg.attr('height', instructions.clientHeight);
-	var arrow = svg.append('svg:g')
+	var svg_height = instructions.clientHeight;
+	var svg_width = document.getElementsByClassName('jump-arrows')[0].clientWidth;
+	
+	svg.attr('height', svg_height);
+	svg.append('svg:g')
 		.attr('transform', function(jump, i) {
-			var width = document.getElementsByClassName('jump-arrows')[0].clientWidth;
-			return 'scale(-1, 1) translate(-' + width + ', 0)';
+			return 'scale(-1, 1) translate(-' + svg_width + ', 0)';
 		})
 		.selectAll('path')
 		.data(jumps)
-		// create curved lines
 		.enter().append('svg:path')
 		.attr('d', function(jump, i) {
-			var x = 2;
+			var x = 5;
+			var ext = (svg_width - x - 5) * (Math.abs(jump.fromY - jump.toY)/svg_height);
+			ext = Math.max(5, ext);
+
 			var command = "M" + x + " " + jump.fromY + " " +
-				"C " + (x+15) + " " + jump.fromY + ", " +
-		 		(x+15) + " " + jump.toY + ", " +
-		 		x + " " + jump.toY;
+				"h " + (x+ext) + " " + 			// diff horizontally
+				"V " + jump.toY + " " + 		// vertical location
+				"h " + (-(x+ext)) + " " 		// diff horizontally
 		 	return command;
 		})
-		.attr('marker-end', "url(#arrow)");
+		.attr('marker-end', "url(#arrow)")
+		.attr('opacity', 0.3)
+		.attr('stroke', "gray");
+		
+
+		attachInstructionHoverHandler(jumps);
 }
+
+// highlight the mouseover-ed jump
+function attachInstructionHoverHandler(jumps) {
+	$(".row.instruction").on("mouseenter", function(event) {
+		var instruc = event.currentTarget;
+
+		// highlight if has jump
+		svg.selectAll('g path')
+			.data(jumps)
+			.attr('opacity', function(jump, b) {
+				if (jump['from'] == instruc.id || jump['to'] == instruc.id) {
+					return 1;
+				}
+				else {
+					return 0.3;
+				}
+			})
+			.attr('stroke', function(jump, b) {
+				if (jump['from'] == instruc.id || jump['to'] == instruc.id) {
+					return "rgb(41,182,246)";
+				}
+				else {
+					return "gray";
+				}
+			});
+
+	});
+}
+
 
 // wrap numbers for base changes etc.
 function wrapAllNumbers() {

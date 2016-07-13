@@ -11,4 +11,4 @@ python app.py
 ```
 
 ### Known Bugs
-
+function search breaks if you have unmatched parens

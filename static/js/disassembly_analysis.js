@@ -55,6 +55,20 @@ function get_stack_info(addr) {
 }
 
 function instructionClicked(e, model) {
+	var target_parent = e.target.parentElement // this is what we're interested in
+	if (target_parent.classList.contains("address")) {
+		addressClicked(e, model);
+		return;
+	}
+	else if (target_parent.classList.contains("mnemonic")) {
+		mnemonicClicked(e, model);
+		return;
+	}
+	else if (target_parent.classList.contains("op_str")) {
+		opStrClicked(e, model);
+		return;
+	}
+
 	// reset instruction highlighting
 	$(".instruc-selected").removeClass("instruc-selected");
 	e.currentTarget.classList.add("instruc-selected");
@@ -67,6 +81,7 @@ function instructionClicked(e, model) {
 	showAnalysis();
 	get_stack_info(addr);
 }
+
 
 // display functions: show and hide analysis panel
 var fullHeight = "97vh";
