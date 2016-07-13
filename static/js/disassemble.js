@@ -105,31 +105,33 @@ function functionClicked(event, model) {
 
 	// activate loading icon
 	assembly.instructions_loading = true;
-	
-	// get function assembly from server
-	disassemble_function(el);
 
 	// get addr -> line info from server
 	// FOR NOW seems unnecessary? may need to bring it back if loading DIEs becomes excessively slow
 	begin = el.attributes["data-st-value"].value;
 	size = el.attributes["data-size"].value;
+	
+	// get function assembly from server
+	return _disassemble_function(el);
+}
 
-	// preload DIE info from server
-	$.ajax({
-		type: "GET",
-		url: URL_DIE_INFO + "?address=" + begin
-	});
+function _disassemble_function(el) {
+	return disassemble_function(
+		el.innerText, 
+		el.attributes["data-st-value"].value, 
+		el.attributes["data-offset"].value,
+		el.attributes["data-size"].value);
 }
 
 // get assembly for given function, given as DOM element
-function disassemble_function(el) {
+function disassemble_function(func_name, st_value, file_offset, size) {
 	// disassemble function
 	data_disassemble = {
 		filename: $('h2.filename').text().trim(),
-		func_name: el.innerText,
-		st_value: el.attributes["data-st-value"].value,
-		file_offset: el.attributes["data-offset"].value,
-		size: el.attributes["data-size"].value
+		func_name: func_name,
+		st_value: st_value,
+		file_offset: file_offset,
+		size: size
 	}
 
 	$.ajax({
@@ -140,8 +142,9 @@ function disassemble_function(el) {
 	.done(function(data) {
 		// Process each line of assembly
 		assembly.data = data.map(function(i) {
+
 			i.address = "0x" + i.address.toString(16);
-			if ("rip" in i) {
+			if (i['rip']) {
 				var replacementStr =  "";
 				replacementStr += '<span class="rip">[';
 				replacementStr += '<span class="rip-default">rip + ' + i['rip-offset'] + '</span>';
@@ -151,8 +154,16 @@ function disassemble_function(el) {
 				replacementStr += ']</span>';
 				i.op_str = i.op_str.replace(/\[.*\]/, replacementStr);
 			}
-			else if ("nop" in i) {
+			else if (i['nop']) {
 				i.op_str = i.size + " bytes";
+			}
+			else if (i['jump']) {
+				var addr = i.op_str
+				i.op_str = '<a href="#" onclick="_disassemble_function(this)" ';
+				i.op_str += 'data-st-value="' + i['jump-function-address'] + '" ';
+				i.op_str += 'data-offset="' + i['jump-function-offset'] + '" ';
+				i.op_str += 'data-size="' + i['jump-function-size'] + '" ';
+				i.op_str += '>' + addr + '</a>';
 			}
 
 			if (i['comment']) {
@@ -172,10 +183,18 @@ function disassemble_function(el) {
 
 		// Adds a "hex" or "twosCompDec64" class to all numbers
 		wrapAllNumbers();
+
+		// preload DIE info from server
+		$.ajax({
+			type: "GET",
+			url: URL_DIE_INFO + "?address=" + st_value
+		});
 	})
 	.fail(function(data) {
 		console.log("Request failed");
 	});
+
+	return false;
 }
 
 function wrapAllNumbers() {

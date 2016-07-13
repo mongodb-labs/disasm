@@ -266,7 +266,7 @@ class ElfExecutable(Executable):
         index = bisect_right(self._symbol_addr_map_keys, addr) - 1
         sym = self._symbol_addr_map[index]
         if sym.entry['st_value'] <= addr < (sym.entry['st_value'] + sym.entry['st_size']):
-            return demangle(sym.name)
+            return sym
         else:
             return None
 
