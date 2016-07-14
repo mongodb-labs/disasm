@@ -117,27 +117,17 @@ function functionClicked(event, model) {
 		return;
 	}
 
-	// clear all info
-	assembly.func_name = "";
-	assembly.contents = [];
-	svg.selectAll('g').remove();
-	hideAnalysis();
-
 	// set class to active and indicate func name
 	$(".selected").removeClass("selected");
 	el.classList.add("selected");
-	assembly.func_name = el.innerText;
 
 	// activate loading icon
 	assembly.instructions_loading = true;
-	
-	// preload DIE info from server
-	begin = el.attributes["data-st-value"].value;
-	$.ajax({
-		type: "GET",
-		url: URL_DIE_INFO + "?address=" + begin
-	});
 
+	// get addr -> line info from server
+	// FOR NOW seems unnecessary? may need to bring it back if loading DIEs becomes excessively slow
+	begin = el.attributes["data-st-value"].value;
+	
 	// get function assembly from server
 	return _disassemble_function(el);
 }
@@ -152,6 +142,19 @@ function _disassemble_function(el) {
 
 // get assembly for given function, given as DOM element
 function disassemble_function(func_name, st_value, file_offset, size) {
+	console.log("Function name: " + func_name);
+	console.log("Address: " + st_value);
+	console.log("Offset: " + file_offset);
+	console.log("Size: " + size);
+
+	// clear all info
+	assembly.func_name = "";
+	assembly.contents = [];
+	svg.selectAll('g').remove();
+	hideAnalysis();
+
+	assembly.func_name = func_name;
+
 	// disassemble function
 	data_disassemble = {
 		filename: $('h2.filename').text().trim(),
@@ -184,13 +187,14 @@ function disassemble_function(func_name, st_value, file_offset, size) {
 			else if (i['nop']) {
 				i.op_str = i.size + " bytes";
 			}
-			else if (i['jump']) {
+			else if (i['external-jump']) {
 				var addr = i.op_str
-				i.op_str = '<a href="#" onclick="_disassemble_function(this)" ';
-				i.op_str += 'data-st-value="' + i['jump-function-address'] + '" ';
-				i.op_str += 'data-offset="' + i['jump-function-offset'] + '" ';
-				i.op_str += 'data-size="' + i['jump-function-size'] + '" ';
-				i.op_str += '>' + addr + '</a>';
+				i.op_str = '<a href="#" onclick="disassemble_function(';
+				i.op_str += '\'' + i['jump-function-name'] + '\',';
+				i.op_str += i['jump-function-address'] + ',';
+				i.op_str += i['jump-function-offset'] + ',';
+				i.op_str += i['jump-function-size'];
+				i.op_str += ')">' + addr + '</a>';
 			}
 
 			if (i['comment']) {

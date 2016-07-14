@@ -33,20 +33,17 @@ def disasm(bytes, offset=0):
                     else:
                         symbol = executable.ex.get_symbol_by_addr(dest_addr)
                         if symbol:
-                            text_sect = executable.ex.elff.get_section_by_name(".text")
-                            sect_addr = text_sect["sh_addr"]
-                            sect_offset = text_sect["sh_offset"]
-                            func_addr = symbol['st_value']
-
+                            text_sect = executable.ex.elff.get_section_by_name('.text')
+                            sect_addr = text_sect['sh_addr']
+                            sect_offset = text_sect['sh_offset']
+                            
                             instr.external_jump = True
                             instr.jump_address = dest_addr
                             instr.jump_function_name = demangle(symbol.name)
-                            instr.jump_function_address = func_addr
-                            instr.jump_function_offset = func_addr - sect_addr + sect_offset
+                            instr.jump_function_address = dest_addr
+                            instr.jump_function_offset = dest_addr - sect_addr + sect_offset
                             instr.jump_function_size = symbol['st_size']
                             instr.comment = demangle(symbol.name)
-                        else:
-                            print "Could not find symbol associated with address", dest_addr
             for op in instr.operands:
                 if op.type == x86.X86_OP_MEM and op.mem.base == x86.X86_REG_RIP:
                     instr.rip = True
