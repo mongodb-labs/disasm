@@ -40,7 +40,7 @@ function get_stack_info(addr) {
 		url: URL_DIE_INFO + "?address=" + addr
 	})
 	.done(function(data) {
-		if (data[0] == null) {
+		if (data == null || data[0] == null) {
 			analysis.stack_info = [["No stack info for this instruction", ""]];
 		}
 		else {
