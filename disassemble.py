@@ -1,7 +1,28 @@
-import sys, os, json
+# Copyright 2016 MongoDB Inc.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 from capstone import Cs, CsError, CS_ARCH_X86, CS_MODE_64, x86
 import executable
 from demangler import demangle
+from os import listdir
+from os.path import isfile, join
+import datetime
+from html_parser import get_short_desc
+import json
+
+# Maps an instruction mnemonic to the file that documents it
+instr_docfile_map = None
 
 # given a sequence of bytes and an optional offset within the file (for display
 # purposes) return assembly for those bytes
@@ -13,10 +34,10 @@ def disasm(bytes, offset=0):
         disassembled = list(md.disasm(bytes, offset))
         for i, instr in enumerate(disassembled):
             print "0x%x:\t%s\t%s" % (instr.address, instr.mnemonic, instr.op_str)
-            # Check to see if it's a no-op instruction
+            # Handle no-op instructions
             if instr.id == x86.X86_INS_NOP:
                 instr.nop = True
-            # Check to see if it's a jump/call instruction
+            # Handle jump/call instructions
             if instr.group(x86.X86_GRP_JUMP) or instr.group(x86.X86_GRP_CALL):
                 # We can only decode the destination if it's an immediate value
                 if instr.operands[0].type == x86.X86_OP_IMM:
@@ -41,7 +62,9 @@ def disasm(bytes, offset=0):
                             instr.jump_function_offset = dest_addr - sect_addr + sect_offset
                             instr.jump_function_size = symbol['st_size']
                             instr.comment = demangle(symbol.name)
+            # Handle individual operands
             for op in instr.operands:
+                # Handle rip-relative operands
                 if op.type == x86.X86_OP_MEM and op.mem.base == x86.X86_REG_RIP:
                     instr.rip = True
                     instr.rip_offset = op.mem.disp
@@ -74,10 +97,49 @@ def disasm(bytes, offset=0):
             # what registers does this instruction read/write?
             instr.regs_write_names = [instr.reg_name(reg) for reg in instr.regs_write]
             instr.regs_read_names = [instr.reg_name(reg) for reg in instr.regs_read]
+            # Add in documentation meta-data
+            instr.docfile = doc_file(instr)
+            instr.short_desc = get_short_desc(instr)
+            if instr.docfile is None:
+                with open('missing_docs.log', 'a+') as f:
+                    f.write('[{}] : {}\n'.format(str(datetime.datetime.now()), instr.mnemonic))
         return disassembled
 
     except CsError as e:
         print("ERROR: %s" %e)
+
+def doc_file(instr):
+    instr_map = get_instr_map()
+    mnemonic = instr.mnemonic.lower()
+    if mnemonic in instr_map:
+        return instr_map[mnemonic]
+    # Jump instructions have a special page of documentation
+    elif instr.group(x86.X86_GRP_JUMP):
+        return instr_map['jcc']
+    # Instructions that start with 'v' may be vex-encoded, and so the 'v' should be stripped out
+    elif instr.mnemonic[0] == 'v':
+        return instr_map[mnemonic[1:]]
+    else:
+        return None
+
+# Returns instr_docfile_map, instantiating it if necessary.
+# instr_docfile_map is a mapping of an instruction mnemonic to the file that documents it
+def get_instr_map():
+    global instr_docfile_map
+    if instr_docfile_map is None:
+        instr_docfile_map = {}
+        dir_path = 'static/inst_ref'
+        # http://stackoverflow.com/questions/3207219/how-to-list-all-files-of-a-directory-in-python
+        filelist = [f for f in listdir(dir_path) if isfile(join(dir_path, f))]
+        for f in filelist:
+            filename = f[:-5].lower()
+            if ':' in filename:
+                names = filename.split(':')
+                for name in names:
+                    instr_docfile_map[name] = f
+            else:
+                instr_docfile_map[filename] = f
+    return instr_docfile_map
 
 # class CsInsn exposes all the internal informaion about the disassembled 
 # instruction that we want to access to
@@ -90,6 +152,8 @@ def jsonify_capstone(data):
             "mnemonic": i.mnemonic,
             "op_str": i.op_str,
             "size": i.size,
+            "docfile": i.docfile,
+            "short_description": i.short_desc
             # "bytes": i.bytes # json can't serialize byte array
         }
         # If this instruction contains a rip-relative address, then assign the relevant data
@@ -149,5 +213,3 @@ def upsert(key, value, obj):
     else:
         obj[key] = [value]
     return obj
-
-

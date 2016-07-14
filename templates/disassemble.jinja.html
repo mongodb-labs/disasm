@@ -74,11 +74,9 @@
             rv-each-i="assembly.contents"
             rv-id='i.address'
             rv-on-click="ctrl.instructionClicked">
-            <div class='address two columns'>
-              {i.address}
+            <div class='address two columns' rv-html="i.address">
             </div>
-            <div class='mnemonic two columns'>
-              {i.mnemonic}
+            <div class='mnemonic two columns tip' rv-html="i.mnemonic" rv-data-tip="i.short_description">
               <span class='flag-write tip' rv-show='i.has_flag_write'
                 rv-data-tip="i.flags.W">
                 <i class="arrow fa fa-caret-right" aria-hidden="true"></i>
@@ -102,7 +100,7 @@
   <div id="function-analysis" class="row">
     <div class="exit" onclick="hideAnalysis()">&#215;</div>
       
-      <div class="stack-info four columns">
+      <div class="stack-info four columns" rv-hide="analysis.show_full_desc">
         <h6>Stack trace</h6>
         <div class="stack-info-frame"
           rv-show="analysis.show_stack_info"
@@ -117,8 +115,9 @@
             </div>
           </div>
       </div>
+      <iframe id="full_desc" rv-show="analysis.show_full_desc"></iframe>
 
-      <div class="source-code seven columns">
+      <div class="source-code seven columns" rv-hide="analysis.show_full_desc">
         <pre class='before C++' rv-html="analysis.source_code.before"></pre>
         <pre class='target C++' rv-html="analysis.source_code.target"></pre>
         <pre class='after C++' rv-html="analysis.source_code.after"></pre>

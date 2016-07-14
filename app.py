@@ -169,7 +169,6 @@ def source_code_from_path():
 			after += line
 	return jsonify({"before": before, "target": target, "after": after})
 
-
 # debug=True auto reloads whenever server code changes
 app.run(debug=True)
 

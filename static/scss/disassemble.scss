@@ -217,6 +217,12 @@ $instruc-color2: rgb(178,235,242); // lighter
 	padding: 0 !important;
 }
 
+.comment {
+	color: #999 !important; 
+}
+
+/****************** Analysis ******************/
+
 $file-selected-bg: aquamarine;
 $source-code-bg1: aquamarine; // highlight relevant line
 #function-analysis {
@@ -265,8 +271,9 @@ $source-code-bg1: aquamarine; // highlight relevant line
 	}
 }
 
-.comment {
-	color: #999 !important; 
+#full_desc {
+	height: 100%;
+	width: 100%;
 }
 
 /****************** Context Menu ******************/

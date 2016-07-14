@@ -105,6 +105,14 @@ svg.append('svg:defs')
 	.append('svg:path')
 	.attr("d", "M0,-5L10,0L0,5");
 
+function showFullDescription(e, filename) {
+	console.log("Docfile: " + filename);
+
+	analysis.show_full_desc = true;
+	showAnalysis();
+	$('#full_desc').attr('src', filename);
+}
+
 function functionClicked(event, model) {
 	// handle expansion/collapse of <> in function name
 	var el = event.currentTarget;
@@ -173,7 +181,20 @@ function disassemble_function(func_name, st_value, file_offset, size) {
 		// Process each line of assembly
 		assembly.data = data.map(function(i) {
 
-			i.address = "0x" + i.address.toString(16);
+			// Process address
+			var _address = i.address
+			i.address = "0x" + _address.toString(16);
+
+			// Process mnemonic
+			var _mnemonic = i.mnemonic;
+			i.mnemonic = '';
+			i.mnemonic += '<span ';
+			i.mnemonic += 'onclick="showFullDescription(event, \'static/inst_ref/' + i['docfile'] + '\')" ';
+			i.mnemonic += '>' + _mnemonic;
+			i.mnemonic += '</span>';
+
+			// Process op_str
+			var _op_str = i.op_str;
 			if (i['rip']) {
 				var replacementStr =  "";
 				replacementStr += '<span class="rip">[';
@@ -188,13 +209,12 @@ function disassemble_function(func_name, st_value, file_offset, size) {
 				i.op_str = i.size + " bytes";
 			}
 			else if (i['external-jump']) {
-				var addr = i.op_str
 				i.op_str = '<a href="#" onclick="disassemble_function(';
 				i.op_str += '\'' + i['jump-function-name'] + '\',';
 				i.op_str += i['jump-function-address'] + ',';
 				i.op_str += i['jump-function-offset'] + ',';
 				i.op_str += i['jump-function-size'];
-				i.op_str += ')">' + addr + '</a>';
+				i.op_str += ')">' + _op_str + '</a>';
 			}
 
 			if (i['comment']) {
@@ -211,6 +231,16 @@ function disassemble_function(func_name, st_value, file_offset, size) {
 					i['flags']['R'] = i['flags']['R'].join(" ")
 				}
 			}
+
+			if (!i['short_description']) {
+				i['short_description'] = "No description available";
+			}
+			if (!i['docfile']) {
+				i['doctile'] = '404.html';
+			}
+
+			// Process etc.
+			// Nothing here yet!
 
 			return i;
 		});

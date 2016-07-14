@@ -19,6 +19,7 @@ var URL_SOURCE_CODE = "/source_code_from_path";
 var analysis = {
 	stack_info: [],
 	show_stack_info: false,
+	show_full_desc: false,
 	source_code: {}
 };
 
@@ -55,16 +56,17 @@ function get_stack_info(addr) {
 }
 
 function instructionClicked(e, model) {
-	var target_parent = e.target.parentElement // this is what we're interested in
-	if (target_parent.classList.contains("address")) {
+	var $target = $(e.target);
+	if ($target.parents('.address').length) {
 		addressClicked(e, model);
 		return;
 	}
-	else if (target_parent.classList.contains("mnemonic")) {
+	// http://stackoverflow.com/questions/17084839/check-if-any-ancestor-has-a-class-using-jquery
+	else if ($target.parents('.mnemonic').length) {
 		mnemonicClicked(e, model);
 		return;
 	}
-	else if (target_parent.classList.contains("op_str")) {
+	else if ($target.parents('.op_str').length) {
 		opStrClicked(e, model);
 		return;
 	}
@@ -76,6 +78,9 @@ function instructionClicked(e, model) {
 	// clear any selected filepaths and source code
 	$(".file-selected").removeClass("file-selected");
 	analysis.source_code = {};
+
+	// Remove the documentation pane isn't being displayed
+	analysis.show_full_desc = false;
 
 	var addr = parseInt(model.i.address);
 
