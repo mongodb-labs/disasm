@@ -108,7 +108,6 @@ function filepathClicked(e, model) {
 // when a particular filepath is clicked, triggering an api call
 // to get the source code
 function _filepathClicked(element, src_path, lineno) {
-	var width = 10;
 	$(".file-selected").removeClass("file-selected");
 	element.classList.add("file-selected");
 
@@ -117,8 +116,7 @@ function _filepathClicked(element, src_path, lineno) {
 		url: URL_SOURCE_CODE,
 		data: {
 			"src_path": src_path,
-			"lineno": lineno,
-			"width": width
+			"lineno": lineno
 		}
 	})
 	.done(function(data) {

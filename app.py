@@ -137,30 +137,34 @@ def get_DIE_info():
 	address = int(request.args['address'])
 	return jsonify(executable.ex.get_addr_stack_info(address))
 
-# expects {"src_path": "", "lineno": "", "width": ""}
+# expects {"src_path": "", "lineno": ""}
 @app.route('/source_code_from_path', methods=["POST"])
 def source_code_from_path():
 	# discard requests that ask for a root path
-	if request.form['src_path'][0] == '/' or request.form['lineno'] == "":
+	if request.form['lineno'] == "":
 		return jsonify({})
 
 	path = app.config['SRC_DIR'] + request.form['src_path']
 	lineno = int(request.form['lineno'])
-	# width = int(request.form['width'])
 
 	before = ""
 	target = ""
 	after = ""
-	with open(path) as fp:
-		for fake_index, line in enumerate(fp):
-			# because of how enumerate numbers lines
-			i = fake_index + 1 
-			if i < lineno:
-				before += line
-			elif i == lineno:
-				target += line
-			elif i >= lineno:
-				after += line
+
+	try:
+		fp = open(path)
+	except:
+		return jsonify({})
+		
+	for fake_index, line in enumerate(fp):
+		# because of how enumerate numbers lines
+		i = fake_index + 1 
+		if i < lineno:
+			before += line
+		elif i == lineno:
+			target += line
+		elif i >= lineno:
+			after += line
 	return jsonify({"before": before, "target": target, "after": after})
 
 
