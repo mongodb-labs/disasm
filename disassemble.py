@@ -1,6 +1,5 @@
-import sys, os
+import sys, os, json
 from capstone import Cs, CsError, CS_ARCH_X86, CS_MODE_64, x86
-import pdb
 import executable
 from demangler import demangle
 
@@ -13,8 +12,6 @@ def disasm(bytes, offset=0):
         md.detail = True
         disassembled = list(md.disasm(bytes, offset))
         for i, instr in enumerate(disassembled):
-            # if instr.address == 11523750:
-            #     pdb.set_trace()
             print "0x%x:\t%s\t%s" % (instr.address, instr.mnemonic, instr.op_str)
             # Check to see if it's a no-op instruction
             if instr.id == x86.X86_INS_NOP:
@@ -74,6 +71,9 @@ def disasm(bytes, offset=0):
                     # see typeName(
                     else:
                         instr.rip_value_ascii = "under construction..."
+            # what registers does this instruction read/write?
+            instr.regs_write_names = [instr.reg_name(reg) for reg in instr.regs_write]
+            instr.regs_read_names = [instr.reg_name(reg) for reg in instr.regs_read]
         return disassembled
 
     except CsError as e:
@@ -114,5 +114,40 @@ def jsonify_capstone(data):
             row['comment'] = i.comment
         if i.nop:
             row['nop'] = True
+
+        # reading/writing registers'
+        row['regs_write'] = i.regs_write_names
+        row['regs_read'] = i.regs_read_names
+        with open('x86registers.json', 'r') as fp:
+            reg_data = json.load(fp)
+        try:
+            row['flags'] = parse_flags(reg_data[i.mnemonic])
+        except:
+            row['flags'] = {}
+            
         ret.append(row)
     return ret
+
+# Given a string of instruction metadata (see x86registers.json)
+# return a dict of the affected flags
+def parse_flags(flag_str):
+    # split string of instruction metadata into an array, and filter out non-flag metadata
+    flag_arr = list(filter(lambda x: '=' in x, flag_str.split()))
+    flags = {}
+    for f in flag_arr:
+        flag_name = f[0:f.index('=')]
+        action = f[f.index('=') + 1:]
+        if action == 'X': # both read and write
+            flags = upsert('R', flag_name, flags)
+            flags = upsert('W', flag_name, flags)
+        flags = upsert(action, flag_name, flags)
+    return flags
+
+def upsert(key, value, obj):
+    if key in obj:
+        obj[key].append(value)
+    else:
+        obj[key] = [value]
+    return obj
+
+
