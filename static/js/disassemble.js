@@ -200,6 +200,18 @@ function disassemble_function(func_name, st_value, file_offset, size) {
 			if (i['comment']) {
 				i.op_str += '<span class="comment"> # ' + i['comment'] + '</span>';
 			}
+
+			if (i['flags']) {
+				if (i['flags']['W']) {
+					i.has_flag_write = true 
+					i['flags']['W'] = i['flags']['W'].join(" ")
+				}
+				if (i['flags']['R']) { 
+					i.has_flag_read = true 
+					i['flags']['R'] = i['flags']['R'].join(" ")
+				}
+			}
+
 			return i;
 		});
 
@@ -217,6 +229,11 @@ function disassemble_function(func_name, st_value, file_offset, size) {
 
 		// Adds a "hex" or "twosCompDec64" class to all numbers
 		wrapAllNumbers();
+
+		// initialize tooltips
+		$('.tip').tipr({
+			'speed': 100
+		});
 
 		// preload DIE info from server
 		$.ajax({

@@ -7,8 +7,10 @@
   <link rel="stylesheet" href="static/css/normalize.css">
   <link rel="stylesheet" href="static/css/jquery.contextMenu.css">
   <link rel="stylesheet" href="static/css/highlight.css">
+  <link rel="stylesheet" href="static/css/tipr.css">
   {% assets "css_all" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
   <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet">
+  <script src="https://use.fontawesome.com/d826d0fa82.js"></script>
   <title>Disassembler</title>
 </head>
 
@@ -72,8 +74,22 @@
             rv-each-i="assembly.contents"
             rv-id='i.address'
             rv-on-click="ctrl.instructionClicked">
-            <div class='address two columns'>{i.address}</div>
-            <div class='mnemonic two columns'>{i.mnemonic}</div>
+            <div class='address two columns'>
+              {i.address}
+            </div>
+            <div class='mnemonic two columns'>
+              {i.mnemonic}
+              <span class='flag-write tip' rv-show='i.has_flag_write'
+                rv-data-tip="i.flags.W">
+                <i class="arrow fa fa-caret-right" aria-hidden="true"></i>
+                <i class="flag fa fa-flag-o" aria-hidden="true"></i>
+              </span>
+              <span class='flag-read tip' rv-show='i.has_flag_read'
+                rv-data-tip='i.flags.R'>
+                <i class="arrow fa fa-caret-left" aria-hidden="true"></i>
+                <i class="flag fa fa-flag" aria-hidden="true"></i>
+              </span>
+            </div>
             <div class='op_str eight columns' rv-html="i.op_str"></div>
           </span>
         </div> {# end instructions #}

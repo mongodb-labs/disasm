@@ -186,6 +186,23 @@ $instruc-color2: rgb(178,235,242); // lighter
 		width: 90%;
 		.instruction.row {
 			display: block;
+
+			.mnemonic span.hljs-keyword {
+		    min-width: 30px;
+		    display: inline-block;
+			}
+
+			/* flag reading/writing icons */
+			.flag-read i.arrow,
+			.flag-write i.arrow {
+				font-weight: bold;
+				font-size: 1.2em;
+			}
+			.flag-read i.flag,
+			.flag-write i.flag {
+				margin-left: -6px;
+			}
+			/* end flag */
 		}
 		.instruction.row:hover {
 			background-color: rgba($instruc-color2, 0.3);

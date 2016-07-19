@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os, datetime
+import os, datetime, json
 from flask import Flask, render_template, request, redirect, url_for, jsonify, g
 from flask_assets import Environment, Bundle
 from werkzeug.utils import secure_filename
@@ -52,6 +52,7 @@ js_disassemble = Bundle('js/rivets.js',
 	'js/jquery.contextMenu.js',
 	'js/jquery.ui.position.js',
 	'js/highlight.pack.js',
+	'js/tipr.js',
 	output='generated/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
 
@@ -107,7 +108,7 @@ def disasm_function():
 	# get sequence of bytes and offset, and pass into disasm
 	file_offset = int(request.form['file_offset'])
 	input_bytes = executable.ex.get_bytes(file_offset, int(request.form['size']))
-	
+
 	# we want to display the addr in memory where the function is located
 	memory_addr = int(request.form['st_value'])
 	data = disasm(input_bytes, memory_addr)	
