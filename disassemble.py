@@ -113,12 +113,15 @@ def doc_file(instr):
     mnemonic = instr.mnemonic.lower()
     if mnemonic in instr_map:
         return instr_map[mnemonic]
-    # Jump instructions have a special page of documentation
+    # Conditional jump instructions have a special page of documentation
     elif instr.group(x86.X86_GRP_JUMP):
         return instr_map['jcc']
     # Conditional move instructions have a special page of documentation
     elif instr.group(x86.X86_GRP_CMOV):
         return instr_map['cmovcc']
+    # Conditional set instructions have a special page of documentation
+    elif instr.mnemonic[:3] == 'set':
+        return instr_map['setcc']
     # Instructions that start with 'v' may be vex-encoded, and so the 'v' should be stripped out
     elif instr.mnemonic[0] == 'v':
         return instr_map[mnemonic[1:]]
