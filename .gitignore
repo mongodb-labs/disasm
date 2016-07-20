@@ -6,8 +6,9 @@ convert_func_list.py
 *.txt
 *.lprof
 *.swp
+*.log
 fix_config.sh
-all.css
+
 
 # Flask stuff:
 instance/
