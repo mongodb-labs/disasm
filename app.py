@@ -30,19 +30,34 @@ app.config.from_pyfile('config.py')
 assets = Environment(app)
 
 # relative to static dir
-scss = Bundle('scss/index.scss', 
-	'scss/disassemble.scss', 
+index_scss = Bundle('scss/index.scss', 
+	filters='pyscss', 
+	output='generated/index_all.css')
+assets.register('index_css', index_scss)
+
+functions_scss = Bundle('scss/functions.scss', 
+	'scss/general.scss',
+	filters='pyscss', 
+	output='generated/functions_all.css')
+assets.register('functions_css', functions_scss)
+
+disassemble_scss = Bundle('scss/disassemble.scss', 
+	'scss/general.scss',
 	filters='pyscss', 
 	output='generated/all.css')
-assets.register('css_all', scss)
+assets.register('disassemble_css', disassemble_scss)
 
 js_index = Bundle('js/index.js', 
 	output='generated/index_all.js')
 assets.register('js_index', js_index)
 
+js_functions = Bundle('js/rivets.js',
+	'js/functions.js',
+	output='generated/functions_all.js')
+assets.register('js_functions', js_functions)
+
 js_disassemble = Bundle('js/rivets.js', 
 	'js/disassemble.js', 
-	'js/autocomplete.js',
 	'js/biginteger.js',
 	'js/disassembly_analysis.js',
 	'js/instruction_events.js',
@@ -66,7 +81,7 @@ def index():
 		file = request.files['file']
 		filename = secure_filename(file.filename)
 		file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
-		return redirect(url_for('disassemble', filename=filename))
+		return redirect(url_for('functions', filename=filename))
 	else:
 		res = {}
 		files = os.listdir(app.config['UPLOAD_DIR'])
@@ -84,8 +99,6 @@ def loadExec(filename):
 	f = open(path, 'rb')
 	a = get_executable(f)
 	executable.ex = a
-	functions = executable.ex.get_all_functions()
-	storeFunctions(functions)
 	print "Done loading the executable"
 
 ## determine which kind of executable
@@ -97,21 +110,41 @@ def get_executable(f):
 	else:
 		raise Exception("Couldn't find executable format")
 
-@app.route('/disassemble', methods=['GET'])
-def disassemble():
-	loadExec(request.args['filename'])
-	return render_template('disassemble.jinja.html', filename=request.args['filename'])	
+def load_functions(filename):
+	if not executable.ex:
+		loadExec(filename)
+	functions = executable.ex.get_all_functions()
+	storeFunctions(functions)
 
-# expects {"filename": "", func_name: "", "st_value": "", "file_offset": "", "size": ""}
-@app.route('/disasm_function', methods=['POST'])
+@app.route('/functions', methods=['GET'])
+def functions():
+	load_functions(request.args['filename'])
+	return render_template('functions.jinja.html', filename=request.args['filename'])	
+
+# expects "filename", "st_value", "file_offset", "size", "func_name"
+@app.route('/disasm_function', methods=['GET'])
 def disasm_function():
-	# get sequence of bytes and offset, and pass into disasm
-	file_offset = int(request.form['file_offset'])
-	input_bytes = executable.ex.get_bytes(file_offset, int(request.form['size']))
+	# initially empty page; load all info via ajax
+	return render_template("disassemble.jinja.html", 
+		filename=request.args['filename'], 
+		st_value=request.args['st_value'],
+		file_offset=request.args['file_offset'],
+		func_name=request.args['func_name'],
+		size=request.args['size'])
 
+
+# expects "filename", "st_value", "file_offset", "size", 
+@app.route('/get_function_assembly', methods=["GET"])
+def get_function_assembly():
+	# get sequence of bytes and offset, and pass into disasm
+	file_offset = int(request.args['file_offset'])
+	if not executable.ex:
+		loadExec(request.args['filename'])
+	input_bytes = executable.ex.get_bytes(file_offset, int(request.args['size']))
+	
 	# we want to display the addr in memory where the function is located
-	memory_addr = int(request.form['st_value'])
-	data = disasm(input_bytes, memory_addr)	
+	memory_addr = int(request.args['st_value'])
+	data = disasm(input_bytes, memory_addr)
 	return jsonify(jsonify_capstone(data))
 
 @app.route('/value_at_addr', methods=['GET'])
@@ -121,11 +154,9 @@ def value_at_addr():
 # expects {"substring": "", "start_index": <int>, "num_functions": <int>, "case_sensitive": <bool>}
 @app.route('/get_substring_matches', methods=['GET'])
 def get_substring_matches():
-	print "Starting to process substring"
 	substring = request.args['substring']
 	functions = getFunctionsBySubstring(substring, int(request.args['start_index']), 
 		int(request.args['num_functions']), request.args['case_sensitive'] == 'True')
-	print "Finished processing substring"
 	return jsonify(functions)
 
 @app.route('/get_line_info', methods=["GET"])

@@ -4,7 +4,7 @@
 <head>
   <link rel="stylesheet" href="static/css/skeleton.css">
   <link rel="stylesheet" href="static/css/normalize.css">
-  {% assets "css_all" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
+  {% assets "index_css" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
   <title>Disassembler</title>
 
 
@@ -31,7 +31,7 @@
     {% for filename, fileinfo in files.items() %}
     <div class="file">
       <div class="filename">
-        <a href="/disassemble?filename={{ filename }}">{{ filename }}</a>
+        <a href="/functions?filename={{ filename }}">{{ filename }}</a>
       </div>
       {% for entry in fileinfo %}
         <div class="{{ loop.cycle('size', 'timestamp') }}">{{ entry }}</div>

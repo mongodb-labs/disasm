@@ -19,36 +19,37 @@
  }
 
  function opStrClicked(event, model) {
- 	if (model.i['internal-jump']) {
- 		jumpTo(model, model.i.jumpTo);
+ 	if (model.i['internal-jump'] && model.i.jumpTo) {
+ 		jumpTo(model, model.i.jumpTo[0]);
+ 		get_stack_info(parseInt(model.i.jumpTo[0]));
  	}
  }
 
  function mnemonicClicked(event, model) {
- 	
+ 	showAnalysis();
+ 	tabMnemonicDescClicked();
  }
 
 
 /*********************************************/
 
- function jumpTo(model, jumpTo) {
- 	var addr = jumpTo[0];
- 	var jumpToDiv = document.getElementById(addr);
+ function jumpTo(model, jumpToAddr) {
+ 	var jumpToDiv = document.getElementById(jumpToAddr);
 
  	// reset instruction highlighting
 	$(".instruc-selected").removeClass("instruc-selected");
 
 	// scroll to row
 	$('#function-disasm').animate({
-		scrollTop: jumpToDiv.offsetTop
+		scrollTop: jumpToDiv.offsetTop - $("#function-disasm").height()/2
 	}, 'fast');
 
 	// clear any selected filepaths and source code
-	hideAnalysis();
 	$(".file-selected").removeClass("file-selected");
 	analysis.source_code = {};
+	analysis.show_stack_info = false;
 
 	// add back highlighting
 	jumpToDiv.classList.add("instruc-selected");
-	assembly.active_instruction = addr;
+	assembly.active_instruction = jumpToAddr;
  }

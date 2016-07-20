@@ -14,6 +14,29 @@
  * limitations under the License.
  */
 
+/* INIT */
+var URL_DIE_INFO = "/get_die_info";
+var URL_FUNCTION_ASSEMBLY = '/get_function_assembly';
+
+var assembly = {
+	contents : [], 
+	func_name: "",
+	active_instruction: "",
+	instructions_loading: false
+};
+
+var assembly_ctrl = {
+	instructionClicked: instructionClicked // in disassembly_analysis
+}
+
+rivets.bind($("#function-disasm"), 
+	{assembly: assembly, ctrl: assembly_ctrl}
+);
+
+assembly.instructions_loading = true;
+get_function_assembly();
+/* END INIT */
+
 $(function() {
     $.contextMenu({
         selector: '.rip',
@@ -66,24 +89,6 @@ function ripCallback(key, opt, classToShow) {
 }
 
 
-var URL_DISASM_FUNCTION = "/disasm_function";
-var URL_DIE_INFO = "/get_die_info";
-
-var assembly = {
-	contents : [], 
-	func_name: "",
-	active_instruction: "",
-	instructions_loading: false
-};
-
-var assembly_ctrl = {
-	instructionClicked: instructionClicked // in disassembly_analysis
-}
-
-rivets.bind($("#function-disasm"), 
-	{assembly: assembly, ctrl: assembly_ctrl}
-);
-
 // for arrows (jump highlighting)
 var svg = d3.select('#function-disasm .jump-arrows')
 	.append('svg:svg')
@@ -105,13 +110,6 @@ svg.append('svg:defs')
 	.append('svg:path')
 	.attr("d", "M0,-5L10,0L0,5");
 
-function showFullDescription(e, filename) {
-	console.log("Docfile: " + filename);
-
-	analysis.show_full_desc = true;
-	showAnalysis();
-	$('#full_desc').attr('src', filename);
-}
 
 function functionClicked(event, model) {
 	// handle expansion/collapse of <> in function name
@@ -149,33 +147,20 @@ function _disassemble_function(el) {
 }
 
 // get assembly for given function, given as DOM element
-function disassemble_function(func_name, st_value, file_offset, size) {
-	console.log("Function name: " + func_name);
-	console.log("Address: " + st_value);
-	console.log("Offset: " + file_offset);
-	console.log("Size: " + size);
-
-	// clear all info
-	assembly.func_name = "";
-	assembly.contents = [];
-	svg.selectAll('g').remove();
-	hideAnalysis();
-
-	assembly.func_name = func_name;
-
+function get_function_assembly() {
 	// disassemble function
-	data_disassemble = {
-		filename: $('h2.filename').text().trim(),
-		func_name: func_name,
-		st_value: st_value,
-		file_offset: file_offset,
-		size: size
+	var $metadata = $("#function-metadata");
+	var st_value = $metadata.attr('data-st-value');
+	request_params = {
+		filename: $metadata.attr('data-filename'),
+		st_value: $metadata.attr('data-st-value'),
+		file_offset: $metadata.attr('data-file-offset'),
+		size: $metadata.attr('data-size')
 	}
 
 	$.ajax({
-		type: "POST",
-		url: URL_DISASM_FUNCTION,
-		data: data_disassemble
+		type: "GET",
+		url: URL_FUNCTION_ASSEMBLY + '?' + $.param(request_params)
 	})
 	.done(function(data) {
 		// Process each line of assembly
@@ -209,12 +194,14 @@ function disassemble_function(func_name, st_value, file_offset, size) {
 				i.op_str = i.size + " bytes";
 			}
 			else if (i['external-jump']) {
-				i.op_str = '<a href="#" onclick="disassemble_function(';
-				i.op_str += '\'' + i['jump-function-name'] + '\',';
-				i.op_str += i['jump-function-address'] + ',';
-				i.op_str += i['jump-function-offset'] + ',';
-				i.op_str += i['jump-function-size'];
-				i.op_str += ')">' + _op_str + '</a>';
+				var addr = i.op_str
+				i.op_str = '<a href="disasm_function?';
+				i.op_str += 'filename=' + $metadata.attr('data-filename');
+				i.op_str += '&st_value=' + i['jump-function-address'];
+				i.op_str += '&file_offset=' + i['jump-function-offset'];
+				i.op_str += '&size=' + i['jump-function-size'];
+				i.op_str += '&func_name=' + i['jump-function-name'];
+				i.op_str += '">' + addr + '</a>';
 			}
 
 			if (i['comment']) {
@@ -270,6 +257,7 @@ function disassemble_function(func_name, st_value, file_offset, size) {
 			type: "GET",
 			url: URL_DIE_INFO + "?address=" + st_value
 		});
+
 	})
 	.fail(function(data) {
 		console.log("Request failed");

@@ -1,0 +1,26 @@
+/******* used in assembly and in functions pages *******/
+
+$body-left: 50px;
+
+main {
+  padding-left: $body-left;
+  padding-right: $body-left;
+}
+
+// override highlight.js
+.hljs {
+	padding: 0 !important; 
+	margin: 0 !important; 
+}
+
+@mixin wrap-text {
+		/* wrap long functions */
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+
+  /* Adds a hyphen where the word breaks, if supported (No Blink) */
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}

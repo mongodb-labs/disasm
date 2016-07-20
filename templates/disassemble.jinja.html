@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="static/css/jquery.contextMenu.css">
   <link rel="stylesheet" href="static/css/highlight.css">
   <link rel="stylesheet" href="static/css/tipr.css">
-  {% assets "css_all" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
+  {% assets "disassemble_css" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
   <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet">
   <script src="https://use.fontawesome.com/d826d0fa82.js"></script>
   <title>Disassembler</title>
@@ -17,93 +17,88 @@
 
 <body>
   <main>
-  <div id="top-half" class="row">
-    <div id="functions-column" class="four columns">
-      <h2 class='header'> 
-        <div class='title'>filename</div>
-        <div class='filename'>{{ filename }} </div>
-      </h2>
+  <div id='function-metadata'
+    data-filename="{{ filename }}"
+    data-st-value="{{ st_value }}"
+    data-file-offset="{{ file_offset }}"
+    data-size="{{ size }}">
+  </div>
 
-      <input type="text" placeholder="function name" id="function-name-input"/>
-
-      {# all functions #}
-      <div id='functions'>
-        <div class='spacer'></div>
-        <div class="nav-buttons">
-          <button id="button-prev"> < </button>
-          <button id="button-next"> > </button>
-        </div>
-
-        <div rv-each-func="functions.contents"
-          class="function"
-          rv-data-st-value="func.st_value"
-          rv-data-offset="func.offset"
-          rv-data-size="func.size"
-          rv-on-click="ctrl.functionClicked"
-          rv-on-mouseover="ctrl.hoverCollapsable"
-          rv-on-mouseout="ctrl.removeHoverCollapsable">
-
-          <span rv-each-part="func.name"
-            rv-class-hovered="part.hovered"
-            rv-class-expandable="part.expandable"
-            rv-class-collapsable="part.collapsable"
-            rv-text="part.display">
-              
-            </span>
-        </div>
+  <div id="top-half">
+    <div class='heading-row row'>
+      <div class="heading">
+        <div class='filename'>{{ filename }}</div> 
+        <div class='func-name'>{{ func_name }}</div>
       </div>
-    </div> {# end of functions column #}
+    </div>
 
-    <div id="assembly-column" class="eight columns">
-      {# selected function's assembly #}
-      <div id='function-disasm'>
-        <div class="selected-func-name">
-        { assembly.func_name }
+    <div class="assembly-row row">
+        {# selected function's assembly #}
+        <div id='function-disasm' class='eight columns'>
+
+          <div class="instructions-loading"
+            rv-show="assembly.instructions_loading">
+            <img src="static/img/pacman.gif"/>
+          </div>
+
+          <div class='jump-arrows'>
+          </div>
+
+          <div class="instructions">
+            <span class='row instruction'
+              rv-each-i="assembly.contents"
+              rv-id='i.address'
+              rv-on-click="ctrl.instructionClicked">
+              <div class='address two columns'>
+                {i.address}
+              </div>
+              <div class='mnemonic two columns'>
+                <span class='mnemonic-text tip'
+                  rv-html="i.mnemonic"
+                  rv-data-tip="i.short_description">
+                </span>
+                <span class='flag-write tip' rv-show='i.has_flag_write'
+                  rv-data-tip="i.flags.W">
+                  <i class="arrow fa fa-caret-right" aria-hidden="true"></i>
+                  <i class="flag fa fa-flag-o" aria-hidden="true"></i>
+                </span>
+                <span class='flag-read tip' rv-show='i.has_flag_read'
+                  rv-data-tip='i.flags.R'>
+                  <i class="arrow fa fa-caret-left" aria-hidden="true"></i>
+                  <i class="flag fa fa-flag" aria-hidden="true"></i>
+                </span>
+              </div>
+              <div class='op_str eight columns' rv-html="i.op_str"></div>
+            </span>
+          </div> {# end instructions #}
+        </div> {# end function disasm #}
+
+        <div id='side-panel' class='four columns'>
         </div>
 
-        <div class="instructions-loading"
-          rv-show="assembly.instructions_loading">
-          <img src="static/img/pacman.gif"/>
-        </div>
-
-        <div class='jump-arrows'>
-        </div>
-
-        <div class="instructions">
-          <span class='row instruction'
-            rv-each-i="assembly.contents"
-            rv-id='i.address'
-            rv-on-click="ctrl.instructionClicked">
-            <div class='address two columns' rv-html="i.address">
-            </div>
-            <div class='mnemonic two columns tip' rv-html="i.mnemonic" rv-data-tip="i.short_description">
-              <span class='flag-write tip' rv-show='i.has_flag_write'
-                rv-data-tip="i.flags.W">
-                <i class="arrow fa fa-caret-right" aria-hidden="true"></i>
-                <i class="flag fa fa-flag-o" aria-hidden="true"></i>
-              </span>
-              <span class='flag-read tip' rv-show='i.has_flag_read'
-                rv-data-tip='i.flags.R'>
-                <i class="arrow fa fa-caret-left" aria-hidden="true"></i>
-                <i class="flag fa fa-flag" aria-hidden="true"></i>
-              </span>
-            </div>
-            <div class='op_str eight columns' rv-html="i.op_str"></div>
-          </span>
-        </div> {# end instructions #}
-      </div> {# end assembly #}
-    </div> {# end of assembly column #}
-  </div> {# end of top half #}
+    </div> {# end of assembly-row #}
+  </div>  {# end top half #}
 
 
   {# bottom half, basically #}
   <div id="function-analysis" class="row">
-    <div class="exit" onclick="hideAnalysis()">&#215;</div>
-      
-      <div class="stack-info four columns" rv-hide="analysis.show_full_desc">
-        <h6>Stack trace</h6>
+    <div class='nav'>
+      <div class="exit" onclick="hideAnalysis()">&#215;</div>
+      <div class='tabs'>
+        <span class='tab tab-stack-info'
+          rv-on-click="ctrl.tabStackInfoClicked">
+          Stack info
+        </span>
+        <span class='tab tab-mnemonic-desc'
+          rv-on-click='ctrl.tabMnemonicDescClicked'>
+          Mnemonic description
+        </span>
+      </div>
+    </div>
+
+    <div class='tab-content tab-stack-info'>
+      <div class="stack-info four columns">
         <div class="stack-info-frame"
-          rv-show="analysis.show_stack_info"
           rv-each-frame="analysis.stack_info"
           rv-on-click="ctrl.filepathClicked">
             <div class='row'>
@@ -115,13 +110,18 @@
             </div>
           </div>
       </div>
-      <iframe id="full_desc" rv-show="analysis.show_full_desc"></iframe>
 
-      <div class="source-code seven columns" rv-hide="analysis.show_full_desc">
+
+      <div class="source-code seven columns">
         <pre class='before C++' rv-html="analysis.source_code.before"></pre>
         <pre class='target C++' rv-html="analysis.source_code.target"></pre>
         <pre class='after C++' rv-html="analysis.source_code.after"></pre>
       </div>
+    </div>
+
+    <div class='tab-content tab-mnemonic-desc'>
+      <iframe id="full_desc">No mnemonic selected</iframe>
+    </div>
 
   </div> {# end function analysis #}
   </main>

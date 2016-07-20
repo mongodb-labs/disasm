@@ -16,15 +16,16 @@
 
 var URL_SOURCE_CODE = "/source_code_from_path";
 
+
 var analysis = {
 	stack_info: [],
-	show_stack_info: false,
-	show_full_desc: false,
-	source_code: {}
+	source_code: {},
 };
 
 var analysis_ctrl = {
-	filepathClicked: filepathClicked
+	filepathClicked: filepathClicked,
+	tabStackInfoClicked: tabStackInfoClicked,
+	tabMnemonicDescClicked: tabMnemonicDescClicked
 };
 
 rivets.bind($("#function-analysis"), 
@@ -33,7 +34,7 @@ rivets.bind($("#function-analysis"),
 
 // get stack info from address
 function get_stack_info(addr) {
-	analysis.show_stack_info = false;
+	$(".tab-content").hide();
 
 	// info from DIE
 	$.ajax({
@@ -47,7 +48,7 @@ function get_stack_info(addr) {
 		else {
 			analysis.stack_info = data;
 		}
-		analysis.show_stack_info = true;
+		tabStackInfoClicked();
 
 		// default to selecting first frame
 		var first_frame = document.getElementsByClassName("stack-info-frame")[0];
@@ -71,22 +72,27 @@ function instructionClicked(e, model) {
 		return;
 	}
 
-	// reset instruction highlighting
-	$(".instruc-selected").removeClass("instruc-selected");
-	e.currentTarget.classList.add("instruc-selected");
-
-	// clear any selected filepaths and source code
-	$(".file-selected").removeClass("file-selected");
-	analysis.source_code = {};
-
-	// Remove the documentation pane isn't being displayed
-	analysis.show_full_desc = false;
-
 	var addr = parseInt(model.i.address);
-
 	assembly.active_instruction = model.i.address;
 	showAnalysis();
+	jumpTo(model, model.i.address);
 	get_stack_info(addr);
+}
+
+function tabStackInfoClicked(event, model) {
+	$(".tab-content").hide();
+	$(".tab-content.tab-stack-info").show();
+
+	$(".tab").removeClass('active');
+	$(".tab.tab-stack-info").addClass("active");
+}
+
+function tabMnemonicDescClicked(event, model) {
+	$(".tab-content").hide();
+	$(".tab-content.tab-mnemonic-desc").show();
+
+	$(".tab").removeClass('active');
+	$(".tab.tab-mnemonic-desc").addClass("active");
 }
 
 
@@ -105,6 +111,12 @@ function hideAnalysis() {
 	$("#top-half").height(fullHeight);
 	assembly.active_instruction = "";
 }
+
+function showFullDescription(e, filename) {
+	$('#full_desc').attr('src', filename);
+	$('iframe#full-descript').contents().find("html").attr('font-size', '0.8em');
+}
+
 
 function filepathClicked(e, model) {
 	_filepathClicked(e.currentTarget, model.frame[0], model.frame[1])

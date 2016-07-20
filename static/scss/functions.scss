@@ -1,0 +1,116 @@
+
+$max-content-height: 80vh;
+$expandable-color: rgb(77,182,172);
+$collapsable-color: rgb(240,98,146);
+$func-bg: rgb(178,223,219);
+
+div#functions-wrapper {
+	height: 97vh;
+	overflow-y: hidden;
+	
+}
+
+h2.header {
+  padding-top: 30px;
+
+  .title {
+  	font-size: .6em;
+  	color: rgb(158,158,158);
+  }
+
+  .filename {
+  	margin-top: -10px;
+  }
+}
+
+
+#function-name-input {
+	width: 100%;
+}
+
+$button-width: 60px;
+$button-color: rgba(128,203,196, 0.8);
+.nav-buttons {
+	margin-top: 10px;
+
+	.nav-button {
+		position: absolute;
+		width: $button-width;
+		padding: inherit;
+		border: none;
+		color: white;
+		background-color: $button-color;
+
+		font-size: 1.5em;
+		font-weight: bolder;
+	}
+	.nav-button:hover {
+		opacity: 0.8;
+	}
+
+	#button-prev {
+		@extend .nav-button;
+	}
+
+	#button-next {
+		@extend .nav-button;
+
+		margin-left: $button-width + 30px;
+	}
+}
+
+#functions a {
+	display: block;
+	text-decoration: none;
+	color: black;
+}
+
+#functions a:nth-child(3) {
+	margin-top: 60px;
+}
+
+#functions a:last-child {
+	padding-bottom: 15px;
+}
+
+$func-offsetTop: 161px;
+#functions {
+	height: calc(100% - 161px);
+	overflow-y: scroll;
+	margin-left: 0; // override skeleton.css
+
+	.spacer{
+		width: 100%;
+	}
+
+	.function {
+		font-family: "Space Mono", monospace;
+		cursor: pointer;
+		margin-bottom: 15px;
+		@include wrap-text;
+
+		span.expandable {
+			color: rgba($expandable-color, 1);
+		}
+		span.collapsable {
+			color: rgba($collapsable-color,1);
+		}
+		span.expandable:hover {
+			color: rgba($expandable-color, 0.7);
+		}
+		span.collapsable.hovered {
+			color: rgba($collapsable-color, 0.7);
+		}
+	}
+
+	.function:hover {
+		background-color: rgba($func-bg, 0.3);
+	}
+	.function:active{
+		background-color: rgba($func-bg, 0.6);
+	}
+
+	.function.selected {
+		background-color: rgba($func-bg, 1);
+	}
+}

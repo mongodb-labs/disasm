@@ -1,154 +1,39 @@
-$body-left: 50px;
-
-main {
-	padding-left: $body-left;
-	padding-right: $body-left;
+#top-half {
+	height: 97vh;
 }
 
-$max-content-height: 80vh;
-$expandable-color: rgb(77,182,172);
-$collapsable-color: rgb(240,98,146);
-$func-bg: rgb(178,223,219);
-
-// override highlight.js
-.hljs {
-	padding: 0 !important; 
-	margin: 0 !important; 
+$heading-height: 100px;
+.heading-row {
+	height: $heading-height;
 }
 
-/****************** Functions ******************/
-@mixin wrap-text {
-		/* wrap long functions */
-  overflow-wrap: break-word;
-  word-wrap: break-word;
+.heading {
+	padding-top: 10px;
+	font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
+	font-size: 1.1em;
+	font-size: 1.4vw;
 
-  /* Adds a hyphen where the word breaks, if supported (No Blink) */
-  -ms-hyphens: auto;
-  -moz-hyphens: auto;
-  -webkit-hyphens: auto;
-  hyphens: auto;
-}
-
-
-$top-half-height: 97vh;
-div#top-half {
-	height: $top-half-height;
-	
-}
-
-div#top-half > div {
-	height: 100%;
-	overflow: hidden;
-}
-
-h2.header {
-  padding-top: 30px;
-
-  .title {
-  	font-size: .6em;
-  	color: rgb(158,158,158);
-  }
-
-  .filename {
-  	margin-top: -10px;
-  }
-}
-
-
-#function-name-input {
-	width: 100%;
-}
-
-$button-width: 60px;
-$button-color: rgba(128,203,196, 0.8);
-.nav-buttons {
-	margin-top: 10px;
-
-	.nav-button {
-		position: absolute;
-		width: $button-width;
-		padding: inherit;
-		border: none;
-		color: white;
-		background-color: $button-color;
-
-		font-size: 1.5em;
-		font-weight: bolder;
+	.filename {
+		font-style: italic;
+		color: gray;
 	}
-	.nav-button:hover {
-		opacity: 0.8;
-	}
+	.func-name {
 
-	#button-prev {
-		@extend .nav-button;
-	}
-
-	#button-next {
-		@extend .nav-button;
-
-		margin-left: $button-width + 30px;
 	}
 }
 
-#functions div:nth-child(3) {
-	margin-top: 60px;
-}
-
-#functions div:last-child {
-	padding-bottom: 15px;
-}
-
-$func-offsetTop: 161px;
-#functions {
-	height: calc(100% - 161px);
-	overflow-y: scroll;
-	margin-left: 0; // override skeleton.css
-
-	.spacer{
-		width: 100%;
-	}
-
-	.function {
-		font-family: "Space Mono", monospace;
-		cursor: pointer;
-		margin-bottom: 15px;
-		@include wrap-text;
-
-		span.expandable {
-			color: rgba($expandable-color, 1);
-		}
-		span.collapsable {
-			color: rgba($collapsable-color,1);
-		}
-		span.expandable:hover {
-			color: rgba($expandable-color, 0.7);
-		}
-		span.collapsable.hovered {
-			color: rgba($collapsable-color, 0.7);
-		}
-	}
-
-	.function:hover {
-		background-color: rgba($func-bg, 0.3);
-	}
-	.function:active{
-		background-color: rgba($func-bg, 0.6);
-	}
-
-	.function.selected {
-		background-color: rgba($func-bg, 1);
-	}
-}
 
 /****************** Assembly ******************/
 
 $instruc-color1: rgb(128,222,234); // darker
 $instruc-color2: rgb(178,235,242); // lighter
+.assembly-row {
+	height: calc(100% - 100px); // can't use vars for calc; match $heading-height
+}
+
 #function-disasm {
 	font-family: "Inconsolata", monospace;
-
-	margin-top: 120px; // seems to line up with search bar
-	height: calc(100% - 120px); // to keep height consistent
+	height: 100%;
 	overflow-y: scroll;
 
 	.instructions-loading {
@@ -221,6 +106,13 @@ $instruc-color2: rgb(178,235,242); // lighter
 	color: #999 !important; 
 }
 
+
+/****************** Side panel ******************/
+#side-panel {
+	height: 96%;
+}
+
+
 /****************** Analysis ******************/
 
 $file-selected-bg: aquamarine;
@@ -232,43 +124,82 @@ $source-code-bg1: aquamarine; // highlight relevant line
 
 	border-top-style: outset;
 
-	.exit {
-		width: 0;
-		font-size: 2em;
-		cursor: pointer;
-	}
-	.exit:hover {
-		font-weight: bold;
-	}
+	.nav {
+		padding-bottom: 15px;
 
-	// left side
-	.stack-info {
-		.stack-info-frame.file-selected {
-			background-color: rgba($file-selected-bg, 0.8);
+		div {
+			display: inline;
 		}
-		.stack-info-frame {
-			padding-left: 15px;
+		.exit:hover,
+		.tabs>span:hover {
+			cursor: pointer;	
+		}
+
+		.exit {
+			width: 0;
+			font-size: 2em;
 			padding-right: 15px;
+		}
+		.exit:hover {
+			font-weight: bold;
+		}
 
-			.lineno {
-				float: right;
+		.tabs {
+			span {
+				margin-left: 20px;
 			}
-
-			.function-name {
-				font-weight: bold;
+			span:hover {
+				border-bottom: solid;
+				border-width: 4px;
+				border-color: rgba($instruc-color1, 0.4);
+			}
+			span.active {
+				border-bottom: solid;
+				border-width: 4px;
+				border-color: $instruc-color1;
 			}
 		}
 	}
 
-	// right side
-	.source-code {
-		font-size: 0.8em;
-		height: 100%;
-		overflow: scroll;
-		.target {
-			background-color: rgba($source-code-bg1, 0.9);
+	.tab-content {
+		height: calc(100% - 63px); // height of nav. hacky but works
+	}
+
+	.tab-content.tab-stack-info {
+		// left side
+		.stack-info {
+			.stack-info-frame.file-selected {
+				background-color: rgba($file-selected-bg, 0.8);
+			}
+			.stack-info-frame {
+				padding-left: 15px;
+				padding-right: 15px;
+
+				.lineno {
+					float: right;
+				}
+
+				.function-name {
+					font-weight: bold;
+				}
+			}
+		}
+
+		// right side
+		.source-code {
+			font-size: 0.8em;
+			height: 100%;
+			overflow: scroll;
+			.target {
+				background-color: rgba($source-code-bg1, 0.9);
+			}
 		}
 	}
+
+	.tab-content.tab-mnemonic-desc {
+
+	}
+
 }
 
 #full_desc {
