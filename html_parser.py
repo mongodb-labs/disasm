@@ -33,6 +33,12 @@ def get_short_desc(instr):
     # Conditional set instructions have a special page of documentation
     elif instr.mnemonic[:3] == 'set':
         return desc_map['setcc']
+    # Conditional loop instructions have a special page of documentation
+    elif instr.mnemonic[:4] == 'loop':
+        return desc_map['loopcc']
+    # Conditional fcmov instructions have a special page of documentation
+    elif instr.mnemonic[:5] == 'fcmov':
+        return desc_map['fcmovcc']
     # Instructions that start with 'v' may be vex-encoded, and so the 'v' should be stripped out
     elif instr.mnemonic[0] == 'v':
         return desc_map[mnemonic[1:]]
