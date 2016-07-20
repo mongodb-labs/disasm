@@ -116,6 +116,9 @@ def doc_file(instr):
     # Jump instructions have a special page of documentation
     elif instr.group(x86.X86_GRP_JUMP):
         return instr_map['jcc']
+    # Conditional move instructions have a special page of documentation
+    elif instr.group(x86.X86_GRP_CMOV):
+        return instr_map['cmovcc']
     # Instructions that start with 'v' may be vex-encoded, and so the 'v' should be stripped out
     elif instr.mnemonic[0] == 'v':
         return instr_map[mnemonic[1:]]

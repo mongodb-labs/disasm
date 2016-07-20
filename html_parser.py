@@ -27,6 +27,9 @@ def get_short_desc(instr):
     # Jump instructions have a special page of documentation
     elif instr.group(x86.X86_GRP_JUMP):
         return desc_map['jcc']
+    # Conditional move instructions have a special page of documentation
+    elif instr.group(x86.X86_GRP_CMOV):
+        return desc_map['cmovcc']
     # Instructions that start with 'v' may be vex-encoded, and so the 'v' should be stripped out
     elif instr.mnemonic[0] == 'v':
         return desc_map[mnemonic[1:]]
