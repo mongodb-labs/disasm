@@ -40,7 +40,7 @@ def get_short_desc(instr):
     elif instr.mnemonic[:5] == 'fcmov':
         return desc_map['fcmovcc']
     # Instructions that start with 'v' may be vex-encoded, and so the 'v' should be stripped out
-    elif instr.mnemonic[0] == 'v':
+    elif instr.mnemonic[0] == 'v' and mnemonic[1:] in desc_map:
         return desc_map[mnemonic[1:]]
     else:
         return None

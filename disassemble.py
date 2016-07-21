@@ -50,7 +50,9 @@ def disasm(bytes, offset=0):
                         instr.internal_jump = True
                         instr.jump_address = dest_addr
                     else:
-                        symbol = executable.ex.get_symbol_by_addr(dest_addr)
+                        symbol, field_name = executable.ex.get_symbol_by_addr(
+                            dest_addr, 
+                            instr.address)
                         if symbol:
                             text_sect = executable.ex.elff.get_section_by_name('.text')
                             sect_addr = text_sect['sh_addr']
@@ -63,6 +65,7 @@ def disasm(bytes, offset=0):
                             instr.jump_function_offset = dest_addr - sect_addr + sect_offset
                             instr.jump_function_size = symbol['st_size']
                             instr.comment = demangle(symbol.name)
+
             # Handle individual operands
             for op in instr.operands:
                 # Handle rip-relative operands
@@ -70,9 +73,19 @@ def disasm(bytes, offset=0):
                     instr.rip = True
                     instr.rip_offset = op.mem.disp
                     instr.rip_resolved = disassembled[i+1].address + instr.rip_offset
-                    symbol = executable.ex.get_symbol_by_addr(instr.rip_resolved)
+                    symbol, field_name = executable.ex.get_symbol_by_addr(
+                        instr.rip_resolved, 
+                        instr.address,
+                        get_sub_symbol=True)
                     if symbol:
                         instr.comment = demangle(symbol.name)
+
+                        # field_name = executable.ex.get_member_name(
+                        #     symbol.name.split(':')[-1],
+                        #     instr.address,
+                        #     isntr.rip_resolved - symbol['st_value'])
+                        if field_name:
+                            instr.comment += '.' + field_name
                     bytes = executable.ex.get_bytes(instr.rip_resolved, op.size)
                     instr.rip_value_hex = ""
                     space = ""
@@ -130,7 +143,7 @@ def doc_file(instr):
     elif instr.mnemonic[:5] == 'fcmov':
         return instr_map['fcmovcc']
     # Instructions that start with 'v' may be vex-encoded, and so the 'v' should be stripped out
-    elif instr.mnemonic[0] == 'v':
+    elif instr.mnemonic[0] == 'v' and mnemonic[1:] in instr_map:
         return instr_map[mnemonic[1:]]
     else:
         return None

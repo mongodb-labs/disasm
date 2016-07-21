@@ -18,6 +18,7 @@ from elftools.dwarf.descriptions import describe_form_class
 from elftools.dwarf.die import DIE
 from demangler import demangle
 from bisect import bisect_right
+from symbol_lookup import get_sub_symbol
 
 ## the (global) executable we're looking at
 ex = None
@@ -263,18 +264,33 @@ class ElfExecutable(Executable):
         for sec in self.elff.iter_sections():
             print sec["sh_type"] + ", name: " + str(sec["sh_name"])
 
-    def get_symbol_by_addr(self, addr):
+    def get_symbol_by_addr(self, symbol_addr, instr_addr, get_sub_symbol=False):
         symtab = self.elff.get_section_by_name('.symtab')
         if self._symbol_addr_map is None:
             self._symbol_addr_map = list(symtab.iter_symbols())
             self._symbol_addr_map.sort(key=lambda symbol: symbol.entry['st_value'])
             self._symbol_addr_map_keys = [symbol.entry['st_value'] for symbol in self._symbol_addr_map]
-        index = bisect_right(self._symbol_addr_map_keys, addr) - 1
+        index = bisect_right(self._symbol_addr_map_keys, symbol_addr) - 1
         sym = self._symbol_addr_map[index]
-        if sym.entry['st_value'] <= addr < (sym.entry['st_value'] + sym.entry['st_size']):
-            return sym
+        if sym.entry['st_value'] <= symbol_addr < (sym.entry['st_value'] + sym.entry['st_size']):
+            if get_sub_symbol:
+                member_name = self.get_sub_symbol_by_offset(
+                    demangle(sym.name).split(':')[-1], 
+                    symbol_addr - sym.entry['st_value'], 
+                    instr_addr)
+                return (sym, member_name,)
+            else:
+                return (sym, None)
         else:
-            return None
+            return (None, None)
+
+    def get_sub_symbol_by_offset(self, symbol_name, offset, instr_addr):
+        return get_sub_symbol(
+            self.dwarff,
+            self.aranges,
+            symbol_name,
+            offset,
+            instr_addr)
 
 """
 Mach-o executable
