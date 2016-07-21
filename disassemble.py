@@ -67,7 +67,11 @@ def disasm(bytes, offset=0):
                             instr.comment = demangle(symbol.name)
 
             # Handle individual operands
+            c = -1
+            instr.regs_write_explicit = []
+            instr.regs_read_explicit = []
             for op in instr.operands:
+                c += 1
                 # Handle rip-relative operands
                 if op.type == x86.X86_OP_MEM and op.mem.base == x86.X86_REG_RIP:
                     instr.rip = True
@@ -108,9 +112,31 @@ def disasm(bytes, offset=0):
                     # see typeName(
                     else:
                         instr.rip_value_ascii = "under construction..."
+                # Handle explicitly read/written registers
+                if op.type == x86.X86_OP_MEM and op.mem.base != x86.X86_REG_RIP:
+                    ptr = []
+                    if op.value.mem.base != 0:
+                        ptr.append(instr.reg_name(op.value.mem.base))
+                    if op.value.mem.index != 0:
+                        ptr.append(instr.reg_name(op.value.mem.index))
+                    if op.value.mem.disp != 0:
+                        ptr.append(hex(op.value.mem.disp))
+
+                    instr.ptr = " ".join(ptr)
+                    if c == 0:
+                        instr.regs_write_explicit.append(instr.ptr)
+                    else:
+                        instr.regs_read_explicit.append(instr.ptr)
+                if op.type == x86.X86_OP_REG:
+                    # this is specific to Intel syntax
+                    if c == 0:
+                        instr.regs_write_explicit.append(instr.reg_name(op.value.reg))
+                    else :
+                        instr.regs_read_explicit.append(instr.reg_name(op.value.reg))
+
             # what registers does this instruction read/write?
-            instr.regs_write_names = [instr.reg_name(reg) for reg in instr.regs_write]
-            instr.regs_read_names = [instr.reg_name(reg) for reg in instr.regs_read]
+            instr.regs_write_implicit = [instr.reg_name(reg) for reg in instr.regs_write]
+            instr.regs_read_implicit = [instr.reg_name(reg) for reg in instr.regs_read]
             # Add in documentation meta-data
             instr.docfile = doc_file(instr)
             instr.short_desc = get_short_desc(instr)
@@ -206,9 +232,12 @@ def jsonify_capstone(data):
         if i.nop:
             row['nop'] = True
 
-        # reading/writing registers'
-        row['regs_write'] = i.regs_write_names
-        row['regs_read'] = i.regs_read_names
+        # reading/writing registers
+        row['ptr'] = i.ptr
+        row['regs_write_explicit'] = i.regs_write_explicit
+        row['regs_read_explicit'] = i.regs_read_explicit
+        row['regs_write_implicit'] = i.regs_write_implicit
+        row['regs_read_implicit'] = i.regs_read_implicit
         with open('x86registers.json', 'r') as fp:
             reg_data = json.load(fp)
         try:

@@ -18,16 +18,26 @@
 var URL_DIE_INFO = "/get_die_info";
 var URL_FUNCTION_ASSEMBLY = '/get_function_assembly';
 
+// enums for register tracking/highlighting
+var READS_REG = 0;
+var WRITES_REG = 1;
+
 var assembly = {
   contents : [], 
   func_name: "",
   active_instruction: "",
   instructions_loading: false,
   in_iaca: false,
+  highlight_read_reg: "",
+  highlight_write_reg: "",
 };
 
 var assembly_ctrl = {
   instructionClicked: instructionClicked // in disassembly_analysis
+}
+
+rivets.formatters.isEmptyStr = function(value) {
+  return value == "";
 }
 
 rivets.bind($("#function-disasm"), 
@@ -36,6 +46,37 @@ rivets.bind($("#function-disasm"),
 
 assembly.instructions_loading = true;
 get_function_assembly();
+
+/*************** For register canonicalization ***************/
+var register_names_all = [
+  ['al', 'ah', 'ax', 'eax', 'rax'],
+  ['bl', 'bh', 'bx', 'ebx', 'rbx'],
+  ['cl', 'ch', 'cx', 'ecx', 'rcx'],
+  ['dl', 'dh', 'dx', 'edx', 'rdx'],
+  ['r8b', 'r8w', 'r8d', 'r8'],
+  ['r9b', 'r9w', 'r9d', 'r9'],
+  ['r10b', 'r10w', 'r10d', 'r10'],
+  ['r11b', 'r11w', 'r11d', 'r11'],
+  ['r12b', 'r12w', 'r12d', 'r12'],
+  ['r13b', 'r13w', 'r13d', 'r13'],
+  ['r14b', 'r14w', 'r14d', 'r14'],
+  ['r15b', 'r15w', 'r15d', 'r15'],
+  ['bpl', 'bp', 'ebp', 'rbp'],
+  ['sil', 'si', 'esi', 'rsi'],
+  ['dil', 'di', 'edi', 'rdi'],
+  ['spl', 'sp', 'esp', 'rsp']];
+var register_names = {};
+register_names_all.forEach(function(names, index) {
+  names.forEach(function(name) {
+    register_names[name] = names;
+  })
+});
+for (var i = 0; i <= 15; i++) {
+  var names = ['zmm'+i, 'ymm'+i, 'zmm'+i];
+  names.forEach(function(name) {
+    register_names[name] = names;
+  });
+}
 /* END INIT */
 
 $(function() {
@@ -81,12 +122,106 @@ $(function() {
             }
         }
     });
+
+  $.contextMenu({
+    selector: '.reg',
+    items: {
+      reads_from: {
+        name: "Show reads",
+        callback: function(key, opt) {
+          var target_reg = $(this)[0].innerText;
+          if (target_reg == 'ptr') {
+            target_reg = $(this).attr('id');
+          }
+
+          var instructs = regsCallback(key, opt, target_reg, READS_REG);
+          
+          $(".show-read").removeClass("show-read");
+          assembly.highlight_read_reg = target_reg;
+          instructs.forEach(function(instr) {
+            $('#' + instr.address).addClass('show-read');
+          });
+        }
+      },
+      writes_to: {
+        name: "Show writes",
+        callback: function(key, opt) {
+          var target_reg = $(this)[0].innerText;
+          if (target_reg == 'ptr') {
+            target_reg = $(this).attr('id');
+          }
+
+          var instructs = regsCallback(key, opt, target_reg, WRITES_REG);
+          
+          $(".show-write").removeClass("show-write");
+          assembly.highlight_write_reg = target_reg;
+          instructs.forEach(function(instr) {
+            $('#' + instr.address).addClass('show-write');
+          }); 
+        }
+      },
+      clear_all: {
+        name: "Clear highlighting",
+        callback: function(key, opt) {
+          clearReadHighlighting();
+          clearWriteHighlighting();
+        }
+      }
+    }
+  });
+
 });
 
 function ripCallback(key, opt, classToShow) {
   var $rip = $(opt.$trigger.context);
   $rip.find("[class^='rip-']").attr("hidden", "hidden");
   $rip.find(classToShow).removeAttr("hidden");
+}
+
+// invoked by context menu;
+// highlight the relevant instructions that write to or read from target register
+function regsCallback(key, opt, target_reg, readsOrWrites) {
+  // canonicalize register names
+  var target_reg = target_reg.toLowerCase();
+  if (register_names[target_reg]) {
+    var target_regs = register_names[target_reg];
+  }
+  else {
+    var target_regs = [target_reg];
+  }
+
+  if (readsOrWrites == READS_REG) {
+    var mode = "regs_read";
+  }
+  else if (readsOrWrites == WRITES_REG) {
+    var mode = "regs_write";
+  }
+  else return undefined;
+  
+  // filter out all instructions that don't include the register in either
+  // its implicit or explicit actions
+  var instrucs = assembly.contents.filter(function(instr, index) {
+    var explicit = instr[mode + "_explicit"].reduce(function(prev, reg) {
+      return prev || (target_regs.indexOf(reg) >= 0);
+    }, false);
+    var implicit = instr[mode + "_implicit"].reduce(function(prev, reg) {
+      return prev || (target_regs.indexOf(reg) >= 0);
+    }, false);
+    return explicit || implicit;
+  });
+  return instrucs;
+}
+
+// clear registers read highlighting
+function clearReadHighlighting() {
+  $(".show-read").removeClass("show-read");
+  assembly.highlight_read_reg = ""
+}
+
+// clear registers write highlighting
+function clearWriteHighlighting() {
+  $(".show-write").removeClass("show-write");
+  assembly.highlight_write_reg = "";
 }
 
 
@@ -221,6 +356,37 @@ function get_function_assembly() {
         }
       }
 
+      // handle registers
+      var regs_str = "";
+      if (i['regs_write_implicit'] && i['regs_write_implicit'].length > 0) {
+        var regs_write = removeFlagsRegs(i['regs_write_implicit']);
+        regs_write.forEach(function(reg, index) {
+          if (index == 0) {
+            regs_str += "W: ";
+          }
+          regs_str += '<span>' + reg + '</span>';
+        });
+      }
+
+      if (i['regs_read_implicit'] && i['regs_read_implicit'].length > 0) {
+        var regs_read = removeFlagsRegs(i['regs_read_implicit']);
+        regs_read.forEach(function(reg, index) {
+          if (index == 0 && regs_str.length > 0) {
+            regs_str += ", R: ";
+          }
+          else if (index == 0 && regs_str.length == 0) {
+            regs_str += " R: ";
+          }
+          regs_str += '<span>' + reg + '</span>';
+        });
+      }
+
+      if (regs_str.length > 0) {
+        regs_str = i['comment'] ? ', ' + regs_str : ' # ' + regs_str;
+        i.op_str += "<span class='comment regs'>" + regs_str + "</span>";
+      }
+
+
       if (!i['short_description']) {
         i['short_description'] = "No description available";
       }
@@ -249,6 +415,9 @@ function get_function_assembly() {
     // Adds a "hex" or "twosCompDec64" class to all numbers
     wrapAllNumbers();
 
+    // Adds a "reg" class to all registers
+    wrapAllRegisters();
+
     // initialize tooltips
     $('.tip').tipr({
       'speed': 100
@@ -266,6 +435,14 @@ function get_function_assembly() {
   });
 
   return false;
+}
+
+function removeFlagsRegs(reg_array) {
+  var flags_index = reg_array.indexOf('rflags');
+  if (flags_index > -1) {
+    reg_array.splice(flags_index, 1);
+  }
+  return reg_array;
 }
 
 // display jump arrows
@@ -406,3 +583,37 @@ function wrapNumbersInElem(elem) {
     console.log(elem);
   }
 }
+
+// wrap registers for register tracking
+function wrapAllRegisters() {
+  $(".instruction .op_str").each(function(index, el) {
+    var instruc = assembly.contents[index];
+    var instruc_regs = instruc.regs_write_explicit
+      .concat(instruc.regs_write_implicit, instruc.regs_read_implicit, instruc.regs_read_explicit);
+    
+    // wrap normal registers and ptr registers
+    var ops = el.getElementsByClassName('hljs-built_in');
+    for (var i = 0; i < ops.length; i++) {
+      // register
+      if (instruc_regs.indexOf(ops[i].innerText) >= 0) {
+        ops[i].classList.add("reg");
+      }
+      // ptr if it's not rip relative; also add the reg
+      if (ops[i].innerText == 'ptr' && !textInHtmlCollection(ops, 'rip')) {
+        ops[i].classList.add("reg");
+        var reg = assembly.contents[index].ptr;
+        ops[i].setAttribute('id', reg);
+      }
+    }
+  });
+}
+
+function textInHtmlCollection(collection, text) {
+  for (var i = 0; i < collection.length; i++) {
+    if (collection[i].innerText == text) {
+      return true;
+    }
+  }
+  return false;
+}
+

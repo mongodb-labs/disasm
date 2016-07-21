@@ -34,7 +34,24 @@
 
     <div class="assembly-row row">
         {# selected function's assembly #}
-        <div id='function-disasm' class='eight columns'>
+        <div id='function-disasm' class='twelve columns'>
+          <div id='status'>
+            <div class='iaca-mode'
+              rv-show='assembly.in_iaca'
+              onclick="clearIaca()">
+              <span>In IACA mode</span>
+            </div>
+            <div class='highlight-read'
+              rv-hide='assembly.highlight_read_reg | isEmptyStr'
+              onclick='clearReadHighlighting()'>
+              <span>Reads from {assembly.highlight_read_reg}</span>
+            </div>
+            <div class='highlight-write'
+              rv-hide='assembly.highlight_write_reg | isEmptyStr'
+              onclick='clearWriteHighlighting()'>
+              <span>Writes to {assembly.highlight_write_reg}</span>
+            </div>
+          </div>
 
           <div class="instructions-loading"
             rv-show="assembly.instructions_loading">
@@ -69,12 +86,11 @@
                 </span>
               </div>
               <div class='op_str eight columns' rv-html="i.op_str"></div>
+
             </span>
           </div> {# end instructions #}
         </div> {# end function disasm #}
 
-        <div id='side-panel' class='four columns'>
-        </div>
 
     </div> {# end of assembly-row #}
   </div>  {# end top half #}

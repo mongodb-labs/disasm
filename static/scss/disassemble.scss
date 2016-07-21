@@ -45,8 +45,42 @@ $heading-height: 100px;
 
 $instruc-color1: rgb(128,222,234); // darker
 $instruc-color2: rgb(178,235,242); // lighter
+$instruc-color-read: rgb(255,245,157);
+$instruc-color-write: rgb(255,171,145);
 .assembly-row {
 	height: calc(100% - 100px); // can't use vars for calc; match $heading-height
+}
+
+#status > div:hover:before {
+	content: "Clear";
+}
+
+#status > div:hover span {
+	display: none;
+}
+
+#status {
+	position: fixed;
+	right: 0px;
+	margin-top: -60px;
+	z-index: 99;
+	min-width: 200px;
+
+	.iaca-mode, .highlight-read, .highlight-write {
+		padding: 0px 10px 0px 10px; // top right bottom left
+		margin-bottom: 10px;
+		cursor: pointer;
+	}
+
+	.iaca-mode {
+		background-color: rgb(197,225,165); // keep consistent with instruction_events.js
+	}
+	.highlight-read {
+		background-color: rgba($instruc-color-read, 0.4);
+	}
+	.highlight-write {
+		background-color: rgba($instruc-color-write, 0.4);
+	}
 }
 
 #function-disasm {
@@ -113,6 +147,12 @@ $instruc-color2: rgb(178,235,242); // lighter
 		.instruction.row.instruc-selected {
 			background-color: rgba($instruc-color1, 0.5);
 		}
+		.show-read {
+			background-color: rgba($instruc-color-read, 0.4);
+		}
+		.show-write {
+			background-color: rgba($instruc-color-write, 0.4);
+		}
 	}
 }
 
@@ -120,7 +160,7 @@ $instruc-color2: rgb(178,235,242); // lighter
 	padding: 0 !important;
 }
 
-.comment {
+.comment, .comment span {
 	color: #999 !important; 
 }
 

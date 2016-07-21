@@ -43,5 +43,3 @@ def run(b, arch_type, analysis_type, iaca_path=None, dyld_lib_path=None):
         return None, Error('os', str(e), e)
     
     return output, None
-
-

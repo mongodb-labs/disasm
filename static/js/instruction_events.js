@@ -90,7 +90,7 @@ function scrollToJump(jumpToAddr) {
 // append instruction objects to analysis.iaca_bytes
  function appendIacaBytes(e, model) {
   var instruc = e.currentTarget;
-  var bgColor = 'rgb(255,205,210)';
+  var bgColor = 'rgb(200,230,201)'; // keep consistent with scss
 
   // first instruction added
   if (analysis.iaca_bytes.length == 0) {

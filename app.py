@@ -207,6 +207,7 @@ def source_code_from_path():
 def get_iaca():
     hex_data = unhexlify(request.form['string_of_bytes'])
     b = bytearray(hex_data)
+
     iaca_path = app.config.get('IACA_PATH')
     dyld_lib_path = app.config.get('DYLD_LIBRARY_PATH')
     
