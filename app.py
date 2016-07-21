@@ -19,10 +19,12 @@ from werkzeug.utils import secure_filename
 import hurry.filesize
 
 import disassemble as disasm
+import iaca
 from function_store import storeFunctions, getFunctions, getFunctionsBySubstring
 from executable import *
 import executable
 from disassemble import disasm, jsonify_capstone
+from binascii import unhexlify
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -35,16 +37,16 @@ index_scss = Bundle('scss/index.scss',
 	output='generated/index_all.css')
 assets.register('index_css', index_scss)
 
-functions_scss = Bundle('scss/functions.scss', 
-	'scss/general.scss',
+functions_scss = Bundle('scss/general.scss',
+	'scss/functions.scss', 
 	filters='pyscss', 
 	output='generated/functions_all.css')
 assets.register('functions_css', functions_scss)
 
-disassemble_scss = Bundle('scss/disassemble.scss', 
-	'scss/general.scss',
+disassemble_scss = Bundle('scss/general.scss',
+	'scss/disassemble.scss', 
 	filters='pyscss', 
-	output='generated/all.css')
+	output='generated/disassemble_all.css')
 assets.register('disassemble_css', disassemble_scss)
 
 js_index = Bundle('js/index.js', 
@@ -200,6 +202,30 @@ def source_code_from_path():
 			after += line
 	return jsonify({"before": before, "target": target, "after": after})
 
+# expects {"string_of_bytes": "", arch_type: "", analysis_type: ""}
+@app.route('/iaca', methods=['POST'])
+def get_iaca():
+	hex_data = unhexlify(request.form['string_of_bytes'])
+	b = bytearray(hex_data)
+	iaca_path = app.config['IACA_PATH'] if 'IACA_PATH' in app.config else None
+	dyld_lib_path = app.config['DYLD_LIBRARY_PATH'] if 'DYLD_LIBRARY_PATH' in app.config else None
+		
+	outfile_name, err = iaca.run(b, request.form['arch_type'], request.form['analysis_type'], 
+		iaca_path=iaca_path, dyld_lib_path=dyld_lib_path)
+
+	if err:
+		print "IACA error", err
+		return jsonify({'error': str(err)})
+
+	if outfile_name:
+		with open(outfile_name, 'r') as f:
+			contents = f.read()
+			return jsonify({'contents': contents})
+
+	return jsonify({'error': 'undefined error'})
+
 # debug=True auto reloads whenever server code changes
 app.run(debug=True)
+
+
 

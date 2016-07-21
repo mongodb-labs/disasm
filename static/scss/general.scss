@@ -13,14 +13,8 @@ main {
 	margin: 0 !important; 
 }
 
-@mixin wrap-text {
-		/* wrap long functions */
-  overflow-wrap: break-word;
-  word-wrap: break-word;
 
-  /* Adds a hyphen where the word breaks, if supported (No Blink) */
-  -ms-hyphens: auto;
-  -moz-hyphens: auto;
-  -webkit-hyphens: auto;
-  hyphens: auto;
+.button, select {
+	height: 30px;
+	line-height: 30px;
 }

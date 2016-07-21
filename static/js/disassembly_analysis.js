@@ -15,17 +15,22 @@
  */
 
 var URL_SOURCE_CODE = "/source_code_from_path";
-
+var URL_IACA ='/iaca';
 
 var analysis = {
 	stack_info: [],
 	source_code: {},
+	iaca_bytes: []
 };
 
 var analysis_ctrl = {
 	filepathClicked: filepathClicked,
 	tabStackInfoClicked: tabStackInfoClicked,
-	tabMnemonicDescClicked: tabMnemonicDescClicked
+	tabMnemonicDescClicked: tabMnemonicDescClicked,
+	tabIacaClicked: tabIacaClicked,
+	startIaca: startIaca,
+	runIaca: runIaca,
+	clearIaca: clearIaca
 };
 
 rivets.bind($("#function-analysis"), 
@@ -56,45 +61,32 @@ function get_stack_info(addr) {
 	});
 }
 
-function instructionClicked(e, model) {
-	var $target = $(e.target);
-	if ($target.parents('.address').length) {
-		addressClicked(e, model);
-		return;
-	}
-	// http://stackoverflow.com/questions/17084839/check-if-any-ancestor-has-a-class-using-jquery
-	else if ($target.parents('.mnemonic').length) {
-		mnemonicClicked(e, model);
-		return;
-	}
-	else if ($target.parents('.op_str').length) {
-		opStrClicked(e, model);
-		return;
-	}
+/********** tab click functions **********/
+function _tabClicked(classname) {
+	$(".tab-content").hide();
+	$(".tab-content" + classname).show();
 
-	var addr = parseInt(model.i.address);
-	assembly.active_instruction = model.i.address;
-	showAnalysis();
-	jumpTo(model, model.i.address);
-	get_stack_info(addr);
+	$(".tab").removeClass('active');
+	$(".tab" + classname).addClass("active");
 }
 
 function tabStackInfoClicked(event, model) {
-	$(".tab-content").hide();
-	$(".tab-content.tab-stack-info").show();
-
-	$(".tab").removeClass('active');
-	$(".tab.tab-stack-info").addClass("active");
+	assembly.in_iaca = false;
+	_tabClicked(".tab-stack-info");
 }
 
 function tabMnemonicDescClicked(event, model) {
-	$(".tab-content").hide();
-	$(".tab-content.tab-mnemonic-desc").show();
-
-	$(".tab").removeClass('active');
-	$(".tab.tab-mnemonic-desc").addClass("active");
+	assembly.in_iaca = false;
+	_tabClicked(".tab-mnemonic-desc");
 }
 
+function tabIacaClicked(event, model) {
+	if (analysis.iaca_bytes && analysis.iaca_bytes.length > 0) {
+		assembly.in_iaca = true;
+	}
+	_tabClicked(".tab-iaca");	
+}
+/********** end tab click functions **********/
 
 // display functions: show and hide analysis panel
 var fullHeight = "97vh";
@@ -172,3 +164,51 @@ function _filepathClicked(element, src_path, lineno) {
 	});
 }
 
+/************** IACA **************/
+function startIaca(event, model) {
+	$('.button.start-iaca').addClass('inactive')
+	assembly.in_iaca = true;
+}
+
+function runIaca(event, model) {
+	var string_of_bytes = ""
+	analysis.iaca_bytes.forEach(function(i) {
+		string_of_bytes += i.bytes;
+	});
+
+	getIaca(string_of_bytes);
+}
+
+function clearIaca() {
+	$('.button.start-iaca').removeClass('inactive')
+	$('.instruction').removeAttr('style');
+	$('pre#iaca-contents').text("");
+	assembly.in_iaca = false;
+	analysis.iaca_bytes = [];	
+}
+
+function getIaca(string_of_bytes) {
+	$.ajax({
+		type: "POST",
+		url: URL_IACA,
+		data: {
+			"string_of_bytes": string_of_bytes,
+			"arch_type": $("select.architecture").val(),
+			"analysis_type": $("select.analysis-type").val()
+		}
+	})
+	.done(function(data) {
+		if (data['error']) {
+			var message = data['error'] 
+				+ '\n' 
+				+ "\t(1) Do you have IACA installed? You can download it <a href='https://software.intel.com/en-us/articles/intel-architecture-code-analyzer-download'>here</a>.\n"
+				+ "\t(2) Did you forget to update IACA_PATH and DYLD_LIBRARY_PATH in your config.py?"
+
+			$('pre#iaca-contents').html(message);
+		}
+		else if (data['contents']) {
+			$('pre#iaca-contents').text(data['contents']);
+		}
+		
+	});
+}

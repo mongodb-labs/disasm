@@ -8,7 +8,8 @@ convert_func_list.py
 *.swp
 *.log
 fix_config.sh
-
+temp.iaca.*
+*.log
 
 # Flask stuff:
 instance/

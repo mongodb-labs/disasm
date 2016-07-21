@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from capstone import Cs, CsError, CS_ARCH_X86, CS_MODE_64, x86
+from capstone import Cs, CsError, CS_ARCH_X86, CS_MODE_64, x86, CS_OPT_SYNTAX_ATT
 import executable
 from demangler import demangle
 from os import listdir
@@ -20,6 +20,7 @@ from os.path import isfile, join
 import datetime
 from html_parser import get_short_desc
 import json
+from binascii import hexlify
 
 # Maps an instruction mnemonic to the file that documents it
 instr_docfile_map = None
@@ -165,9 +166,10 @@ def jsonify_capstone(data):
             "op_str": i.op_str,
             "size": i.size,
             "docfile": i.docfile,
-            "short_description": i.short_desc
-            # "bytes": i.bytes # json can't serialize byte array
+            "short_description": i.short_desc,
+            "bytes": hexlify(i.bytes)
         }
+
         # If this instruction contains a rip-relative address, then assign the relevant data
         if i.rip:
             row['rip'] = True

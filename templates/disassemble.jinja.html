@@ -93,6 +93,10 @@
           rv-on-click='ctrl.tabMnemonicDescClicked'>
           Mnemonic description
         </span>
+        <span class='tab tab-iaca'
+          rv-on-click='ctrl.tabIacaClicked'>
+          IACA
+        </span>
       </div>
     </div>
 
@@ -123,6 +127,33 @@
       <iframe id="full_desc">No mnemonic selected</iframe>
     </div>
 
+    <div class='tab-content tab-iaca'>
+      <div class='left settings two columns'>
+        <div class='buttons'>
+          <span class='button start-iaca' 
+            rv-on-click='ctrl.startIaca'>Start</span>
+          <span class='button run-iaca' rv-on-click='ctrl.runIaca'>Run</span>
+          <span class='button clear-iaca' rv-on-click='ctrl.clearIaca'>Clear</span>
+        </div>
+
+        <label>Architecture</label>
+        <select class='architecture'>
+          <option value="NHM">NHM</option>
+          <option value="WSM">WSM</option>
+          <option value="SNB">SNB</option>
+          <option value="IVB">IVB</option>
+          <option value="HSW" selected="selected">HSW</option>
+        </select>
+
+        <label>Analysis type</label>
+        <select class='analysis-type'>
+          <option value="LATENCY">Latency</option>
+          <option value="THROUGHPUT" selected="selected">Throughput</option>
+        </select>
+      </div>
+
+      <pre class='ten columns' id='iaca-contents'></pre>
+    </div>  
   </div> {# end function analysis #}
   </main>
 

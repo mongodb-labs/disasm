@@ -1,3 +1,21 @@
+@mixin wrap-text {
+	/* wrap long functions */
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+
+  /* Adds a hyphen where the word breaks, if supported (No Blink) */
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+
+@mixin inactive-button {
+  opacity: 0.8;
+  background-color: lightgray;
+  cursor: default;
+}
+
 #top-half {
 	height: 97vh;
 }
@@ -47,7 +65,7 @@ $instruc-color2: rgb(178,235,242); // lighter
 
 	.selected-func-name {
 		font-size: 1.2em;
-		@include wrap-text;	
+		@include wrap-text;
 	}
 
 	.instructions, .jump-arrows {
@@ -198,6 +216,30 @@ $source-code-bg1: aquamarine; // highlight relevant line
 
 	.tab-content.tab-mnemonic-desc {
 
+	}
+
+	.tab-content.tab-iaca {
+
+		.buttons {
+			.button {
+				display: block;
+			}
+			.button.inactive {
+				@include inactive-button;
+			}
+		}
+
+		label {
+			margin-top: 15px;
+		}
+
+		pre {
+			height: 100%;
+			overflow-y: scroll;
+			font-size: 0.85em;
+			margin-top: 0;
+			margin-bottom: 0;
+		}
 	}
 
 }

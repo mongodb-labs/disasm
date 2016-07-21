@@ -17,6 +17,7 @@
 document.addEventListener('keyup', function(e) {
 	// escape key
 	if (e.keyCode == 27) {
+		clearIaca();
 		hideAnalysis();
 	}
 });

@@ -22,7 +22,8 @@ var assembly = {
 	contents : [], 
 	func_name: "",
 	active_instruction: "",
-	instructions_loading: false
+	instructions_loading: false,
+	in_iaca: false
 };
 
 var assembly_ctrl = {
@@ -164,7 +165,8 @@ function get_function_assembly() {
 	})
 	.done(function(data) {
 		// Process each line of assembly
-		assembly.data = data.map(function(i) {
+		assembly.data = data.map(function(i, index) {
+			i.index = index;
 
 			// Process address
 			var _address = i.address
