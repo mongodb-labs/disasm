@@ -18,12 +18,9 @@ from demangler import demangle
 from os import listdir
 from os.path import isfile, join
 import datetime
-from html_parser import get_short_desc
+from documentation import get_documentation
 import json
 from binascii import hexlify
-
-# Maps an instruction mnemonic to the file that documents it
-instr_docfile_map = None
 
 # given a sequence of bytes and an optional offset within the file (for display
 # purposes) return assembly for those bytes
@@ -138,60 +135,14 @@ def disasm(bytes, offset=0):
             instr.regs_write_implicit = [instr.reg_name(reg) for reg in instr.regs_write]
             instr.regs_read_implicit = [instr.reg_name(reg) for reg in instr.regs_read]
             # Add in documentation meta-data
-            instr.docfile = doc_file(instr)
-            instr.short_desc = get_short_desc(instr)
-            if instr.docfile is None:
+            instr.short_desc, instr.docfile = get_documentation(instr)
+            if instr.docfile or instr.short_desc is None:
                 with open('missing_docs.log', 'a+') as f:
                     f.write('[{}] : {}\n'.format(str(datetime.datetime.now()), instr.mnemonic))
         return disassembled
 
     except CsError as e:
         print("ERROR: %s" %e)
-
-def doc_file(instr):
-    instr_map = get_instr_map()
-    mnemonic = instr.mnemonic.lower()
-    if mnemonic in instr_map:
-        return instr_map[mnemonic]
-    # Conditional jump instructions have a special page of documentation
-    elif instr.group(x86.X86_GRP_JUMP):
-        return instr_map['jcc']
-    # Conditional move instructions have a special page of documentation
-    elif instr.group(x86.X86_GRP_CMOV):
-        return instr_map['cmovcc']
-    # Conditional set instructions have a special page of documentation
-    elif instr.mnemonic[:3] == 'set':
-        return instr_map['setcc']
-    # Conditional loop instructions have a special page of documentation
-    elif instr.mnemonic[:4] == 'loop':
-        return instr_map['loopcc']
-    # Conditional fcmov instructions have a special page of documentation
-    elif instr.mnemonic[:5] == 'fcmov':
-        return instr_map['fcmovcc']
-    # Instructions that start with 'v' may be vex-encoded, and so the 'v' should be stripped out
-    elif instr.mnemonic[0] == 'v' and mnemonic[1:] in instr_map:
-        return instr_map[mnemonic[1:]]
-    else:
-        return None
-
-# Returns instr_docfile_map, instantiating it if necessary.
-# instr_docfile_map is a mapping of an instruction mnemonic to the file that documents it
-def get_instr_map():
-    global instr_docfile_map
-    if instr_docfile_map is None:
-        instr_docfile_map = {}
-        dir_path = 'static/inst_ref'
-        # http://stackoverflow.com/questions/3207219/how-to-list-all-files-of-a-directory-in-python
-        filelist = [f for f in listdir(dir_path) if isfile(join(dir_path, f))]
-        for f in filelist:
-            filename = f[:-5].lower()
-            if ':' in filename:
-                names = filename.split(':')
-                for name in names:
-                    instr_docfile_map[name] = f
-            else:
-                instr_docfile_map[filename] = f
-    return instr_docfile_map
 
 # class CsInsn exposes all the internal informaion about the disassembled 
 # instruction that we want to access to
