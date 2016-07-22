@@ -15,31 +15,31 @@
  */
 
 function instructionClicked(e, model) {
-	if (model.assembly.in_iaca == true) {
-		appendIacaBytes(e, model);
-		return;
-	}
+  if (model.assembly.in_iaca == true) {
+    appendIacaBytes(e, model);
+    return;
+  }
 
-	var $target = $(e.target);
-	if ($target.parents('.address').length) {
-		addressClicked(e, model);
-		return;
-	}
-	// http://stackoverflow.com/questions/17084839/check-if-any-ancestor-has-a-class-using-jquery
-	else if ($target.parents('.mnemonic').length) {
-		mnemonicClicked(e, model);
-		return;
-	}
-	else if ($target.parents('.op_str').length) {
-		opStrClicked(e, model);
-		return;
-	}
+  var $target = $(e.target);
+  if ($target.parents('.address').length) {
+    addressClicked(e, model);
+    return;
+  }
+  // http://stackoverflow.com/questions/17084839/check-if-any-ancestor-has-a-class-using-jquery
+  else if ($target.parents('.mnemonic').length) {
+    mnemonicClicked(e, model);
+    return;
+  }
+  else if ($target.parents('.op_str').length) {
+    opStrClicked(e, model);
+    return;
+  }
 
-	var addr = parseInt(model.i.address);
-	assembly.active_instruction = model.i.address;
-	showAnalysis();
-	jumpTo(model, model.i.address);
-	get_stack_info(addr);
+  var addr = parseInt(model.i.address);
+  assembly.active_instruction = model.i.address;
+  showAnalysis();
+  jumpTo(model, model.i.address);
+  get_stack_info(addr);
 }
 
 
@@ -48,86 +48,86 @@ function instructionClicked(e, model) {
  }
 
  function opStrClicked(event, model) {
- 	if (model.i['internal-jump'] && model.i.jumpTo) {
- 		jumpTo(model, model.i.jumpTo[0]);
- 		get_stack_info(parseInt(model.i.jumpTo[0]));
- 	}
+  if (model.i['internal-jump'] && model.i.jumpTo) {
+    jumpTo(model, model.i.jumpTo[0]);
+    get_stack_info(parseInt(model.i.jumpTo[0]));
+  }
  }
 
  function mnemonicClicked(event, model) {
- 	showAnalysis();
- 	tabMnemonicDescClicked();
+  showAnalysis();
+  tabMnemonicDescClicked();
  }
 
 
 /*********************************************/
 
 function scrollToJump(jumpToAddr) {
-	var jumpToDiv = document.getElementById(jumpToAddr);
-	// scroll to row
-	$('#function-disasm').animate({
-		scrollTop: jumpToDiv.offsetTop - $("#function-disasm").height()/2
-	}, 'fast');	
+  var jumpToDiv = document.getElementById(jumpToAddr);
+  // scroll to row
+  $('#function-disasm').animate({
+    scrollTop: jumpToDiv.offsetTop - $("#function-disasm").height()/2
+  }, 'fast'); 
 }
 
  function jumpTo(model, jumpToAddr) {
- 	// reset instruction highlighting
-	$(".instruc-selected").removeClass("instruc-selected");
+  // reset instruction highlighting
+  $(".instruc-selected").removeClass("instruc-selected");
 
-	scrollToJump(jumpToAddr);
+  scrollToJump(jumpToAddr);
 
-	// clear any selected filepaths and source code
-	$(".file-selected").removeClass("file-selected");
-	analysis.source_code = {};
-	analysis.show_stack_info = false;
+  // clear any selected filepaths and source code
+  $(".file-selected").removeClass("file-selected");
+  analysis.source_code = {};
+  analysis.show_stack_info = false;
 
-	// add back highlighting
-	var jumpToDiv = document.getElementById(jumpToAddr);
-	jumpToDiv.classList.add("instruc-selected");
-	assembly.active_instruction = jumpToAddr;
+  // add back highlighting
+  var jumpToDiv = document.getElementById(jumpToAddr);
+  jumpToDiv.classList.add("instruc-selected");
+  assembly.active_instruction = jumpToAddr;
  }
 
 // append instruction objects to analysis.iaca_bytes
  function appendIacaBytes(e, model) {
- 	var instruc = e.currentTarget;
- 	var bgColor = 'rgb(255,205,210)';
+  var instruc = e.currentTarget;
+  var bgColor = 'rgb(255,205,210)';
 
- 	// first instruction added
- 	if (analysis.iaca_bytes.length == 0) {
- 		instruc.style.backgroundColor = bgColor;
- 		analysis.iaca_bytes.push(model.i);
- 		if (model.i['internal-jump'] && model.i.jumpTo) {
- 			handleIacaJumpTo(model.i.jumpTo[0], bgColor);
- 		}
- 		return;
- 	}
+  // first instruction added
+  if (analysis.iaca_bytes.length == 0) {
+    instruc.style.backgroundColor = bgColor;
+    analysis.iaca_bytes.push(model.i);
+    if (model.i['internal-jump'] && model.i.jumpTo) {
+      handleIacaJumpTo(model.i.jumpTo[0], bgColor);
+    }
+    return;
+  }
 
- 	// append everything between the last thing clicked and this thing clicked
- 	var this_index = model.i.index;
- 	var last_index = analysis.iaca_bytes[analysis.iaca_bytes.length - 1].index;
- 	for (var j = last_index + 1; j <= this_index; j++) {
- 		var instruc_obj = assembly.contents[j];
- 		var instruc_element = document.getElementById(instruc_obj.address);
-	 	instruc_element.style.backgroundColor = bgColor;
-	 	analysis.iaca_bytes.push(instruc_obj);
- 	}
+  // append everything between the last thing clicked and this thing clicked
+  var this_index = model.i.index;
+  var last_index = analysis.iaca_bytes[analysis.iaca_bytes.length - 1].index;
+  for (var j = last_index + 1; j <= this_index; j++) {
+    var instruc_obj = assembly.contents[j];
+    var instruc_element = document.getElementById(instruc_obj.address);
+    instruc_element.style.backgroundColor = bgColor;
+    analysis.iaca_bytes.push(instruc_obj);
+  }
 
- 	// if you clicked a jump, also add the jumpTo instruction
- 	if (this_index > last_index && model.i['internal-jump'] && model.i.jumpTo) {
- 		handleIacaJumpTo(model.i.jumpTo[0], bgColor)
- 	}
+  // if you clicked a jump, also add the jumpTo instruction
+  if (this_index > last_index && model.i['internal-jump'] && model.i.jumpTo) {
+    handleIacaJumpTo(model.i.jumpTo[0], bgColor)
+  }
 
  }
 
 // only called in appendIacaBytes; handle scrolling and bg highlighting of jumpTo instruc
 function handleIacaJumpTo(targetAddr, bgColor) {
-	scrollToJump(targetAddr);
-	var jumpToObj = assembly.contents.filter(function(i) {
-		return i.address == targetAddr;
-	})[0];
+  scrollToJump(targetAddr);
+  var jumpToObj = assembly.contents.filter(function(i) {
+    return i.address == targetAddr;
+  })[0];
 
-	document.getElementById(jumpToObj.address).style.backgroundColor = bgColor;
-	analysis.iaca_bytes.push(jumpToObj);
+  document.getElementById(jumpToObj.address).style.backgroundColor = bgColor;
+  analysis.iaca_bytes.push(jumpToObj);
 }
 
 
