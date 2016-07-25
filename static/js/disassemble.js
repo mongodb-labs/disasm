@@ -360,25 +360,23 @@ function get_function_assembly() {
       var regs_str = "";
       if (i['regs_write_implicit'] && i['regs_write_implicit'].length > 0) {
         var regs_write = removeFlagsRegs(i['regs_write_implicit']);
-        regs_write.forEach(function(reg, index) {
-          if (index == 0) {
-            regs_str += "W: ";
-          }
-          regs_str += '<span>' + reg + '</span>';
-        });
+        if (regs_write.length > 0) {
+          regs_str = "W: ";
+          regs_str += "<span>" + regs_write.join(' ') + "</span>";
+        } 
       }
 
       if (i['regs_read_implicit'] && i['regs_read_implicit'].length > 0) {
         var regs_read = removeFlagsRegs(i['regs_read_implicit']);
-        regs_read.forEach(function(reg, index) {
-          if (index == 0 && regs_str.length > 0) {
+        if (regs_read.length > 0) {
+          if (regs_str.length > 0) {
             regs_str += ", R: ";
           }
-          else if (index == 0 && regs_str.length == 0) {
+          else if (regs_str.length == 0) {
             regs_str += " R: ";
           }
-          regs_str += '<span>' + reg + '</span>';
-        });
+          regs_str += "<span>" + regs_read.join(' ') + "</span>";
+        } 
       }
 
       if (regs_str.length > 0) {
