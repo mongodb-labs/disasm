@@ -264,6 +264,25 @@ class ElfExecutable(Executable):
         for sec in self.elff.iter_sections():
             print sec["sh_type"] + ", name: " + str(sec["sh_name"])
 
+    # Returns the symbol that a particular address maps to, if applicable.
+    #
+    # If get_sub_symbol is true, then this function will also attempt to determine the "sub" symbol
+    # of this address. That is, if the object at that address is a class, struct, union, etc., then
+    # the member variable can also be determined in a reasonable amount of time using dwarf and 
+    # aranges
+    #
+    # symbol_addr : <int>
+    #   Memory address in question
+    # instr_addr : <int>
+    #   Address of the instruction that references symbol_addr
+    # gets_ub_symbol: <bool>
+    #   True if the program should look for the "sub" symbol, False otherwise.
+    #   Functions do not have "sub" symbols, so this lookup is costly and pointless in this case.
+    #
+    # Returns a 2-tuple:
+    #   (symbol_name, sub_symbol)
+    #   sub_symbol will always be None if get_sub_symbol is false or if .dwarf_info or 
+    #   .dwarf_aranges doesn't exist
     def get_symbol_by_addr(self, symbol_addr, instr_addr, get_sub_symbol=False):
         symtab = self.elff.get_section_by_name('.symtab')
         if self._symbol_addr_map is None:
@@ -285,6 +304,8 @@ class ElfExecutable(Executable):
             return (None, None)
 
     def get_sub_symbol_by_offset(self, symbol_name, offset, instr_addr):
+        if self. dwarff is None or self.aranges is None:
+            return None
         return get_sub_symbol(
             self.dwarff,
             self.aranges,
