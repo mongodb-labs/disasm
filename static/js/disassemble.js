@@ -31,6 +31,7 @@ var assembly = {
   in_iaca: false,
   highlight_read_reg: "",
   highlight_write_reg: "",
+  jumps: [],
 };
 
 var assembly_ctrl = {
@@ -47,6 +48,11 @@ var rivetsAssemblyView = rivets.bind($("#function-disasm"),
 
 assembly.instructions_loading = true;
 get_function_assembly();
+
+// Show the stack info by default.
+tabStackInfoClicked();
+
+/* END INIT */
 
 $(function() {
     $.contextMenu({
@@ -148,11 +154,6 @@ function get_function_assembly() {
 
       // Process mnemonic
       var _mnemonic = i.mnemonic;
-      i.mnemonic = '';
-      i.mnemonic += '<span ';
-      i.mnemonic += 'onclick="showFullDescription(event, \'static/inst_ref/' + i['docfile'] + '\')" ';
-      i.mnemonic += '>' + _mnemonic;
-      i.mnemonic += '</span>';
 
       // Process op_str
       var _op_str = i.op_str;
@@ -237,7 +238,6 @@ function get_function_assembly() {
       }
 
       // Process etc.
-      // Nothing here yet!
 
       return i;
     });
@@ -245,6 +245,20 @@ function get_function_assembly() {
     // clear loading icon
     assembly.instructions_loading = false;
     assembly.contents = data;
+
+    if (window.location.hash) {
+      // Set the page's hash and active instruction to be the id of the first instruction
+      jumpTo(window.location.hash.substring(1));
+      assembly.active_instruction = window.location.hash.substring(1);
+    } else {
+      // If we've navigated back to this page, then set the hash and active instruction to be the
+      // instruction we were at before we left
+      window.location.hash = assembly.contents[0].address;
+      assembly.active_instruction = assembly.contents[0].address;
+    }
+      
+    // Highlight the first instruction
+    $(document.getElementById(assembly.active_instruction)).addClass('instruc-selected');
 
     // syntax highlighting
     $(".instructions span.row.instruction").each(function(i, block) {
@@ -323,11 +337,11 @@ function handleJumpHighlighting() {
   });
 
   // build array of { from: <addr>, to: <addr> }
-  var jumps = [];
+  assembly.jumps = [];
   assembly.contents.map(function(line) {
     var vert_offset = 12;
     if (line['internal-jump'] && document.getElementById(line['jump-address'])) {
-      jumps.push({
+      assembly.jumps.push({
         "from": line.address,
         "fromY": document.getElementById(line.address).offsetTop + vert_offset,
         "to": line['jump-address'],
@@ -347,7 +361,7 @@ function handleJumpHighlighting() {
       return 'scale(-1, 1) translate(-' + svg_width + ', 0)';
     })
     .selectAll('path')
-    .data(jumps)
+    .data(assembly.jumps)
     .enter().append('svg:path')
     .attr('d', function(jump, i) {
       var x = 5;
@@ -365,25 +379,31 @@ function handleJumpHighlighting() {
     .attr('stroke', "gray");
     
 
-    attachInstructionHandlers(jumps);
+    attachInstructionHandlers(assembly.jumps);
 }
 
 // highlight the mouseover-ed or clicked jump
-function attachInstructionHandlers(jumps) {
+function attachInstructionHandlers() {
+  var jumps = assembly.jumps;
   $(".row.instruction").on("mouseenter", function(event) {
     var instruc = event.currentTarget;
     highlightJumpArrows(jumps, instruc.id);
   });
 
-  $(".row.instruction").on("click", function(event) {
-    var instruc = event.currentTarget;
-    assembly.active_instruction = event.currentTarget.id;
-    highlightJumpArrows(jumps, instruc.id);
-  });
+  // This is handled in instruction_events.js:instructionClicked() now. Leaving this here just
+  // causes active_instruction to get the wrong value.
+  // $(".row.instruction").on("click", function(event) {
+  //   var instruc = event.currentTarget;
+  //   assembly.active_instruction = event.currentTarget.id;
+  //   highlightJumpArrows(instruc.id);
+  // });
 }
 
-
-function highlightJumpArrows(jumps, instruc_id) {
+// I wanted to call highlightJumpArrows elsewhere, so I moved jumps to the assembly object, since
+// A) it seemed more appropriate since the jumps don't change within the scope of this function's
+// assembly, and B) that way I could call it from elsewhere in the code
+function highlightJumpArrows(instruc_id) {
+  var jumps = assembly.jumps;
   var instr_active = assembly.active_instruction;
 
   // highlight if has jump

@@ -33,14 +33,25 @@ var analysis_ctrl = {
   clearIaca: clearIaca
 };
 
+// The current call stack being displayed in the analysis tab
+var activeStack = null;
+// The index of the filepath currently selected in the call stack
+var activeStackIndex = null;
+
 rivets.bind($("#function-analysis"), 
   {analysis: analysis, ctrl: analysis_ctrl}
 );
 
-// get stack info from address
-function get_stack_info(addr) {
-  $(".tab-content").hide();
+// Update the information in the analysis menu based on the currently selected instruction
+function updateAnalysis() {
+  get_stack_info(parseInt(assembly.active_instruction));
+  var selectedInstruction = document.getElementById(assembly.active_instruction);
+  var model = assembly.contents[selectedInstruction.getAttribute('data-index')];
+  showFullDescription(model.docfile);
+}
 
+// Update the stack information in the Stack Info tab of the analysis menu
+function get_stack_info(addr) {
   // info from DIE
   $.ajax({
     type: "GET",
@@ -53,12 +64,49 @@ function get_stack_info(addr) {
     else {
       analysis.stack_info = data;
     }
-    tabStackInfoClicked();
 
-    // default to selecting first frame
-    var first_frame = document.getElementsByClassName("stack-info-frame")[0];
-    _filepathClicked(first_frame, analysis.stack_info[0][0], analysis.stack_info[0][1]);
+    var stackIndex;
+    if (activeStack && activeStackIndex) {
+      // Find the first filepath in [0, activeStackIndex] that doesn't match the active stack.
+      for (stackIndex = 0; stackIndex <= activeStackIndex; stackIndex++) {
+        var activeFilepath = activeStack[stackIndex];
+        var potentialFilepath = analysis.stack_info[stackIndex];
+        if (!arrayEquals(activeFilepath, potentialFilepath)) {
+          break;
+        }
+      }
+      // We want the index to be the one before the first failed match.
+      // If all matches failed (stackIndex == 0), then settle for index 0.
+      stackIndex = stackIndex == 0 ? 0 : stackIndex-1;
+    }
+    else {
+      // default to selecting first filepath.
+      stackIndex = 0;
+    }
+    var frame = document.getElementsByClassName("stack-info-frame")[stackIndex];
+    _filepathClicked(
+      frame,
+      stackIndex,
+      analysis.stack_info[stackIndex][0], 
+      analysis.stack_info[stackIndex][1]);
   });
+}
+
+function arrayEquals(a, b) {
+  if (!a && !b) {
+    return true;
+  }
+  if (!a || !b) {
+    return false;
+  }
+  if (a.length != b.length) {
+    return false;
+  }
+  for (var i = 0; i < a.length; i++) {
+    if (a[i] !== b[i])
+      return false;
+  }
+  return true;
 }
 
 /********** tab click functions **********/
@@ -91,34 +139,41 @@ function tabIacaClicked(event, model) {
 // display functions: show and hide analysis panel
 var fullHeight = "97vh";
 var partialHeight = "50vh";
-$("#function-analysis").hide(); // init hide
+$("#function-analysis").hide(); // init hide.
+var analysisVisible = false; // Whether or not the analysis menu is currently visible.
+
 function showAnalysis() {
+  analysisVisible = true;
   $("#function-analysis").show();
   $("#top-half").height(partialHeight);
 }
 
 function hideAnalysis() {
-  $(".instruc-selected").removeClass("instruc-selected");
+  analysisVisible = false;
   $("#function-analysis").hide();
   $("#top-half").height(fullHeight);
-  assembly.active_instruction = "";
 }
 
-function showFullDescription(e, filename) {
-  $('#full_desc').attr('src', filename);
+function showFullDescription(filename) {
+  document.getElementById('full_desc').contentWindow.location.replace(filename);
   $('iframe#full-descript').contents().find("html").attr('font-size', '0.8em');
 }
 
 
 function filepathClicked(e, model) {
-  _filepathClicked(e.currentTarget, model.frame[0], model.frame[1])
+  _filepathClicked(e.currentTarget, model.index, model.frame[0], model.frame[1]);
+
 }
 
 // when a particular filepath is clicked, triggering an api call
 // to get the source code
-function _filepathClicked(element, src_path, lineno) {
+function _filepathClicked(element, index, src_path, lineno) {
   $(".file-selected").removeClass("file-selected");
   element.classList.add("file-selected");
+
+  // Figure out which index in the stack this information is associated with.
+  activeStack = analysis.stack_info;
+  activeStackIndex = index;
 
   $.ajax({
     type: "POST",

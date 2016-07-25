@@ -22,6 +22,8 @@ from documentation import get_documentation
 import json
 from binascii import hexlify
 
+INSTR_REF_DIRECTORY = 'static/inst_ref/'
+
 # given a sequence of bytes and an optional offset within the file (for display
 # purposes) return assembly for those bytes
 def disasm(bytes, offset=0):
@@ -62,7 +64,8 @@ def disasm(bytes, offset=0):
                             instr.jump_function_offset = dest_addr - sect_addr + sect_offset
                             instr.jump_function_size = symbol['st_size']
                             instr.comment = demangle(symbol.name)
-
+            if instr.group(x86.X86_GRP_RET):
+                instr.return_type = True
             # Handle individual operands
             c = -1
             instr.regs_explicit = []
@@ -158,7 +161,7 @@ def jsonify_capstone(data):
             "mnemonic": i.mnemonic,
             "op_str": i.op_str,
             "size": i.size,
-            "docfile": i.docfile,
+            "docfile": INSTR_REF_DIRECTORY + i.docfile,
             "short_description": i.short_desc,
             "bytes": hexlify(i.bytes)
         }
@@ -185,6 +188,8 @@ def jsonify_capstone(data):
             row['comment'] = i.comment
         if i.nop:
             row['nop'] = True
+        if i.return_type:
+            row['return'] = True
 
         # reading/writing registers
         row['ptr'] = i.ptr

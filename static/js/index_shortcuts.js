@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-document.addEventListener('keyup', function(e) {
-	// escape key
-	if (e.keyCode == 27) {
-		clearIaca();
-		hideAnalysis();
-	}
-});
+var listener = new window.keypress.Listener();
+listener.register_many([
+    
+]);

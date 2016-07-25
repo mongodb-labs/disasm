@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="static/css/jquery.contextMenu.css">
   <link rel="stylesheet" href="static/css/highlight.css">
   <link rel="stylesheet" href="static/css/tipr.css">
+  <link rel="stylesheet" href="static/css/colorbox.css">
   {% assets "disassemble_css" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
   <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet">
   <script src="https://use.fontawesome.com/d826d0fa82.js"></script>
@@ -65,7 +66,8 @@
             <span class='row instruction'
               rv-each-i="assembly.contents"
               rv-id='i.address'
-              rv-on-click="ctrl.instructionClicked">
+              rv-on-click="ctrl.instructionClicked"
+              rv-data-index="i.index">
               <div class='address two columns'>
                 {i.address}
               </div>
@@ -123,7 +125,8 @@
       <div class="stack-info four columns">
         <div class="stack-info-frame"
           rv-each-frame="analysis.stack_info"
-          rv-on-click="ctrl.filepathClicked">
+          rv-on-click="ctrl.filepathClicked"
+          rv-data-index="index">
             <div class='row'>
               <span class="filename"> {frame.0} </span>
               <span class="lineno"> {frame.1} </span>
@@ -179,6 +182,7 @@
 
 <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+{% assets "js_global" %} <script src="{{ ASSET_URL }}"></script> {% endassets %}
 {% assets "js_disassemble" %} <script src="{{ ASSET_URL }}"></script> {% endassets %}
 
 </body>

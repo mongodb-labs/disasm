@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+
+/* INIT */
 var URL_DISASM_FUNCTION = "/disasm_function";
 
 // structure of each func in function.contents:
@@ -59,6 +61,9 @@ rivets.formatters.function_href = function(func) {
 
 var curr_index = 0;
 var NUM_FUNCTIONS = 100;
+
+var selectedFunction = null;
+/* END INIT */
 
 // handle expansion/collapse of <> in function name
 function functionClicked(event, model) {
@@ -145,12 +150,18 @@ function chunk_str(str) {
 
 var searchbar = $('#function-name-input');
 
+// The current request
 var searchRequest;
 // Number of miliseconds to wait before checking to see if the request is stale
 var SEARCH_DELAY = 10;
+// Last successfully completed request
+var prevRequest = "";
 
 // helper for getting functions/pagination of functions
 function getNextPage(query, curr_index, num_functions) {
+    // If the search request has not changed from the last completed search, then don't bother
+    if (query == prevRequest)
+        return;
     searchRequest = query;
     setTimeout(function(){
         if (searchRequest !== query) {
@@ -174,7 +185,12 @@ function getNextPage(query, curr_index, num_functions) {
         .done(function(funcs) {
         	// remove highlighted function
       		$(".selected").removeClass("selected");
-          functions.contents = format_functions(funcs);
+            functions.contents = format_functions(funcs);
+            var firstFunc = $(".function")[0];
+            $(firstFunc).addClass('selected')
+            selectedFunction = firstFunc;
+
+            prevRequest = query;
         })
         .fail(function() {
             alert("Unable to contact server.");

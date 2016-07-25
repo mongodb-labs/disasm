@@ -4,6 +4,7 @@
 <head>
   <link rel="stylesheet" href="static/css/skeleton.css">
   <link rel="stylesheet" href="static/css/normalize.css">
+  <link rel="stylesheet" href="static/css/colorbox.css">
   {% assets "index_css" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
   <title>Disassembler</title>
 
@@ -42,6 +43,7 @@
 
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+{% assets "js_global" %} <script src="{{ ASSET_URL }}"></script> {% endassets %}
 {% assets "js_index" %} <script src="{{ ASSET_URL }}"></script> {% endassets %}
 </body>
 

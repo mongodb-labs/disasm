@@ -32,38 +32,46 @@ app.config.from_pyfile('config.py')
 assets = Environment(app)
 
 # relative to static dir
-index_scss = Bundle('scss/index.scss', 
+index_scss = Bundle(
+    'scss/index.scss', 
     filters='pyscss', 
     output='generated/index_all.css')
 assets.register('index_css', index_scss)
 
-functions_scss = Bundle('scss/general.scss',
+functions_scss = Bundle(
+    'scss/general.scss',
     'scss/functions.scss', 
     filters='pyscss', 
     output='generated/functions_all.css')
 assets.register('functions_css', functions_scss)
 
-disassemble_scss = Bundle('scss/general.scss',
-    'scss/disassemble.scss', 
+disassemble_scss = Bundle(
+    'scss/general.scss',
+    'scss/disassemble.scss',
     filters='pyscss', 
     output='generated/disassemble_all.css')
 assets.register('disassemble_css', disassemble_scss)
 
-js_index = Bundle('js/index.js', 
+# Javascript files that are used in index.jinja.tml
+js_index = Bundle(
+    'js/index.js',
+    'js/index_shortcuts.js',
     output='generated/index_all.js')
 assets.register('js_index', js_index)
 
-js_functions = Bundle('js/rivets.js',
+# Javascript files that are used in functions.jinja.html
+js_functions = Bundle(
     'js/functions.js',
+    'js/functions_shortcuts.js',
     output='generated/functions_all.js')
 assets.register('js_functions', js_functions)
 
-js_disassemble = Bundle('js/rivets.js', 
+# Javascript files that are used in disassemble.jinja.html
+js_disassemble = Bundle(
     'js/disassemble.js', 
     'js/biginteger.js',
     'js/disassembly_analysis.js',
     'js/instruction_events.js',
-    'js/keyboard_shortcuts.js',
     'js/number_conversion.js',
     'js/jquery.contextMenu.js',
     'js/jquery.contextMenu.js',
@@ -71,8 +79,18 @@ js_disassemble = Bundle('js/rivets.js',
     'js/highlight.pack.js',
     'js/tipr.js',
     'js/register_info.js',
+    'js/disassemble_shortcuts.js',
     output='generated/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
+
+# Javascript files that are used on all pages.
+js_global = Bundle(
+    'js/keypress.js',
+    'js/rivets.js',
+    'js/global_shortcuts.js',
+    'js/jquery.colorbox-min.js',
+    output='generated/global_all.js')
+assets.register('js_global', js_global)
 
 # home and upload
 @app.route('/', methods=['GET', 'POST'])
