@@ -65,8 +65,9 @@ def disasm(bytes, offset=0):
 
             # Handle individual operands
             c = -1
-            instr.regs_write_explicit = []
-            instr.regs_read_explicit = []
+            instr.regs_explicit = []
+            # instr.regs_write_explicit = []
+            # instr.regs_read_explicit = []
             for op in instr.operands:
                 c += 1
                 # Handle rip-relative operands
@@ -120,19 +121,16 @@ def disasm(bytes, offset=0):
                         ptr.append(hex(op.value.mem.disp))
 
                     instr.ptr = " ".join(ptr)
-                    if c == 0:
-                        instr.regs_write_explicit.append(instr.ptr)
-                    else:
-                        instr.regs_read_explicit.append(instr.ptr)
-                if op.type == x86.X86_OP_REG:
-                    # this is specific to Intel syntax
-                    if c == 0:
-                        instr.regs_write_explicit.append(instr.reg_name(op.value.reg))
-                    else :
-                        instr.regs_read_explicit.append(instr.reg_name(op.value.reg))
+                    instr.regs_explicit.append(instr.ptr)
+                elif op.type == x86.X86_OP_REG:
+                    instr.regs_explicit.append(instr.reg_name(op.value.reg))
+                else:
+                    instr.regs_explicit.append("")
 
             # what registers does this instruction read/write?
             instr.regs_write_implicit = [instr.reg_name(reg) for reg in instr.regs_write]
+            if instr.group(x86.X86_GRP_CALL) and instr.reg_name(x86.X86_REG_RAX) not in instr.regs_write_implicit:
+                instr.regs_write_implicit.append(instr.reg_name(x86.X86_REG_RAX))
             instr.regs_read_implicit = [instr.reg_name(reg) for reg in instr.regs_read]
             # Add in documentation meta-data
             instr.short_desc, instr.docfile = get_documentation(instr)
@@ -185,8 +183,23 @@ def jsonify_capstone(data):
 
         # reading/writing registers
         row['ptr'] = i.ptr
-        row['regs_write_explicit'] = i.regs_write_explicit
-        row['regs_read_explicit'] = i.regs_read_explicit
+        row['regs_write_explicit'] = []
+        row['regs_read_explicit'] = []
+        with open('x86operands.json', 'r') as fp:
+            op_data = json.load(fp)
+        try:
+            readwrites = op_data[i.mnemonic][str(len(i.regs_explicit))]
+            for rw, reg in zip(readwrites, i.regs_explicit):
+                if reg != "" and rw == 'W':
+                    row['regs_write_explicit'].append(reg)
+                elif reg != "" and rw == 'R':
+                    row['regs_read_explicit'].append(reg)
+                elif reg != "" and rw == 'X':
+                    row['regs_write_explicit'].append(reg)
+                    row['regs_read_explicit'].append(reg)
+        except:
+            pass
+
         row['regs_write_implicit'] = i.regs_write_implicit
         row['regs_read_implicit'] = i.regs_read_implicit
         with open('x86registers.json', 'r') as fp:
