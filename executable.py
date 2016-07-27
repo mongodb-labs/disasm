@@ -14,11 +14,13 @@
 
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
-from elftools.dwarf.descriptions import describe_form_class
+from elftools.dwarf.descriptions import (describe_form_class,
+    describe_DWARF_expr, set_global_machine_arch)
 from elftools.dwarf.die import DIE
 from demangler import demangle
 from bisect import bisect_right
 from symbol_lookup import get_sub_symbol
+from dwarf_expr import *
 
 ## the (global) executable we're looking at
 ex = None
@@ -103,6 +105,7 @@ class ElfExecutable(Executable):
             functions.append(func)
         return functions
 
+    # get all the symbols that correspond to functions
     def get_function_syms(self):
         symtab = self.elff.get_section_by_name(".symtab")
         function_syms = list(filter(lambda sym: sym["st_info"]["type"] == "STT_FUNC", symtab.iter_symbols()))
@@ -130,6 +133,121 @@ class ElfExecutable(Executable):
             elif entry.state.address > (begin + size):
                 return info
         return info
+
+    # utility to get the first DIE in the CU the given address points to
+    def _get_top_DIE(self, address):
+        if not self.dwarff:
+            return None
+            
+        CU_offset = self.aranges.cu_offset_at_addr(address)
+        CU = self.dwarff._parse_CU_at_offset(CU_offset)
+        # preload tree of DIEs
+        if CU_offset in self.CU_offset_to_DIE:
+            top_DIE = self.CU_offset_to_DIE[CU_offset]
+        else:
+            top_DIE = CU.get_top_DIE()
+            self.CU_offset_to_DIE[CU_offset] = top_DIE # save
+
+        return top_DIE
+
+    # given a cu and an offset, return the DIE object at that offset
+    def _parse_DIE_at_offset(self, cu, die_offset):
+        die = DIE(
+                cu=cu,
+                stream=cu.dwarfinfo.debug_info_sec.stream,
+                offset=die_offset + cu.cu_offset)
+        return die
+
+    # given a DIE object, get its name
+    def _get_DIE_name(self, die):
+        CU = die.cu
+
+        if "DW_AT_name" in die.attributes:
+            return die.attributes["DW_AT_name"].value
+        while "DW_AT_abstract_origin" in die.attributes:
+            die = self._parse_DIE_at_offset(CU, die.attributes["DW_AT_abstract_origin"].value)
+            if "DW_AT_name" in die.attributes:
+                return die.attributes["DW_AT_name"].value
+        return None
+
+    # get the dies of the variables "owned" by the given parent
+    def _die_variables(self, parent, children=[]):
+        for child in parent.iter_children():
+            children.append(child)
+            if child.tag == "DW_TAG_lexical_block":
+                children = self._die_variables(child, children)
+        return children
+
+    # a helper function for get_function_reg_contents;
+    # add the given location piece to the reg_contents accumulator 
+    def _update_reg_contents(self, reg_contents, begin_addr, end_addr, loc_pieces, name):
+        for piece in loc_pieces:
+            # sometimes it's just a const??? why????
+            if not isinstance(piece, OpPiece):
+                continue
+            # there are rare cases when there will be multiple registers per variable location piece
+            # for ease, we convert all registers into an array
+            regs = [piece.key] if not isinstance(piece.key, list) else piece.key
+            for reg in regs:
+                if reg not in reg_contents:
+                    reg_contents[reg] = []
+                reg_contents[reg].append({
+                    "start": begin_addr,
+                    "end": end_addr,
+                    "name": name,
+                    "value": piece.value,
+                    "size": piece.size
+                    });
+        return reg_contents
+
+    # get the mappings of registers -> variables, where available, in the given function
+    def get_function_reg_contents(self, address):
+        top_DIE = self._get_top_DIE(address)
+        if top_DIE == None:
+            return None
+        CU = top_DIE.cu
+
+        # get function (subprogram) DIE
+        parent = None
+        for die in top_DIE.iter_children():
+            if self._addr_in_DIE(die, address) and die.tag == "DW_TAG_subprogram":
+                parent = die
+
+        if parent == None: 
+            return None
+
+        set_global_machine_arch(self.elff.get_machine_arch())
+
+        # we are only interested in dies that have a location attribute
+        reg_contents = {}
+        function_children = self._die_variables(parent, [])
+        loc_dies = [die for die in function_children if "DW_AT_location" in die.attributes]
+        location_lists = self.dwarff.location_lists()
+        for die in loc_dies:
+            loc_attributes = die.attributes["DW_AT_location"]
+            name = self._get_DIE_name(die)
+            if name is None:
+                name = id(name)
+            print name
+
+            # create mapping of register -> location and corresponding variable name
+            if loc_attributes.form == "DW_FORM_exprloc":
+                loc_pieces = describe_DWARF_expr(loc_attributes.value, CU.structs)
+                if loc_pieces is None:
+                    continue
+                reg_contents = self._update_reg_contents(reg_contents, "", "", loc_pieces, name)
+            elif loc_attributes.form == "DW_FORM_sec_offset":
+                loclist = location_lists.get_location_list_at_offset(loc_attributes.value)
+                for loc in loclist:
+                    print hex(loc.begin_offset), hex(loc.end_offset)
+                    loc_pieces = describe_DWARF_expr(loc.loc_expr, CU.structs)
+                    if loc_pieces is None:
+                        continue
+                    reg_contents = self._update_reg_contents(reg_contents, 
+                        hex(loc.begin_offset), hex(loc.end_offset), loc_pieces, name)
+            
+        return reg_contents
+
 
     # is the given address contained in the given DIE?
     def _addr_in_DIE(self, DIE, address):
@@ -205,18 +323,11 @@ class ElfExecutable(Executable):
 
     # get array of DIEs for given address
     def get_addr_stack_info(self, address):
-        if not self.dwarff:
+        top_DIE = self._get_top_DIE(address)
+        if top_DIE == None:
             return None
-            
-        CU_offset = self.aranges.cu_offset_at_addr(address)
-        CU = self.dwarff._parse_CU_at_offset(CU_offset)
-        # preload tree of DIEs
-        if CU_offset in self.CU_offset_to_DIE:
-            top_DIE = self.CU_offset_to_DIE[CU_offset]
-        else:
-            top_DIE = CU.get_top_DIE()
-            self.CU_offset_to_DIE[CU_offset] = top_DIE # save
-        
+        CU = top_DIE.cu
+
         # stack[0] is the parent-est
         stack = self._get_addr_DIEs(top_DIE, address, [])
 

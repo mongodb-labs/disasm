@@ -70,6 +70,7 @@ js_disassemble = Bundle('js/rivets.js',
     'js/jquery.ui.position.js',
     'js/highlight.pack.js',
     'js/tipr.js',
+    'js/register_info.js',
     output='generated/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
 
@@ -225,6 +226,11 @@ def get_iaca():
         return jsonify({'contents': contents})
 
     return jsonify({'error': 'undefined error'})
+
+@app.route('/get_reg_contents', methods=["GET"])
+def get_reg_contents():
+    address = int(request.args['address'])
+    return jsonify(executable.ex.get_function_reg_contents(address))
 
 # debug=True auto reloads whenever server code changes
 app.run(debug=True)
