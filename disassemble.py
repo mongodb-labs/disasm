@@ -113,10 +113,15 @@ def disasm(bytes, offset=0):
                 # Handle explicitly read/written registers
                 if op.type == x86.X86_OP_MEM and op.mem.base != x86.X86_REG_RIP:
                     ptr = []
+                    instr.regs_ptr_explicit = []
                     if op.value.mem.base != 0:
-                        ptr.append(instr.reg_name(op.value.mem.base))
+                        regname = instr.reg_name(op.value.mem.base)
+                        ptr.append(regname)
+                        instr.regs_ptr_explicit.append(regname)
                     if op.value.mem.index != 0:
-                        ptr.append(instr.reg_name(op.value.mem.index))
+                        regname = instr.reg_name(op.value.mem.index)
+                        ptr.append(regname)
+                        instr.regs_ptr_explicit.append(regname)
                     if op.value.mem.disp != 0:
                         ptr.append(hex(op.value.mem.disp))
 
@@ -184,7 +189,7 @@ def jsonify_capstone(data):
         # reading/writing registers
         row['ptr'] = i.ptr
         row['regs_write_explicit'] = []
-        row['regs_read_explicit'] = []
+        row['regs_read_explicit'] = [] if not i.regs_ptr_explicit else i.regs_ptr_explicit
         with open('x86operands.json', 'r') as fp:
             op_data = json.load(fp)
         try:
