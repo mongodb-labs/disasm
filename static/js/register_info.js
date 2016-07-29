@@ -64,6 +64,17 @@ $(function() {
     $.contextMenu({
     selector: '.reg',
     items: {
+      reads_and_writes: {
+        name: "Show reads & writes",
+        callback: function(key, opt) {
+          var target_reg = $(this)[0].innerText;
+          if (target_reg == 'ptr') {
+            target_reg = $(this).attr('id');
+          }
+          readRegsCallback(key, opt, target_reg);
+          writeRegsCallback(key, opt, target_reg);
+        }
+      },
       reads_from: {
         name: "Show reads",
         callback: function(key, opt) {
@@ -71,14 +82,7 @@ $(function() {
           if (target_reg == 'ptr') {
             target_reg = $(this).attr('id');
           }
-
-          var instructs = regsCallback(key, opt, target_reg, READS_REG);
-          
-          $(".show-read").removeClass("show-read");
-          assembly.highlight_read_reg = target_reg;
-          instructs.forEach(function(instr) {
-            $('#' + instr.address).addClass('show-read');
-          });
+          readRegsCallback(key, opt, target_reg);
         }
       },
       writes_to: {
@@ -88,14 +92,7 @@ $(function() {
           if (target_reg == 'ptr') {
             target_reg = $(this).attr('id');
           }
-
-          var instructs = regsCallback(key, opt, target_reg, WRITES_REG);
-          
-          $(".show-write").removeClass("show-write");
-          assembly.highlight_write_reg = target_reg;
-          instructs.forEach(function(instr) {
-            $('#' + instr.address).addClass('show-write');
-          }); 
+          writeRegsCallback(key, opt, target_reg);
         }
       },
       clear_all: {
@@ -109,6 +106,26 @@ $(function() {
   });
 })
 
+function readRegsCallback(key, opt, target_reg) {
+  var instructs = regsCallback(key, opt, target_reg, READS_REG);
+  
+  $(".show-read").removeClass("show-read");
+  assembly.highlight_read_reg = target_reg;
+  instructs.forEach(function(instr) {
+    $('#' + instr.address).addClass('show-read');
+  });
+}
+
+function writeRegsCallback(key, opt, target_reg) {
+  var instructs = regsCallback(key, opt, target_reg, WRITES_REG);
+  
+  $(".show-write").removeClass("show-write");
+  assembly.highlight_write_reg = target_reg;
+  instructs.forEach(function(instr) {
+    $('#' + instr.address).addClass('show-write');
+  }); 
+}
+ 
 // invoked by context menu;
 // highlight the relevant instructions that write to or read from target register
 function regsCallback(key, opt, target_reg, readsOrWrites) {
