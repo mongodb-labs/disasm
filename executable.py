@@ -265,6 +265,9 @@ class ElfExecutable(Executable):
             else:
                 print('Error: invalid DW_AT_high_pc class:', highpc_attr_class)
             return lo <= address < hi
+        elif "DW_AT_low_pc" in DIE.attributes:
+            lo = int(DIE.attributes["DW_AT_low_pc"].value)
+            return address == lo
 
     # helper function to get array of DIEs for given address
     def _get_addr_DIEs(self, parent, address, stack):
@@ -287,6 +290,8 @@ class ElfExecutable(Executable):
             lineprog = self.dwarff.line_program_for_CU(CU)
         
         prevstate = None
+        res = (None, None)
+        # get last (aka most narrow) line entry program
         for entry in lineprog.get_entries():
             if entry.state is None or entry.state.end_sequence:
                 continue
@@ -296,9 +301,9 @@ class ElfExecutable(Executable):
                 filepath = (lineprog["include_directory"][file_entry.dir_index - 1] 
                     + "/" 
                     + file_entry.name)
-                return (filepath, prevstate.line)
+                res = (filepath, prevstate.line)
             prevstate = entry.state
-        return None # addr not found in lineprog
+        return res
 
     def _die_to_function(self, die):
         while "DW_AT_name" not in die.attributes:
