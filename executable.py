@@ -14,13 +14,12 @@
 
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
-from elftools.dwarf.descriptions import (describe_form_class,
-    describe_DWARF_expr, set_global_machine_arch)
+from elftools.dwarf.descriptions import describe_form_class
 from elftools.dwarf.die import DIE
 from demangler import demangle
 from bisect import bisect_right
 from symbol_lookup import get_sub_symbol
-from dwarf_expr import *
+from dwarf_expr import describe_DWARF_expr, set_global_machine_arch, OpPiece
 
 ## the (global) executable we're looking at
 ex = None
@@ -142,13 +141,10 @@ class ElfExecutable(Executable):
         CU_offset = self.aranges.cu_offset_at_addr(address)
         CU = self.dwarff._parse_CU_at_offset(CU_offset)
         # preload tree of DIEs
-        if CU_offset in self.CU_offset_to_DIE:
-            top_DIE = self.CU_offset_to_DIE[CU_offset]
-        else:
-            top_DIE = CU.get_top_DIE()
-            self.CU_offset_to_DIE[CU_offset] = top_DIE # save
-
-        return top_DIE
+        if not CU_offset in self.CU_offset_to_DIE:
+            self.CU_offset_to_DIE[CU_offset] = CU.get_top_DIE() # save
+        
+        return self.CU_offset_to_DIE[CU_offset]
 
     # given a cu and an offset, return the DIE object at that offset
     def _parse_DIE_at_offset(self, cu, die_offset):
@@ -228,7 +224,6 @@ class ElfExecutable(Executable):
             name = self._get_DIE_name(die)
             if name is None:
                 name = id(name)
-            print name
 
             # create mapping of register -> location and corresponding variable name
             if loc_attributes.form == "DW_FORM_exprloc":
@@ -239,7 +234,6 @@ class ElfExecutable(Executable):
             elif loc_attributes.form == "DW_FORM_sec_offset":
                 loclist = location_lists.get_location_list_at_offset(loc_attributes.value)
                 for loc in loclist:
-                    print hex(loc.begin_offset), hex(loc.end_offset)
                     loc_pieces = describe_DWARF_expr(loc.loc_expr, CU.structs)
                     if loc_pieces is None:
                         continue

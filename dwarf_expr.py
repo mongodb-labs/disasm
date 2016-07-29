@@ -50,7 +50,8 @@ def describe_DWARF_expr(expr, structs):
     op = dwarf_expr_dumper.parse_stack()
     return op
 
-
+# inherits from ExprDumper in pyelftools description.py to 
+# override _after_visit and execute dwarf expression stack operations
 class ExprParser(ExprDumper):
     def __init__(self, structs):
         super(ExprDumper, self).__init__(structs)
@@ -77,20 +78,15 @@ class ExprParser(ExprDumper):
     def parse_stack(self, parts=None):
         if not parts:
             parts = self._parts
-        print parts
             
         stack = [] # stack of DwarfOps
         for part in parts:
             try: # fail with unimplemented dwarf expressions
                 stack, terminate = self._handle_stack(part, stack)
                 if terminate:
-                    print stack
-                    print ""
                     return stack
             except:
                 return None
-        print stack
-        print ""
         return stack
 
     # Given a "most recent" dwarf expression operation and the stack so far,
