@@ -18,39 +18,12 @@
   <div class="row">
     <div id="functions-wrapper" class="ten columns">
       <h2 class='header'> 
-        <div class='title'>filename</div>
-        <div class='filename'>{{ filename }} </div>
+        <div class='title'>filename:</div>
+        <div class='filename'>{{ filename }}</div>
       </h2>
 
-        <input type="text" placeholder="function name" id="function-name-input"/>
-
-        {# all functions #}
-        <div id='functions'>
-          <div class='spacer'></div>
-          <div class="nav-buttons">
-            <button id="button-prev"> < </button>
-            <button id="button-next"> > </button>
-          </div>
-
-          <a rv-each-func="functions.contents"
-            class="function"
-            rv-href="func | function_href"
-            rv-data-st-value="func.st_value"
-            rv-data-offset="func.offset"
-            rv-data-size="func.size"
-            rv-on-click='ctrl.functionClicked'
-            rv-on-mouseover="ctrl.hoverCollapsable"
-            rv-on-mouseout="ctrl.removeHoverCollapsable">
-
-            <span rv-each-part="func.name"
-              rv-class-hovered="part.hovered"
-              rv-class-expandable="part.expandable"
-              rv-class-collapsable="part.collapsable"
-              rv-text="part.display">
-              </span>
-          </a>
-
-        </div>
+      {% include 'function_search.partial.html' %}
+      
     </div> {# end of functions column #}
   </div> 
   </main>

@@ -17,6 +17,20 @@
 
 
 <body>
+
+  <div class='heading-row row'>
+    <div class="heading">
+      <a href="/">
+        <i class="fa fa-home" aria-hidden="true"></i> 
+      </a>
+      <div class='filename'>{{ filename }}</div>
+      <div class='function-search'>
+        {% include 'function_search.partial.html' %}
+      </div>
+      <div class='func-name'>{{ func_name }}</div>
+    </div>
+  </div>
+
   <main>
   <div id='function-metadata'
     data-filename="{{ filename }}"
@@ -26,13 +40,6 @@
   </div>
 
   <div id="top-half">
-    <div class='heading-row row'>
-      <div class="heading">
-        <div class='filename'>{{ filename }}</div> 
-        <div class='func-name'>{{ func_name }}</div>
-      </div>
-    </div>
-
     <div class="assembly-row row">
         {# selected function's assembly #}
         <div id='function-disasm' class='twelve columns'>

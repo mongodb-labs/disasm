@@ -387,16 +387,8 @@ function attachInstructionHandlers() {
   var jumps = assembly.jumps;
   $(".row.instruction").on("mouseenter", function(event) {
     var instruc = event.currentTarget;
-    highlightJumpArrows(jumps, instruc.id);
+    highlightJumpArrows(instruc.id);
   });
-
-  // This is handled in instruction_events.js:instructionClicked() now. Leaving this here just
-  // causes active_instruction to get the wrong value.
-  // $(".row.instruction").on("click", function(event) {
-  //   var instruc = event.currentTarget;
-  //   assembly.active_instruction = event.currentTarget.id;
-  //   highlightJumpArrows(instruc.id);
-  // });
 }
 
 // I wanted to call highlightJumpArrows elsewhere, so I moved jumps to the assembly object, since

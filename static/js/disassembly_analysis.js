@@ -137,9 +137,9 @@ function tabIacaClicked(event, model) {
 /********** end tab click functions **********/
 
 // display functions: show and hide analysis panel
-var fullHeight = "97vh";
-var partialHeight = "50vh";
-$("#function-analysis").hide(); // init hide.
+var fullHeight = "calc(97vh - 100px)"; // 100px header
+var partialHeight = "44vh";
+$("#function-analysis").hide(); // init hide
 var analysisVisible = false; // Whether or not the analysis menu is currently visible.
 
 function showAnalysis() {

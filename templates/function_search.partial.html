@@ -1,0 +1,29 @@
+<input type="text" placeholder="Search for functions" id="function-name-input"/>
+
+{# all functions #}
+<div id='functions' data-filename="{{ filename }}">
+  <div class='spacer'></div>
+  <div class="nav-buttons">
+    <button id="button-prev"> < </button>
+    <button id="button-next"> > </button>
+  </div>
+
+  <a rv-each-func="functions.contents"
+    class="function"
+    rv-href="func | function_href"
+    rv-data-st-value="func.st_value"
+    rv-data-offset="func.offset"
+    rv-data-size="func.size"
+    rv-on-click='ctrl.functionClicked'
+    rv-on-mouseover="ctrl.hoverCollapsable"
+    rv-on-mouseout="ctrl.removeHoverCollapsable">
+
+    <span rv-each-part="func.name"
+      rv-class-hovered="part.hovered"
+      rv-class-expandable="part.expandable"
+      rv-class-collapsable="part.collapsable"
+      rv-text="part.display">
+      </span>
+  </a>
+
+</div>

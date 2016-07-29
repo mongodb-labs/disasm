@@ -20,7 +20,7 @@ import hurry.filesize
 
 import disassemble as disasm
 import iaca
-from function_store import storeFunctions, getFunctions, getFunctionsBySubstring
+from function_store import storeFunctions, getFunctions, getFunctionsBySubstring, hasStoredFunctions
 from executable import *
 import executable
 from disassemble import disasm, jsonify_capstone
@@ -70,6 +70,7 @@ assets.register('js_functions', js_functions)
 js_disassemble = Bundle(
     'js/disassemble.js', 
     'js/biginteger.js',
+    'js/functions.js',
     'js/disassembly_analysis.js',
     'js/instruction_events.js',
     'js/number_conversion.js',
@@ -172,10 +173,12 @@ def get_function_assembly():
 def value_at_addr():
     return executable.ex.get_bytes(int(request.args['addr'], 16), request.args['len'])
 
-# expects {"substring": "", "start_index": <int>, "num_functions": <int>, "case_sensitive": <bool>}
+# expects {"filename": "", "substring": "", "start_index": <int>, "num_functions": <int>, "case_sensitive": <bool>}
 @app.route('/get_substring_matches', methods=['GET'])
 def get_substring_matches():
     substring = request.args['substring']
+    if not hasStoredFunctions():
+        load_functions(request.args['filename'])
     functions = getFunctionsBySubstring(substring, int(request.args['start_index']), 
         int(request.args['num_functions']), request.args['case_sensitive'] == 'True')
     return jsonify(functions)

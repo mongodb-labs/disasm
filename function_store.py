@@ -33,6 +33,10 @@ def storeFunctions(functions):
     global functionsList
     functionsList = functions
 
+def hasStoredFunctions():
+    global functionsList
+    return functionsList is not None
+
 def getFunctions(start_index, num_functions):
     global functionsList
     if functionsList:

@@ -17,26 +17,115 @@
 }
 
 #top-half {
-	height: 97vh;
+	height: calc(97vh - 100px); // can't use vars for calc; match $heading-height
 }
 
 $heading-height: 100px;
+$heading-bg: rgb(128,203,196);
 .heading-row {
 	height: $heading-height;
+	padding-left: 30px;
+	padding-right: 30px;
+	background-color: $heading-bg;
 }
 
 .heading {
 	padding-top: 10px;
 	font-family: 'Open Sans', 'Helvetica Neue', sans-serif;
-	font-size: 1.1em;
-	font-size: 1.4vw;
 
+	$filename-color: ghostwhite;
 	.filename {
-		font-style: italic;
-		color: gray;
+		font-size: 1.6em;
+	}
+	.filename, .fa.fa-home {
+		color: $filename-color;
+		display: inline-block;
+	}
+	.fa.fa-home:hover {
+		color: white;
+		cursor: pointer;
+	}
+	.fa.fa-home {
+		font-size: 2em;
+	}
+	.function-search {
+		display: inline-block;
 	}
 	.func-name {
+		font-size: 1.3em;
+		color: white;
+		margin-top: 12px;
 
+		white-space: nowrap;
+		overflow-x: scroll;
+	}
+}
+
+
+/****************** Function search bar ******************/
+.function-search {
+	z-index: 99;
+	width: 50%;
+	margin-left: 20px;
+	font-size: 14px;
+	position: relative;
+
+  input#function-name-input:focus + #functions {
+		display: block;
+	}
+	#functions:hover {
+		display: block;
+	}
+
+  input#function-name-input {
+  	width: 100%;
+  	z-index: 999;
+  	height: 30px;
+  }
+
+  #functions {
+  	.nav-buttons {
+  		display: none;
+  	}
+
+  	position: absolute;
+  	margin-top: -3px;
+    z-index: -1;
+
+  	width: 100%;
+  	max-height: 85vh;
+  	overflow-y: scroll;
+  	background-color: white;
+		display: none; // don't display unless ur focused in the input
+	
+		// border-color: lightblue;
+		// border-bottom-style: solid;
+  //   border-left-style: solid;
+  //   border-right-style: solid;
+  //   border-width: 2px;
+
+  	// top-left, top-right, bottom-right, bottom-left
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+
+    -webkit-box-shadow: 1px 1px 8px 0px rgba(8,170,199,0.39);
+		-moz-box-shadow: 1px 1px 8px 0px rgba(8,170,199,0.39);
+		box-shadow: 1px 1px 8px 0px rgba(8,170,199,0.39);
+	}
+
+	#functions .function {
+		display: block;
+		text-decoration: none;
+		color: darkslategray;
+
+		padding-left: 5px;
+		padding-top: 5px;
+		margin-bottom: 10px;
+		@include wrap-text;
+	}
+	#functions .function:hover {
+		background-color: rgba(128,222,234, 0.3);
 	}
 }
 
@@ -48,7 +137,7 @@ $instruc-color2: rgb(178,235,242); // lighter
 $instruc-color-read: rgb(255,245,157);
 $instruc-color-write: rgb(255,171,145);
 .assembly-row {
-	height: calc(100% - 100px); // can't use vars for calc; match $heading-height
+	height: 100%;
 }
 
 #status > div:hover:before {
@@ -62,7 +151,7 @@ $instruc-color-write: rgb(255,171,145);
 #status {
 	position: fixed;
 	right: 0px;
-	margin-top: -20px;
+	margin-top: 7px;
 	z-index: 99;
 	min-width: 200px;
 
@@ -232,6 +321,7 @@ $source-code-bg1: aquamarine; // highlight relevant line
 			.stack-info-frame {
 				padding-left: 15px;
 				padding-right: 15px;
+				@include wrap-text;
 
 				.lineno {
 					float: right;
@@ -295,3 +385,4 @@ $source-code-bg1: aquamarine; // highlight relevant line
 .context-menu-item.disabled {
 	color: #BBB;
 }
+
