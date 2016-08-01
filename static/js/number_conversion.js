@@ -69,11 +69,25 @@ $(function() {
             unsignedDec64: {
                 name: "64-bit Unsigned Decimal"
             },
+            unsignedDec128: {
+                name: "128-bit Unsigned Decimal"
+            },
             twosCompDec64: {
                 name: "64-bit Signed 2's Complement Decimal"
             },
+            twosCompDec128: {
+                name: "128-bit Signed 2's Complement Decimal"
+            },
             binary: {
                 name: "Binary"
+            },
+            ascii: {
+                name: "ASCII",
+                disabled: function(key, opt) {
+                    var startVal = opt.$trigger.context.innerHTML;
+                    var base = opt.$trigger.context.getAttribute("value");
+                    return getConvertedVal(startVal, base, "unsignedDec64") > 127;
+                }
             }
         },
         callback: contextMenuConvertBase
@@ -86,10 +100,14 @@ function contextMenuConvertBase(key, opt) {
         console.log("Number is unchanged");
         return; 
     }
-    // var radix;
-    var binString;
     var startVal = opt.$trigger.context.innerHTML;
-    var newVal;
+    var newVal = getConvertedVal(startVal, base, key);
+    opt.$trigger.context.setAttribute("value", key);
+    opt.$trigger.context.innerHTML = newVal;
+}
+
+function getConvertedVal(startVal, base, key) {
+    var binString, newVal;
     switch(base) {
         case "hex":
             binString = hexToBin(startVal);
@@ -97,37 +115,53 @@ function contextMenuConvertBase(key, opt) {
         case "unsignedDec64":
             binString = unsignedDecToBin(startVal, 64);
             break;
+        case "unsignedDec128":
+            binString = unsignedDecToBin(startVal, 128);
+            break;
         case "twosCompDec64":
             binString = signedDecToBin(startVal, 64);
+            break;
+        case "twosCompDec128":
+            binString = signedDecToBin(startVal, 128);
             break;
         case "binary":
             binString = startVal;
             break;
+        case "ascii":
+            startVal = startVal.charAt(1);
+            binString = unsignedDecToBin(startVal.charCodeAt(0), 64);
+            break;
         default:
             throw new Error("Unexpected base type: " + base);
     }
+    console.log("Converted " + base + " number from " + startVal + " to binary number " + binString);
     switch (key) {
         case "hex":
-            newVal = binToHex(binString);
+            newVal = "0x" + binToHex(binString);
             break;
         case "unsignedDec64":
             newVal = binToUnsignedDec(binString, 64);
             break;
+        case "unsignedDec128":
+            newVal = binToUnsignedDec(binString, 128);
+            break;
         case "twosCompDec64":
             newVal = binToSignedDec(binString, 64);
+            break;
+        case "twosCompDec128":
+            newVal = binToSignedDec(binString, 128);
             break;
         case "binary":
             newVal = binString;
             break;
+        case "ascii":
+            newVal = "'" + String.fromCharCode(binToUnsignedDec(binString, 64)) + "'";
+            break;
         default:
             throw new Error("Unexpected key type: " + key);
     }
-    opt.$trigger.context.setAttribute("value", key);
-    if (key == "hex") {
-        newVal = "0x" + newVal; 
-    }
-    opt.$trigger.context.innerHTML = newVal;
-    console.log("Converted " + base + " number " + startVal + " to binary number " + binString + " to " + key + " number " + newVal);
+    console.log("Converted binary number from " + binString + " to " + key + " number " + newVal);
+    return newVal
 }
 
 function hexToBin(val) {
@@ -139,13 +173,18 @@ function hexToBin(val) {
 }
 
 function binToHex(val) {
-    var hexStr = "";
+    var hexStr = "", leadingZero = true;
     // Make the binary string length divisible by 4 by prepending it with 0's
     for (var i = val.length % 4; i > 0; i--) {
         val = "0" + val;
     }
     for (var i = 0; i < val.length; i += 4) {
-        hexStr += binToHexMap[val.substring(i, i+4)];
+        var nextChar = binToHexMap[val.substring(i, i+4)];
+        // We want to avoid padding the number with 0s. It's meaningless and awkward
+        if (!leadingZero || nextChar != 0)
+            hexStr += nextChar;
+        if (nextChar != 0)
+            leadingZero = false;
     }
     return hexStr;
 }
@@ -177,7 +216,7 @@ function signedDecToBin(val, bits) {
     var negative = false;
     if (val.charAt(0) == '-') {
         negative = true;
-        val = val.substring(1,substring.length);
+        val = val.substring(1,val.length);
     }
     var unsignedBinVal = unsignedDecToBin(val, bits);
     var twosCompBin = negative ? applyTwosCompConversion(unsignedBinVal) : unsignedBinVal;
