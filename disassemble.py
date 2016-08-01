@@ -21,6 +21,7 @@ import datetime
 from documentation import get_documentation
 import json
 from binascii import hexlify
+from struct import unpack
 
 INSTR_REF_DIRECTORY = 'static/inst_ref/'
 
@@ -78,6 +79,36 @@ def disasm(bytes, offset=0):
                     instr.rip = True
                     instr.rip_offset = op.mem.disp
                     instr.rip_resolved = disassembled[i+1].address + instr.rip_offset
+
+                    # Read in and unpack the first byte at the offset
+                    val_8 = executable.ex.get_bytes(instr.rip_resolved, 1)
+                    instr.signed_8 = unpack('b', val_8)[0]
+                    instr.unsigned_8 = unpack('B', val_8)[0]
+                    instr.hex_8 = hex(instr.unsigned_8)
+                    print instr.signed_8
+                    print instr.unsigned_8
+                    print instr.hex_8
+
+                    # Read in and unpack the first two bytes at the offset
+                    val_16 = executable.ex.get_bytes(instr.rip_resolved, 2)
+                    instr.signed_16 = unpack('h', val_16)[0]
+                    instr.unsigned_16 = unpack('H', val_16)[0]
+                    instr.hex_16 = hex(instr.unsigned_16)
+
+                    # Read in and unpack the first four bytes at the offset
+                    val_32 = executable.ex.get_bytes(instr.rip_resolved, 4)
+                    instr.signed_32 = unpack('i', val_32)[0]
+                    instr.unsigned_32 = unpack('I', val_32)[0]
+                    instr.hex_32 = hex(instr.unsigned_32)
+                    instr.float = unpack('f', val_32)[0]
+
+                    # Read in and unpack the first eight bytes at the offset
+                    val_64 = executable.ex.get_bytes(instr.rip_resolved, 8)
+                    instr.signed_64 = unpack('q', val_64)[0]
+                    instr.unsigned_64 = unpack('Q', val_64)[0]
+                    instr.hex_64 = hex(instr.unsigned_64)
+                    instr.double = unpack('d', val_64)[0]
+
                     symbol, field_name = executable.ex.get_symbol_by_addr(
                         instr.rip_resolved, 
                         instr.address,
@@ -173,6 +204,23 @@ def jsonify_capstone(data):
             row['rip-resolved'] = i.rip_resolved
             row['rip-value-ascii'] = i.rip_value_ascii
             row['rip-value-hex'] = i.rip_value_hex
+            row['rip-value-signed-8'] = i.signed_8
+            row['rip-value-signed-16'] = i.signed_16
+            row['rip-value-signed-32'] = i.signed_32
+            row['rip-value-signed-64'] = i.signed_64
+            row['rip-value-unsigned-8'] = i.unsigned_8
+            row['rip-value-unsigned-16'] = i.unsigned_16
+            row['rip-value-unsigned-32'] = i.unsigned_32
+            row['rip-value-unsigned-64'] = i.unsigned_64
+            row['rip-value-hex-8'] = i.hex_8
+            row['rip-value-hex-16'] = i.hex_16
+            row['rip-value-hex-32'] = i.hex_32
+            row['rip-value-hex-64'] = i.hex_64
+            row['rip-value-float'] = i.float
+            row['rip-value-double'] = i.double
+            print row['rip-value-signed-8']
+            print row['rip-value-unsigned-8']
+            print row['rip-value-hex-8']
         if i.internal_jump: 
             row['internal-jump'] = True
             row['jump-address'] = hex(i.jump_address)

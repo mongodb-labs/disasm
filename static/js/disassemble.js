@@ -84,6 +84,90 @@ $(function() {
                 ripCallback(key, opt, '.rip-value-hex');
               }
             },
+            value_signed_8: {
+              name: "8-bit Signed Integer",
+              callback: function(key, opt) {
+                ripCallback(key, opt, '.rip-value-signed-8');
+              }
+            },
+            value_signed_16: {
+              name: "16-bit Signed Integer",
+              callback: function(key, opt) {
+                ripCallback(key, opt, '.rip-value-signed-16');
+              }
+            },
+            value_signed_32: {
+              name: "32-bit Signed Integer",
+              callback: function(key, opt) {
+                ripCallback(key, opt, '.rip-value-signed-32');
+              }
+            },
+            value_signed_64: {
+              name: "64-bit Signed Integer",
+              callback: function(key, opt) {
+                ripCallback(key, opt, '.rip-value-signed-64');
+              }
+            },
+            value_unsigned_8: {
+              name: "8-bit Unsigned Integer",
+              callback: function(key, opt) {
+                ripCallback(key, opt, '.rip-value-unsigned-8');
+              }
+            },
+            value_unsigned_16: {
+              name: "16-bit Unsigned Integer",
+              callback: function(key, opt) {
+                ripCallback(key, opt, '.rip-value-unsigned-16');
+              }
+            },
+            value_unsigned_32: {
+              name: "32-bit Unsigned Integer",
+              callback: function(key, opt) {
+                ripCallback(key, opt, '.rip-value-unsigned-32');
+              }
+            },
+            value_unsigned_64: {
+              name: "64-bit Unsigned Integer",
+              callback: function(key, opt) {
+                ripCallback(key, opt, '.rip-value-unsigned-64');
+              }
+            },
+            value_hex_8: {
+              name: "8-bit Hex Integer",
+              callback: function(key, opt) {
+                ripCallback(key, opt, '.rip-value-hex-8');
+              }
+            },
+            value_hex_16: {
+              name: "16-bit Hex Integer",
+              callback: function(key, opt) {
+                ripCallback(key, opt, '.rip-value-hex-16');
+              }
+            },
+            value_hex_32: {
+              name: "32-bit Hex Integer",
+              callback: function(key, opt) {
+                ripCallback(key, opt, '.rip-value-hex-32');
+              }
+            },
+            value_hex_64: {
+              name: "64-bit Hex Integer",
+              callback: function(key, opt) {
+                ripCallback(key, opt, '.rip-value-hex-64');
+              }
+            },
+            value_float: {
+              name: "Single-Precision Floating Point",
+              callback: function(key, opt) {
+                ripCallback(key, opt, '.rip-value-float');
+              }
+            },
+            value_double: {
+              name: "Double-Precision Floating Point",
+              callback: function(key, opt) {
+                ripCallback(key, opt, '.rip-value-double');
+              }
+            },
             cstring: {
               name: "Referenced Value (cString)",
               callback: function(key, opt) {
@@ -187,6 +271,20 @@ function get_function_assembly() {
         replacementStr += '<span class="rip-resolved" hidden>' + i['rip-resolved'] + '</span>';
         replacementStr += '<span class="rip-value-ascii" hidden>"' + i['rip-value-ascii'] + '"</span>';
         replacementStr += '<span class="rip-value-hex" hidden>' + i['rip-value-hex'] + '</span>';
+        replacementStr += '<span class="rip-value-signed-8" hidden>' + i['rip-value-signed-8'] + '</span>';
+        replacementStr += '<span class="rip-value-signed-16" hidden>' + i['rip-value-signed-16'] + '</span>';
+        replacementStr += '<span class="rip-value-signed-32" hidden>' + i['rip-value-signed-32'] + '</span>';
+        replacementStr += '<span class="rip-value-signed-64" hidden>' + i['rip-value-signed-64'] + '</span>';
+        replacementStr += '<span class="rip-value-unsigned-8" hidden>' + i['rip-value-unsigned-8'] + '</span>';
+        replacementStr += '<span class="rip-value-unsigned-16" hidden>' + i['rip-value-unsigned-16'] + '</span>';
+        replacementStr += '<span class="rip-value-unsigned-32" hidden>' + i['rip-value-unsigned-32'] + '</span>';
+        replacementStr += '<span class="rip-value-unsigned-64" hidden>' + i['rip-value-unsigned-64'] + '</span>';
+        replacementStr += '<span class="rip-value-hex-8" hidden>' + i['rip-value-hex-8'] + '</span>';
+        replacementStr += '<span class="rip-value-hex-16" hidden>' + i['rip-value-hex-16'] + '</span>';
+        replacementStr += '<span class="rip-value-hex-32" hidden>' + i['rip-value-hex-32'] + '</span>';
+        replacementStr += '<span class="rip-value-hex-64" hidden>' + i['rip-value-hex-64'] + '</span>';
+        replacementStr += '<span class="rip-value-float" hidden>' + i['rip-value-float'] + '</span>';
+        replacementStr += '<span class="rip-value-double" hidden>' + i['rip-value-double'] + '</span>';
         replacementStr += '<span class="rip-value-cstring" hidden></span>';
         replacementStr += ']</span>';
         i.op_str = i.op_str.replace(/\[.*\]/, replacementStr);
