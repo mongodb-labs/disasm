@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
 from elftools.dwarf.descriptions import describe_form_class
@@ -293,17 +294,20 @@ class ElfExecutable(Executable):
         
         prevstate = None
         res = (None, None)
-        # get last (aka most narrow) line entry program
+        minDiff = sys.maxint
+        # get the most narrow line entry program
         for entry in lineprog.get_entries():
             if entry.state is None or entry.state.end_sequence:
                 continue
             # prev and cur states encompass the address we're looking for
-            if prevstate and prevstate.address <= address < entry.state.address:
+            if (prevstate and prevstate.address <= address < entry.state.address 
+                and address - prevstate.address < minDiff):
                 file_entry = lineprog['file_entry'][prevstate.file - 1]
                 filepath = (lineprog["include_directory"][file_entry.dir_index - 1] 
                     + "/" 
                     + file_entry.name)
                 res = (filepath, prevstate.line)
+                minDiff = address - prevstate.address
             prevstate = entry.state
         return res
 
@@ -335,6 +339,7 @@ class ElfExecutable(Executable):
         # put in jsonifiable form of [{filepath, line, function name}, ...]
         # function info is offset by one entry (because we want enclosing function)
         # we're not using dwarfinfo.line_program_for_CU because it re-parses all DIEs
+        
         if 'DW_AT_stmt_list' in top_DIE.attributes:
             lineprog = self.dwarff._parse_line_program_at_offset(
                 top_DIE.attributes['DW_AT_stmt_list'].value, CU.structs)
