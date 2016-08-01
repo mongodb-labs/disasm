@@ -260,7 +260,8 @@ def get_data_as_cstring():
     return executable.ex.get_data_as_cstring(file_offset)
 
 # debug=True auto reloads whenever server code changes
-app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
 
 
 

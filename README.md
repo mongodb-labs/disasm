@@ -9,7 +9,7 @@ There is optional IACA integration; to use it, you must first download IACA from
 
 To run:
 ```python
-python app.py
+gunicorn app:app
 ```
 
 ### Known Bugs

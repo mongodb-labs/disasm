@@ -6,6 +6,7 @@ Demangler==0.1
 enum34==1.1.6
 Flask==0.11.1
 Flask-Assets==0.11
+gunicorn==19.6.0
 hurry.filesize==0.9
 itsdangerous==0.24
 Jinja2==2.8
