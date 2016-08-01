@@ -351,14 +351,6 @@ function get_function_assembly() {
         } 
       }
 
-
-      if (!i['short_description']) {
-        i['short_description'] = "No description available";
-      }
-      if (!i['docfile']) {
-        i['doctile'] = '404.html';
-      }
-
       // Process etc.
 
       return i;

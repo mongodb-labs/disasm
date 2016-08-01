@@ -85,9 +85,6 @@ def disasm(bytes, offset=0):
                     instr.signed_8 = unpack('b', val_8)[0]
                     instr.unsigned_8 = unpack('B', val_8)[0]
                     instr.hex_8 = hex(instr.unsigned_8)
-                    print instr.signed_8
-                    print instr.unsigned_8
-                    print instr.hex_8
 
                     # Read in and unpack the first two bytes at the offset
                     val_16 = executable.ex.get_bytes(instr.rip_resolved, 2)
@@ -173,9 +170,9 @@ def disasm(bytes, offset=0):
             instr.regs_read_implicit = [instr.reg_name(reg) for reg in instr.regs_read]
             # Add in documentation meta-data
             instr.short_desc, instr.docfile = get_documentation(instr)
-            if instr.docfile or instr.short_desc is None:
+            if instr.docfile is None or instr.short_desc is None:
                 with open('missing_docs.log', 'a+') as f:
-                    f.write('[{}] : {}\n'.format(str(datetime.datetime.now()), instr.mnemonic))
+                    f.write('[{}] : {} : {} : {}\n'.format(str(datetime.datetime.now()), instr.mnemonic, instr.docfile, instr.short_desc))
         return disassembled
 
     except CsError as e:
@@ -192,9 +189,7 @@ def jsonify_capstone(data):
             "mnemonic": i.mnemonic,
             "op_str": i.op_str,
             "size": i.size,
-            "docfile": INSTR_REF_DIRECTORY + i.docfile,
-            "short_description": i.short_desc,
-            "bytes": hexlify(i.bytes)
+            "bytes": hexlify(i.bytes),
         }
 
         # If this instruction contains a rip-relative address, then assign the relevant data
@@ -218,9 +213,6 @@ def jsonify_capstone(data):
             row['rip-value-hex-64'] = i.hex_64
             row['rip-value-float'] = i.float
             row['rip-value-double'] = i.double
-            print row['rip-value-signed-8']
-            print row['rip-value-unsigned-8']
-            print row['rip-value-hex-8']
         if i.internal_jump: 
             row['internal-jump'] = True
             row['jump-address'] = hex(i.jump_address)
@@ -238,6 +230,10 @@ def jsonify_capstone(data):
             row['nop'] = True
         if i.return_type:
             row['return'] = True
+        if i.short_desc:
+            row['short_description'] = i.short_desc
+        if i.docfile:
+            row['docfile'] = INSTR_REF_DIRECTORY + i.docfile
 
         # reading/writing registers
         row['ptr'] = i.ptr
