@@ -44,10 +44,16 @@ rivets.bind($("#function-analysis"),
 
 // Update the information in the analysis menu based on the currently selected instruction
 function updateAnalysis() {
-  get_stack_info(parseInt(assembly.active_instruction), assembly.filename);
-  var selectedInstruction = document.getElementById(assembly.active_instruction);
-  var model = assembly.contents[selectedInstruction.getAttribute('data-index')];
-  showFullDescription(model.docfile);
+  var active_instr = assembly.active_instruction;
+  setTimeout(function() {
+    if (active_instr != assembly.active_instruction) {
+      return;
+    }
+    get_stack_info(parseInt(assembly.active_instruction), assembly.filename);
+    var selectedInstruction = document.getElementById(assembly.active_instruction);
+    var model = assembly.contents[selectedInstruction.getAttribute('data-index')];
+    showFullDescription(model.docfile);
+  }, 100);
 }
 
 // Update the stack information in the Stack Info tab of the analysis menu
