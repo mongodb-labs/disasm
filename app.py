@@ -20,9 +20,8 @@ import hurry.filesize
 
 import disassemble as disasm
 import iaca
-from function_store import storeFunctions, getFunctions, getFunctionsBySubstring, hasStoredFunctions
-from executable import *
-import executable
+from function_store import storeFunctions, getFunctionsBySubstring, hasStoredFunctions
+from executable import ElfExecutable, MachoExecutable, Executable
 from disassemble import disasm, jsonify_capstone
 from binascii import unhexlify
 
@@ -93,6 +92,9 @@ js_global = Bundle(
     output='generated/global_all.js')
 assets.register('js_global', js_global)
 
+## the (global) executable list we're looking at
+executables = {}
+
 # home and upload
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -120,7 +122,7 @@ def loadExec(filename):
     path = app.config['UPLOAD_DIR'] + filename
     f = open(path, 'rb')
     a = get_executable(f)
-    executable.ex = a
+    executables[filename] = a
     print "Done loading the executable"
 
 ## determine which kind of executable
@@ -133,10 +135,10 @@ def get_executable(f):
         raise Exception("Couldn't find executable format")
 
 def load_functions(filename):
-    if not executable.ex:
+    if not executables.get(filename):
         loadExec(filename)
-    functions = executable.ex.get_all_functions()
-    storeFunctions(functions)
+    functions = executables.get(filename).get_all_functions()
+    storeFunctions(filename, functions)
 
 @app.route('/functions', methods=['GET'])
 def functions():
@@ -160,39 +162,33 @@ def disasm_function():
 def get_function_assembly():
     # get sequence of bytes and offset, and pass into disasm
     file_offset = int(request.args['file_offset'])
-    if not executable.ex:
-        loadExec(request.args['filename'])
-    input_bytes = executable.ex.get_bytes(file_offset, int(request.args['size']))
+    filename = request.args['filename']
+    if not executables.get(filename):
+        loadExec(filename)
+    input_bytes = executables.get(filename).get_bytes(file_offset, int(request.args['size']))
     
     # we want to display the addr in memory where the function is located
     memory_addr = int(request.args['st_value'])
-    data = disasm(input_bytes, memory_addr)
+    data = disasm(executables.get(filename), input_bytes, memory_addr)
     return jsonify(jsonify_capstone(data))
-
-@app.route('/value_at_addr', methods=['GET'])
-def value_at_addr():
-    return executable.ex.get_bytes(int(request.args['addr'], 16), request.args['len'])
 
 # expects {"filename": "", "substring": "", "start_index": <int>, "num_functions": <int>, "case_sensitive": <bool>}
 @app.route('/get_substring_matches', methods=['GET'])
 def get_substring_matches():
     substring = request.args['substring']
-    if not hasStoredFunctions():
-        load_functions(request.args['filename'])
-    functions = getFunctionsBySubstring(substring, int(request.args['start_index']), 
+    filename = request.args['filename']
+    if not hasStoredFunctions(filename):
+        load_functions(filename)
+    functions = getFunctionsBySubstring(filename, substring, int(request.args['start_index']), 
         int(request.args['num_functions']), request.args['case_sensitive'] == 'True')
     return jsonify(functions)
 
-@app.route('/get_line_info', methods=["GET"])
-def get_line_info():
-    begin = int(request.args['begin'])
-    size = int(request.args['size'])
-    return jsonify(executable.ex.get_function_line_info(begin, size))
-
+# expects "filename", "address"
 @app.route('/get_die_info', methods=["GET"])
 def get_DIE_info():
     address = int(request.args['address'])
-    return jsonify(executable.ex.get_addr_stack_info(address))
+    filename = request.args['filename']
+    return jsonify(executables.get(filename).get_addr_stack_info(address))
 
 # expects {"src_path": "", "lineno": ""}
 @app.route('/source_code_from_path', methods=["POST"])
@@ -248,16 +244,19 @@ def get_iaca():
 
     return jsonify({'error': 'undefined error'})
 
+# expects "address", "filename"
 @app.route('/get_reg_contents', methods=["GET"])
 def get_reg_contents():
     address = int(request.args['address'])
-    return jsonify(executable.ex.get_function_reg_contents(address))
+    filename = request.args['filename']
+    return jsonify(executables.get(filename).get_function_reg_contents(address))
 
-# expects {"file_offset": <int>}
+# expects {"file_offset": <int>, "filename": <str>}
 @app.route('/get_data_as_cstring', methods=["GET"])
 def get_data_as_cstring():
     file_offset = int(request.args['file_offset'])
-    return executable.ex.get_data_as_cstring(file_offset)
+    filename = request.args['filename']
+    return executables.get(filename).get_data_as_cstring(file_offset)
 
 # debug=True auto reloads whenever server code changes
 if __name__ == '__main__':

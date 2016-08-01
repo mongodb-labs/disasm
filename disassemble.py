@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from capstone import Cs, CsError, CS_ARCH_X86, CS_MODE_64, x86, CS_OPT_SYNTAX_ATT
-import executable
 from demangler import demangle
 from os import listdir
 from os.path import isfile, join
@@ -27,7 +26,7 @@ INSTR_REF_DIRECTORY = 'static/inst_ref/'
 
 # given a sequence of bytes and an optional offset within the file (for display
 # purposes) return assembly for those bytes
-def disasm(bytes, offset=0):
+def disasm(exe, bytes, offset=0):
     print "offset %i" % offset
     try:
         md = Cs(CS_ARCH_X86, CS_MODE_64)
@@ -50,11 +49,11 @@ def disasm(bytes, offset=0):
                         instr.internal_jump = True
                         instr.jump_address = dest_addr
                     else:
-                        symbol, field_name = executable.ex.get_symbol_by_addr(
+                        symbol, field_name = exe.get_symbol_by_addr(
                             dest_addr, 
                             instr.address)
                         if symbol:
-                            text_sect = executable.ex.elff.get_section_by_name('.text')
+                            text_sect = exe.elff.get_section_by_name('.text')
                             sect_addr = text_sect['sh_addr']
                             sect_offset = text_sect['sh_offset']
                             
@@ -81,45 +80,45 @@ def disasm(bytes, offset=0):
                     instr.rip_resolved = disassembled[i+1].address + instr.rip_offset
 
                     # Read in and unpack the first byte at the offset
-                    val_8 = executable.ex.get_bytes(instr.rip_resolved, 1)
+                    val_8 = exe.get_bytes(instr.rip_resolved, 1)
                     instr.signed_8 = unpack('b', val_8)[0]
                     instr.unsigned_8 = unpack('B', val_8)[0]
                     instr.hex_8 = hex(instr.unsigned_8)
 
                     # Read in and unpack the first two bytes at the offset
-                    val_16 = executable.ex.get_bytes(instr.rip_resolved, 2)
+                    val_16 = exe.get_bytes(instr.rip_resolved, 2)
                     instr.signed_16 = unpack('h', val_16)[0]
                     instr.unsigned_16 = unpack('H', val_16)[0]
                     instr.hex_16 = hex(instr.unsigned_16)
 
                     # Read in and unpack the first four bytes at the offset
-                    val_32 = executable.ex.get_bytes(instr.rip_resolved, 4)
+                    val_32 = exe.get_bytes(instr.rip_resolved, 4)
                     instr.signed_32 = unpack('i', val_32)[0]
                     instr.unsigned_32 = unpack('I', val_32)[0]
                     instr.hex_32 = hex(instr.unsigned_32)
                     instr.float = unpack('f', val_32)[0]
 
                     # Read in and unpack the first eight bytes at the offset
-                    val_64 = executable.ex.get_bytes(instr.rip_resolved, 8)
+                    val_64 = exe.get_bytes(instr.rip_resolved, 8)
                     instr.signed_64 = unpack('q', val_64)[0]
                     instr.unsigned_64 = unpack('Q', val_64)[0]
                     instr.hex_64 = hex(instr.unsigned_64)
                     instr.double = unpack('d', val_64)[0]
 
-                    symbol, field_name = executable.ex.get_symbol_by_addr(
+                    symbol, field_name = exe.get_symbol_by_addr(
                         instr.rip_resolved, 
                         instr.address,
                         get_sub_symbol=True)
                     if symbol:
                         instr.comment = demangle(symbol.name)
 
-                        # field_name = executable.ex.get_member_name(
+                        # field_name = exe.get_member_name(
                         #     symbol.name.split(':')[-1],
                         #     instr.address,
                         #     isntr.rip_resolved - symbol['st_value'])
                         if field_name:
                             instr.comment += '.' + field_name
-                    bytes = executable.ex.get_bytes(instr.rip_resolved, op.size)
+                    bytes = exe.get_bytes(instr.rip_resolved, op.size)
                     instr.rip_value_hex = ""
                     space = ""
                     for char in bytes:

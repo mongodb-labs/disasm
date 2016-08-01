@@ -22,27 +22,18 @@ import cProfile
 from datetime import datetime
 import sys
 
-subStringIndex = {}
-functionsList = None
+functionsList = {}
 
 start = None
 
-def storeFunctions(functions):
+def storeFunctions(filename, functions):
     # Store the list of functions in a global list.
-    #import pdb; pdb.set_trace()
     global functionsList
-    functionsList = functions
+    functionsList[filename] = functions
 
-def hasStoredFunctions():
+def hasStoredFunctions(filename):
     global functionsList
-    return functionsList is not None
-
-def getFunctions(start_index, num_functions):
-    global functionsList
-    if functionsList:
-        return functionsList[start_index:start_index+num_functions]
-    else:
-        return None
+    return functionsList.get(filename) is not None
 
 # This takes far too long, and there's not enough RAM in the room to complete this operation.
 def indexSubstrings(functions):
@@ -66,53 +57,18 @@ class FunctionMatch():
     def __lt__(self, other):
         return self.score > other.score
 
-def getFunctionsBySubstring(substring, start_index, num_functions, case_sensitive):
+def getFunctionsBySubstring(filename, substring, start_index, num_functions, case_sensitive):
     functions = []
-    # ALGO = "RE"
-    # if ALGO == "CMDT":
-    #     for function in functionsList:
-    #         # print "Scanning haystack '", function['name'], "'"
-    #         haystack = filterName(function['name'])
-    #         # print "Scanning haystack '", haystack, "'"
-    #         memo = [None]*(len(substring) * len(function['name']))
-    #         rightmost_match = get_rightmost_match(substring, haystack, case_sensitive)
-    #         if rightmost_match is None:
-    #             continue
-    #         score = match(substring, 0, function["name"], 0, 0, 0.0, True, memo, rightmost_match)
-    #         heapq.heappush(functions, FunctionMatch(function['name'], score))
-    # elif ALGO == "RE":
     if case_sensitive:
         prog = re.compile(substring)
     else:
         prog = re.compile(substring, re.IGNORECASE)
-    for function in functionsList:
-        # haystack = filterName(function['name'])
+    for function in functionsList[filename]:
         haystack = function['name']
         if prog.search(haystack):
             functions.append(function)
             if len(functions) == start_index + num_functions:
                 break
-    # elif ALGO == "OG":
-    #     if subStringIndex.has_key(substring):
-    #         return subStringIndex[substring][start_index:start_index+num_functions]
-    #     else:
-    #         # pattern = ".*"
-    #         # for char in substring:
-    #         #     pattern += char + ".*"
-    #         # # Check every function name to see if it matches the requested pattern
-    #         # prog = re.compile(pattern, flags=re.IGNORECASE)
-    #         if subStringIndex.has_key(substring[:-1]):
-    #             listToIter = subStringIndex[substring[:-1]]
-    #         else:
-    #             listToIter = functionsList
-    #         for function in listToIter:
-    #             # if prog.match(function['name']):
-    #             if matchesSubstring(function['name'], substring, case_sensitive):
-    #                 functions.append(function)
-    #         subStringIndex[substring] = functions
-    # else:
-    #     raise "Not a valid search algo"
-    # print len(functions)
     return functions[start_index:start_index+num_functions]
 
 def filterName(funcHeader):
@@ -141,8 +97,6 @@ def get_rightmost_match(needle, haystack, case_sensitive):
             if c == d:
                 rightmost_match[needle_index] = i
                 needle_index -= 1
-    # if needle in haystack:
-    #     import pdb; pdb.set_trace()
     if needle_index != -1:
         return None
     else:
@@ -191,56 +145,7 @@ def match(needle, needle_start, haystack, haystack_start, last_index, score, cas
                 last_index = j
                 haystack_start = j + 1
                 score += char_score
-                # memo[j*len(needle)+i] = max(seen_score,score)
                 memo[j*len(needle)+i] = max(seen_score,score)
                 if i == len(needle) - 1:
-                    # import pdb; pdb.set_trace()
                     return memo[j*len(needle)+i]
-    # memo[len(haystack)*len(needle)+len(needle)] = score
-    # return memo[j*len(needle)+i]
-    # import pdb; pdb.set_trace()
     return score
-
-# @profile
-def calc_char_score(haystack, haystack_index, last_index, max_char_score):
-    return 0
-    # distance = haystack_index - last_index
-    # if distance > 1:
-    #     prev = haystack[haystack_index-1]
-    #     curr = haystack[haystack_index]
-    #     if prev == '/':
-    #         factor = .9
-    #     elif prev == '-' or prev == '_' or prev == ' ' or (prev >= '0' and prev <= '9'):
-    #         factor = .8
-    #     elif prev >= 'a' and prev <= 'z' and curr >= 'A' and curr <= 'Z':
-    #         factor = .8
-    #     elif prev == '.':
-    #         factor = .7
-    #     else:
-    #         factor = (1.0/distance) * .75
-    #     return max_char_score * factor
-    # else:
-    #     return max_char_score
-
-def test(argv):
-    global start
-    start = datetime.now()
-    with open('functions_list.txt', 'r') as f:
-        global functionsList
-        functionsList = pickle.load(f)
-    # matches = getFunctionsBySubstring("vector.*push", 0, 20, False)
-    matches = getFunctionsBySubstring("e", 100, 20, False)
-    # for matchItem in matches:
-    #     print "%f : %s" % (matchItem.score, matchItem.name)
-
-    # functionsList = ["lolNiceMeme", "notInCatEars", "insdiascde"]    
-    # needle = "nice"
-    # for func in functionsList:
-    #     rightmost_match = get_rightmost_match(needle, func, False)
-    #     if rightmost_match is None:
-    #         continue
-    #     score = match(needle, 0, func, 0, 0, 0.0, False, [None]*(len(needle) * len(func)), rightmost_match)
-    #     print "%f : %s" % (score, func)
-
-if __name__ == '__main__':
-    test(sys.argv[1:])

@@ -44,18 +44,18 @@ rivets.bind($("#function-analysis"),
 
 // Update the information in the analysis menu based on the currently selected instruction
 function updateAnalysis() {
-  get_stack_info(parseInt(assembly.active_instruction));
+  get_stack_info(parseInt(assembly.active_instruction), assembly.filename);
   var selectedInstruction = document.getElementById(assembly.active_instruction);
   var model = assembly.contents[selectedInstruction.getAttribute('data-index')];
   showFullDescription(model.docfile);
 }
 
 // Update the stack information in the Stack Info tab of the analysis menu
-function get_stack_info(addr) {
+function get_stack_info(addr, filename) {
   // info from DIE
   $.ajax({
     type: "GET",
-    url: URL_DIE_INFO + "?address=" + addr
+    url: URL_DIE_INFO + "?address=" + addr + "&filename=" + filename
   })
   .done(function(data) {
     if (data == null || data[0] == null) {

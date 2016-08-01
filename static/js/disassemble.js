@@ -27,6 +27,7 @@ var WRITES_REG = 1;
 var assembly = {
   contents : [], 
   func_name: "",
+  filename: $("#function-metadata").attr('data-filename'),
   active_instruction: "",
   instructions_loading: false,
   in_iaca: false,
@@ -176,7 +177,10 @@ $(function() {
                 var cString;
                 $.get(
                   URL_GET_CSTRING, 
-                  {file_offset: parseInt(opt.$trigger.context.getAttribute('value'))}
+                  {
+                    file_offset: parseInt(opt.$trigger.context.getAttribute('value')),
+                    filename: assembly.filename
+                  }
                 )
                 .done(function(data) {
                   cString = data;
@@ -240,8 +244,8 @@ function get_function_assembly() {
   var $metadata = $("#function-metadata");
   var st_value = $metadata.attr('data-st-value');
   request_params = {
-    filename: $metadata.attr('data-filename'),
-    st_value: $metadata.attr('data-st-value'),
+    filename: assembly.filename,
+    st_value: st_value,
     file_offset: $metadata.attr('data-file-offset'),
     size: $metadata.attr('data-size')
   }
@@ -295,7 +299,7 @@ function get_function_assembly() {
       else if (i['external-jump']) {
         var addr = i.op_str
         i.op_str = '<a href="disasm_function?';
-        i.op_str += 'filename=' + $metadata.attr('data-filename');
+        i.op_str += 'filename=' + assembly.filename;
         i.op_str += '&st_value=' + i['jump-function-address'];
         i.op_str += '&file_offset=' + i['jump-function-offset'];
         i.op_str += '&size=' + i['jump-function-size'];
@@ -396,7 +400,7 @@ function get_function_assembly() {
     // load register content info
     $.ajax({
       type: "GET",
-      url: URL_REG_CONTENTS + "?address=" + st_value
+      url: URL_REG_CONTENTS + "?address=" + st_value + "&filename=" + assembly.filename
     }).done(function(data){
       handleRegisterContent(data);
       console.log(data)
@@ -405,7 +409,7 @@ function get_function_assembly() {
     // preload DIE info from server
     $.ajax({
       type: "GET",
-      url: URL_DIE_INFO + "?address=" + st_value
+      url: URL_DIE_INFO + "?address=" + st_value + "&filename=" + assembly.filename
     });
 
   })

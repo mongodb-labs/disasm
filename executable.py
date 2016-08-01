@@ -22,9 +22,6 @@ from bisect import bisect_right
 from symbol_lookup import get_sub_symbol
 from dwarf_expr import describe_DWARF_expr, set_global_machine_arch, OpPiece
 
-## the (global) executable we're looking at
-ex = None
-
 """
 Base class for executables
 """
