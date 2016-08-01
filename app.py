@@ -253,6 +253,12 @@ def get_reg_contents():
     address = int(request.args['address'])
     return jsonify(executable.ex.get_function_reg_contents(address))
 
+# expects {"file_offset": <int>}
+@app.route('/get_data_as_cstring', methods=["GET"])
+def get_data_as_cstring():
+    file_offset = int(request.args['file_offset'])
+    return executable.ex.get_data_as_cstring(file_offset)
+
 # debug=True auto reloads whenever server code changes
 app.run(debug=True)
 

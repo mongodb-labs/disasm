@@ -18,6 +18,7 @@
 var URL_DIE_INFO = "/get_die_info";
 var URL_FUNCTION_ASSEMBLY = '/get_function_assembly';
 var URL_REG_CONTENTS = '/get_reg_contents';
+var URL_GET_CSTRING = '/get_data_as_cstring';
 
 // enums for register tracking/highlighting
 var READS_REG = 0;
@@ -75,13 +76,35 @@ $(function() {
                 name: "Referenced Value (ASCII)",
                 callback: function(key, opt) {
                   ripCallback(key, opt, '.rip-value-ascii');
-
                 }
             },
             value_hex: {
-              name: "References Value (Hex)",
+              name: "Referenced Value (Hex)",
               callback: function(key, opt) {
                 ripCallback(key, opt, '.rip-value-hex');
+              }
+            },
+            cstring: {
+              name: "Referenced Value (cString)",
+              callback: function(key, opt) {
+                $(opt.$trigger.context).find('rip-value-cstring').html("Loading...");
+                ripCallback(key, opt, '.rip-value-cstring');
+                var cString;
+                $.get(
+                  URL_GET_CSTRING, 
+                  {file_offset: parseInt(opt.$trigger.context.getAttribute('value'))}
+                )
+                .done(function(data) {
+                  cString = data;
+                })
+                .fail(function() {
+                  cString = "Unable to get cString from this value";
+                  console.log("Failed");
+                })
+                .always(function() {
+                  console.log(cString);
+                  $(opt.$trigger.context).find('.rip-value-cstring')[0].innerHTML = cString;
+                });
               }
             },
             symbol: {
@@ -159,11 +182,12 @@ function get_function_assembly() {
       var _op_str = i.op_str;
       if (i['rip']) {
         var replacementStr =  "";
-        replacementStr += '<span class="rip">[';
+        replacementStr += '<span class="rip" value="' + i['rip-resolved'] + '">[';
         replacementStr += '<span class="rip-default">rip + ' + i['rip-offset'] + '</span>';
         replacementStr += '<span class="rip-resolved" hidden>' + i['rip-resolved'] + '</span>';
         replacementStr += '<span class="rip-value-ascii" hidden>"' + i['rip-value-ascii'] + '"</span>';
         replacementStr += '<span class="rip-value-hex" hidden>' + i['rip-value-hex'] + '</span>';
+        replacementStr += '<span class="rip-value-cstring" hidden></span>';
         replacementStr += ']</span>';
         i.op_str = i.op_str.replace(/\[.*\]/, replacementStr);
       }

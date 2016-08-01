@@ -69,14 +69,8 @@ $(function() {
             unsignedDec64: {
                 name: "64-bit Unsigned Decimal"
             },
-            unsignedDec128: {
-                name: "128-bit Unsigned Decimal"
-            },
             twosCompDec64: {
                 name: "64-bit Signed 2's Complement Decimal"
-            },
-            twosCompDec128: {
-                name: "128-bit Signed 2's Complement Decimal"
             },
             binary: {
                 name: "Binary"
@@ -115,14 +109,8 @@ function getConvertedVal(startVal, base, key) {
         case "unsignedDec64":
             binString = unsignedDecToBin(startVal, 64);
             break;
-        case "unsignedDec128":
-            binString = unsignedDecToBin(startVal, 128);
-            break;
         case "twosCompDec64":
             binString = signedDecToBin(startVal, 64);
-            break;
-        case "twosCompDec128":
-            binString = signedDecToBin(startVal, 128);
             break;
         case "binary":
             binString = startVal;
@@ -142,14 +130,8 @@ function getConvertedVal(startVal, base, key) {
         case "unsignedDec64":
             newVal = binToUnsignedDec(binString, 64);
             break;
-        case "unsignedDec128":
-            newVal = binToUnsignedDec(binString, 128);
-            break;
         case "twosCompDec64":
             newVal = binToSignedDec(binString, 64);
-            break;
-        case "twosCompDec128":
-            newVal = binToSignedDec(binString, 128);
             break;
         case "binary":
             newVal = binString;

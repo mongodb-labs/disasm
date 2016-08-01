@@ -64,6 +64,8 @@ class Executable(object):
     def get_symbol_by_addr(self, addr):
         self.raise_not_implemented()
 
+    def get_data_as_cstring(self, file_offset):
+        self.raise_not_implemented()
 
 """
 ELF executable
@@ -422,6 +424,21 @@ class ElfExecutable(Executable):
             symbol_name,
             offset,
             instr_addr)
+
+    def get_data_as_cstring(self, file_offset):
+        cstring = ""
+        index = 0
+        curr_byte = self.get_bytes(file_offset, 1)
+        while curr_byte != '\x00':
+            cstring += curr_byte
+            index += 1
+            if index > 128:
+                break
+            curr_byte = self.get_bytes(file_offset + index, 1)
+        print repr(cstring)
+        print index
+        return repr(cstring)
+
 
 """
 Mach-o executable
