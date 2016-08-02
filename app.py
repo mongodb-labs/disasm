@@ -17,6 +17,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, g
 from flask_assets import Environment, Bundle
 from werkzeug.utils import secure_filename
 import hurry.filesize
+import argparse
 
 import disassemble as disasm
 import iaca
@@ -24,6 +25,9 @@ from function_store import storeFunctions, getFunctionsBySubstring, hasStoredFun
 from executable import ElfExecutable, MachoExecutable, Executable
 from disassemble import disasm, jsonify_capstone
 from binascii import unhexlify
+
+FILE_LIST = 'file_list.json'
+METADATA = '.metadata'
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -100,27 +104,96 @@ executables = {}
 def index():
     if not os.path.exists(app.config['UPLOAD_DIR']):
         os.makedirs(app.config['UPLOAD_DIR'])
-    # uploading new file
+    if not os.path.exists(METADATA):
+        os.makedirs(METADATA)
+    # Adding a new file.
     if request.method == 'POST':
         file = request.files['file']
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
-        return redirect(url_for('functions', filename=filename))
+        full_path = os.path.abspath(os.path.join(app.config['UPLOAD_DIR'], filename))
+        # Save the file in the UPLOAD_DIR directory
+        file.save(full_path)
+        with open(FILE_LIST, 'a+') as f:
+            f.seek(0)
+            # Attempt to read the (filename -> filepath) mapping from FILE_LIST
+            try:
+                file_list_data = json.load(f)
+            # If FILE_LIST does not exist, json.load() will raise a ValueError after reading an
+            # empty file.
+            # If FILE_LIST exists but does not contain a valid JSON file, json.load() will raise 
+            # a ValueError.
+            # In either case, we need to start with an empty dictionary.
+            except ValueError:
+                print "Unable to parse JSON from " + FILE_LIST
+                file_list_data = {}
+            file_list_data[filename] = full_path
+            # Store the newly updated list back into the file.
+            f.truncate(0)
+            json.dump(file_list_data, f)
+            return redirect(url_for('functions', filename=filename))
     else:
-        res = {}
-        files = os.listdir(app.config['UPLOAD_DIR'])
-        # display file info
-        for file in files:
-            t = os.path.getmtime(app.config['UPLOAD_DIR'] + file)
-            timestamp = datetime.datetime.fromtimestamp(t)
-            size = os.path.getsize(app.config['UPLOAD_DIR'] + file)
-            res[file] = [hurry.filesize.size(size), timestamp]
-        
-        return render_template("index.jinja.html", files=res)
+        parser = argparse.ArgumentParser()
+        parser.add_argument('files', nargs='*')
+        cmdFileList = parser.parse_args().files
+        fileMap = {}
+        try:
+            fileMap = {os.path.basename(open(filename).name) : getFileMetadata(filename) for filename in cmdFileList}
+        except:
+            for filename in cmdFileList:
+                try:
+                    with open(filename) as f:
+                        fileMap[os.path.basename(f.name)] = getFileMetadata(filename)
+                except:
+                    fileMap[filename] = ["Error!", "Cannot find file!"]
+        existingFileList = getExistingFiles()
+        return render_template("index.jinja.html", files=dict(fileMap, **existingFileList))
+
+def getExistingFiles():
+    res = {}
+    try:
+        with open(FILE_LIST, 'r') as f:
+            files = json.load(f)
+    # If FILE_LIST does not exist, open() will raise a ValueError. 
+    # If FILE_LIST does not contain a valid JSON file, json.load() will raise a 
+    # ValueErrormeaning.
+    # In either case, we need to start with an empty dictionary.
+    except (IOError, ValueError):
+        files = {}
+    # display file info
+    for filename, full_path in files.items():
+        res[filename] = getFileMetadata(full_path)
+    return res
+
+def getFileMetadata(full_path):
+    t = os.path.getmtime(full_path)
+    timestamp = datetime.datetime.fromtimestamp(t)
+    size = os.path.getsize(full_path)
+    return [hurry.filesize.size(size), timestamp]
 
 def loadExec(filename):
-    path = app.config['UPLOAD_DIR'] + filename
-    f = open(path, 'rb')
+    # First try to find filename in FILE_LIST
+    try:
+        with open(FILE_LIST, 'r') as file_list: 
+            file_list_data = json.load(file_list)
+        path = file_list_data.get(filename)
+        if not path:
+            raise LookupError
+        f = open(path, 'rb')
+    # either FILE_LIST does not exist or path does not exist
+    except IOError as e:
+        print e
+    except ValueError:
+        print "Unable to load dict from " + FILE_LIST
+    except LookupError:
+        print "Unable to find " + filename + " in " + FILE_LIST
+    # Next try to find it in the uploads folder
+    try:
+        path = os.path.abspath(os.path.join(app.config['UPLOAD_DIR'] + filename))
+        f = open(path, 'rb')
+    # If the file still cannot be opened, there's nothing we can do, so we panic
+    # This can probably actually be handled a bit cleaner...
+    except IOError:
+        raise LookupError("Cannot find file '{}'".format(filename))
     a = get_executable(f)
     executables[filename] = a
     print "Done loading the executable"

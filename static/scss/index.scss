@@ -48,3 +48,12 @@ h1 {
 	  flex: 1;               /* NEW, Spec - Firefox, Chrome, Opera */
 	}
 }
+
+#error-message {
+	background-color: rgb(179, 0, 0);
+	/* http://howtocenterincss.com/ */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 75px;
+}

@@ -12,13 +12,15 @@
 </head>
 
 <body>
+  <div id="meta-data" hidden data-show-error="{{show_error}}"></div>
+  <div id="error-message" rv-show="show_error"> {{ error_message }} </div>
   <h1>Disassemble</h1>
 	<form id="file-uploader" action="" method="post" enctype="multipart/form-data">
     <p>
       <input id="file_selector" type="file" name="file">
+      <input class="file_submit" name="file_submit" value="upload" type="submit">
       <input name="start_index" value="0" type="hidden">
       <input name="num_functions" value="100" type="hidden">
-      <input id="file_submit" type="submit">
     </p>
 	</form>
 
