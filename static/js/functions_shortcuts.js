@@ -22,22 +22,7 @@ listener.register_many([
         "keys"          : "up",
         "on_keydown"    : function() {
             if (selectedFunction) {
-                var prev = selectedFunction.previousSibling;
-                if (prev && $(prev).hasClass('function')) {
-                    $(selectedFunction).removeClass('selected');
-                    $(prev).addClass('selected');
-                    selectedFunction = prev;
-                }
-
-                // If the selected element is off-screen, scroll s.t. the selected element is at the 
-                // to of the function list.
-                var selectedTop = selectedFunction.getBoundingClientRect().top;
-                var selectedBot = selectedFunction.getBoundingClientRect().bottom;
-                var functionsTop = functionList.getBoundingClientRect().top;
-                var functionsBot = functionList.getBoundingClientRect().bottom;
-                if (selectedTop < functionsTop || selectedBot > functionsBot) {
-                    functionList.scrollTop += selectedTop - functionsTop;
-                }
+                functionsOnUp(functionList);
             }
         }
     },
@@ -45,21 +30,7 @@ listener.register_many([
         "keys"          : "down",
         "on_keydown"    : function() {
             if (selectedFunction) {
-                var next = selectedFunction.nextSibling;
-                if (next && $(next).hasClass('function')) {
-                    $(selectedFunction).removeClass('selected');
-                    $(next).addClass('selected');
-                    selectedFunction = next;
-                }
-                // If the selected element is off-screen, scroll s.t. the selected element is at the 
-                // bottom of the function list.
-                var selectedTop = selectedFunction.getBoundingClientRect().top;
-                var selectedBot = selectedFunction.getBoundingClientRect().bottom;
-                var functionsTop = functionList.getBoundingClientRect().top;
-                var functionsBot = functionList.getBoundingClientRect().bottom;
-                if (selectedBot > functionsBot || selectedTop < functionsTop) {
-                    functionList.scrollTop += selectedBot - functionsBot;
-                }
+                functionsOnDown(functionList);
             }
         }
     },
@@ -73,10 +44,9 @@ listener.register_many([
     },
 ]);
 
-var helpListener = new window.keypress.Listener();
-helpListener.simple_combo('?', function() {
-    console.log("Only when outside the text box");
-})
+
 $('input[type=text]')
-    .bind("focus", function() { helpListener.stop_listening(); })
-    .bind("blur", function() { helpListener.listen(); });
+    .bind("focus", function() { globalListener.stop_listening(); })
+    .bind("blur", function() { globalListener.listen(); });
+
+    

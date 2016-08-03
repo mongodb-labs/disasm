@@ -111,12 +111,6 @@ $heading-bg: rgb(128,203,196);
   	overflow-y: scroll;
   	background-color: white;
 		display: none; // don't display unless ur focused in the input
-	
-		// border-color: lightblue;
-		// border-bottom-style: solid;
-  //   border-left-style: solid;
-  //   border-right-style: solid;
-  //   border-width: 2px;
 
   	// top-left, top-right, bottom-right, bottom-left
     -webkit-border-radius: 10px;
@@ -138,8 +132,12 @@ $heading-bg: rgb(128,203,196);
 		margin-bottom: 10px;
 		@include wrap-text;
 	}
+	$func-bg:rgb(128,222,234);
+	#functions .function.selected {
+		background-color: rgba($func-bg, 0.8);
+	}
 	#functions .function:hover {
-		background-color: rgba(128,222,234, 0.3);
+		background-color: rgba($func-bg, 0.3);
 	}
 }
 

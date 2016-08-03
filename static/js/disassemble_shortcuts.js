@@ -15,9 +15,10 @@
  */
 
 var instructionList = document.getElementById('function-disasm');
+var functionList = document.getElementById('functions');
 
-var listener = new window.keypress.Listener();
-listener.register_many([
+var mainListener = new window.keypress.Listener();
+mainListener.register_many([
     {
         "keys"          : "up",
         "on_keydown"    : function() {
@@ -148,6 +149,34 @@ listener.register_many([
     },
 ]);
 
+var searchListener = new window.keypress.Listener();
+searchListener.register_many([
+    {
+        "keys"          : "up",
+        "on_keydown"    : function() {
+            functionsOnUp(functionList);
+        }
+    },
+    {
+        "keys"          : "down",
+        "on_keydown"    : function() {
+            functionsOnDown(functionList);
+        }
+    },
+    {
+        "keys"          : "enter",
+        "on_keydown"    : function() {
+            window.location = selectedFunction.href;
+        }
+    }, 
+    {
+        "keys"          : "esc",
+        "on_keydown"    : function() {
+            $("#function-name-input").blur();
+        }
+    },
+]);
+
 // http://stackoverflow.com/a/1844577
 var currentHash = window.location.hash;
 var returning = false;
@@ -172,4 +201,17 @@ window.addEventListener("hashchange", function() {
         }
     }
 }, false);
+
+$('#function-name-input')
+    .bind("focus", function() { 
+        globalListener.stop_listening(); 
+        searchListener.listen();
+        mainListener.stop_listening();
+    })
+    .bind("blur", function() { 
+        globalListener.listen(); 
+        searchListener.stop_listening();
+        mainListener.listen();
+    });
+
 

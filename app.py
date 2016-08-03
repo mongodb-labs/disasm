@@ -92,6 +92,7 @@ js_global = Bundle(
     'js/keypress.js',
     'js/rivets.js',
     'js/global_shortcuts.js',
+    'js/functions_shortcut_helpers.js',
     'js/jquery.colorbox-min.js',
     output='generated/global_all.js')
 assets.register('js_global', js_global)
