@@ -142,20 +142,20 @@ def disasm(exe, bytes, offset=0):
                         instr.rip_value_ascii = "under construction..."
                 # Handle explicitly read/written registers
                 if op.type == x86.X86_OP_MEM and op.mem.base != x86.X86_REG_RIP:
-                    ptr = []
+                    ptr = ["", "", ""] # using an array instead of object to guarantee ordering
                     instr.regs_ptr_explicit = []
                     if op.value.mem.base != 0:
                         regname = instr.reg_name(op.value.mem.base)
-                        ptr.append(regname)
+                        ptr[0] = regname
                         instr.regs_ptr_explicit.append(regname)
                     if op.value.mem.index != 0:
                         regname = instr.reg_name(op.value.mem.index)
-                        ptr.append(regname)
+                        ptr[1] = regname
                         instr.regs_ptr_explicit.append(regname)
                     if op.value.mem.disp != 0:
-                        ptr.append(hex(op.value.mem.disp))
+                        ptr[2] = hex(op.value.mem.disp)
 
-                    instr.ptr = " ".join(ptr)
+                    instr.ptr = ptr
                     instr.regs_explicit.append(instr.ptr)
                 elif op.type == x86.X86_OP_REG:
                     instr.regs_explicit.append(instr.reg_name(op.value.reg))

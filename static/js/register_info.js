@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+var URL_OBJECT_MEMBERS = '/get_obj_members'
+
  /*************** For register canonicalization ***************/
 var register_names_all = [
   ['al', 'ah', 'ax', 'eax', 'rax'],
@@ -173,7 +175,17 @@ function clearWriteHighlighting() {
 }
 
 // given register content data, update assembly.contents accordingly
-function handleRegisterContent(data) {
+function handleRegisterContent(data, address) {
+  // check for any object (class type, struct, union) members with known offsets
+  $.ajax({
+    type: "GET",
+    url: URL_OBJECT_MEMBERS + "?address=" + address + "&filename=" + assembly.filename
+  }).done(function(objData) {
+    _handleRegisterContent(data, objData);
+  });
+}
+
+function _handleRegisterContent(data, objData) {
   assembly.contents.forEach(function(instr, index) {
     // filter out duplicates and include canonical names
     var instr_regs = instr['regs_read_explicit'].concat(instr['regs_write_explicit'])
@@ -185,6 +197,7 @@ function handleRegisterContent(data) {
         return arr.indexOf(reg) == pos;
       });
 
+    // loop through the registers in each instruction
     instr_regs.forEach(function(instr_reg) {
       if (data[instr_reg]) {
         data[instr_reg].forEach(function(variable_loc) {
@@ -198,7 +211,7 @@ function handleRegisterContent(data) {
             size = ""
           }
           // is the instruction in the variable's range?
-          var comment_content_base = variable_loc.name + "=" + variable_loc.value + size;
+          var comment_content_base = get_variable_display(instr.ptr, variable_loc, objData) + size;
           if (instr_in_loc && instr.comment_html) {
             var comment_content = "<span class='comment'>, " + comment_content_base + "</span>";
             $("#" + instr.address).find(".comments").append(comment_content);
@@ -214,3 +227,21 @@ function handleRegisterContent(data) {
     });
   });
 }
+
+// get a variable's true name and register (+offset); 
+// use objData to replace offsets with member names
+function get_variable_display(instrPtr, variableLoc, objData) {
+  var varName = variableLoc.name
+  var varLoc = variableLoc.value
+  if (objData[varName] && instrPtr) {
+    var reg = instrPtr[0]
+    var offset = instrPtr[2]
+    if (reg == varLoc && offset != "" && objData[varName][parseInt(offset, 16)]) {
+      var sign = parseInt(offset, 16) > 0 ? "+" : "";
+      return varName + "." + objData[varName][parseInt(offset, 16)] + "=" + varLoc + sign + offset;
+    }
+  }
+  return varName + "=" + varLoc;
+}
+
+

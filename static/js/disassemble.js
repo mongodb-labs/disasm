@@ -402,7 +402,7 @@ function get_function_assembly() {
       type: "GET",
       url: URL_REG_CONTENTS + "?address=" + st_value + "&filename=" + assembly.filename
     }).done(function(data){
-      handleRegisterContent(data);
+      handleRegisterContent(data, st_value);
       console.log(data)
     });
 
@@ -584,6 +584,7 @@ function wrapAllRegisters() {
       if (ops[i].innerText == 'ptr' && !textInHtmlCollection(ops, 'rip')) {
         ops[i].classList.add("reg");
         var reg = assembly.contents[index].ptr;
+        reg = reg.filter(val => val != "").join(" ");
         ops[i].setAttribute('id', reg);
       }
     }

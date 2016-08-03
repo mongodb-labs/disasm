@@ -324,6 +324,14 @@ def get_reg_contents():
     filename = request.args['filename']
     return jsonify(executables.get(filename).get_function_reg_contents(address))
 
+# expects "address", "filename"
+@app.route('/get_obj_members', methods=['GET'])
+def get_obj_members():
+    address = int(request.args['address'])
+    filename = request.args['filename']
+    return jsonify(executables.get(filename).get_obj_members(address))
+
+
 # expects {"file_offset": <int>, "filename": <str>}
 @app.route('/get_data_as_cstring', methods=["GET"])
 def get_data_as_cstring():
@@ -333,7 +341,7 @@ def get_data_as_cstring():
 
 # debug=True auto reloads whenever server code changes
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=8000)
 
 
 

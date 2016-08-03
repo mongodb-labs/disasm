@@ -166,6 +166,48 @@ class ElfExecutable(Executable):
                 return die.attributes["DW_AT_name"].value
         return None
 
+    # given a CU and the offset of the class/struct/union type DIE, get its member DIEs
+    def _get_obj_member_info(self, CU, offset):
+        objAttrs = ["DW_TAG_structure_type", "DW_TAG_union_type", "DW_TAG_class_type"]
+        members = []
+        for die in CU.iter_DIEs():
+            if die.tag in objAttrs and die.offset == offset:
+                for child in die.iter_children():
+                    if child.tag == "DW_TAG_member":
+                        members.append(child)
+        memberInfo = {}
+        for member in members:
+            memberAttrs = member.attributes 
+            if "DW_AT_name" in memberAttrs and "DW_AT_data_member_location" in memberAttrs:
+                memberInfo[memberAttrs["DW_AT_data_member_location"].value] = memberAttrs["DW_AT_name"].value
+        return memberInfo
+
+    def get_obj_members(self, address):
+        top_DIE = self._get_top_DIE(address)
+        if top_DIE == None:
+            return None
+        CU = top_DIE.cu
+
+        # get function (subprogram) DIE
+        parent = None
+        for die in top_DIE.iter_children():
+            if self._addr_in_DIE(die, address) and die.tag == "DW_TAG_subprogram":
+                parent = die
+
+        if parent == None: 
+            return None
+
+        function_children = self._die_variables(parent, [])
+        name2member = {}
+        for die in function_children:
+            name =  self._get_DIE_name(die)
+            while "DW_AT_type" in die.attributes:
+                nextDie = self._parse_DIE_at_offset(die.cu, die.attributes["DW_AT_type"].value)
+                die = nextDie
+                if die.tag == "DW_TAG_class_type":
+                    name2member[name] = self._get_obj_member_info(CU, die.offset)
+        return name2member
+
     # get the dies of the variables "owned" by the given parent
     def _die_variables(self, parent, children=[]):
         for child in parent.iter_children():
@@ -418,7 +460,7 @@ class ElfExecutable(Executable):
             return (None, None)
 
     def get_sub_symbol_by_offset(self, symbol_name, offset, instr_addr):
-        if self. dwarff is None or self.aranges is None:
+        if self.dwarff is None or self.aranges is None:
             return None
         return get_sub_symbol(
             self.dwarff,
