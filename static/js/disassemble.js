@@ -54,6 +54,13 @@ get_function_assembly();
 // Show the stack info by default.
 tabStackInfoClicked();
 
+// show or hide #functions
+$("#function-name-input").focusin(function() {
+  $(".input.row").addClass("focused");
+}).focusout(function() {
+  $(".input.row").removeClass("focused");
+});
+
 /* END INIT */
 
 $(function() {

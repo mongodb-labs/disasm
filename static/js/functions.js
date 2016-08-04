@@ -30,6 +30,7 @@ var URL_DISASM_FUNCTION = "/disasm_function";
 // }
 var functions = {
   contents: [], 
+  functionsLoading: false,
   filename: document.getElementById('functions').getAttribute('data-filename')
 };
 
@@ -39,7 +40,7 @@ var functions_ctrl = {
   removeHoverCollapsable: removeHoverCollapsable
 };
 
-rivets.bind($("#functions"), 
+rivets.bind($("#functions, .functions-loading-icon"), 
   { 
     functions: functions, 
     ctrl: functions_ctrl 
@@ -164,8 +165,9 @@ var prevRequest = "";
 // helper for getting functions/pagination of functions
 function getNextPage(query, curr_index, num_functions) {
     // If the search request has not changed from the last completed search, then don't bother
-    if (query == prevRequest)
-        return;
+    if (query == prevRequest) {
+      return;
+    }
     searchRequest = query;
     setTimeout(function(){
         if (searchRequest !== query) {
@@ -180,6 +182,8 @@ function getNextPage(query, curr_index, num_functions) {
         if (query.toLowerCase() !== query) {
             case_sensitive = true;
         }
+
+        functions.functionsLoading = true;
         $.get('/get_substring_matches', { 
             filename: functions.filename,
             substring: query, 
@@ -196,6 +200,7 @@ function getNextPage(query, curr_index, num_functions) {
             selectedFunction = firstFunc;
 
             prevRequest = query;
+            functions.functionsLoading = false;
         })
         .fail(function() {
             alert("Unable to contact server.");

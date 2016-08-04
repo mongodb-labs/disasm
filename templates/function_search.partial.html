@@ -1,4 +1,10 @@
-<input type="text" placeholder="Search for functions" id="function-name-input"/>
+<div class="row input">
+  <input type="text" placeholder="Search for functions" id="function-name-input" class='ten columns'> 
+  <div class='functions-loading-icon'
+    rv-show="functions.functionsLoading">
+    {% include 'rolling.html' %}
+  </div>
+</div>
 
 {# all functions #}
 <div id='functions' data-filename="{{ filename }}">

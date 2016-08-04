@@ -70,9 +70,10 @@ $heading-bg: rgb(128,203,196);
 	font-size: 14px;
 	position: relative;
 
-  input#function-name-input:focus + #functions {
+	.input.row.focused + #functions {
 		display: block;
 	}
+
 	#functions:hover {
 		display: block;
 	}
@@ -82,6 +83,19 @@ $heading-bg: rgb(128,203,196);
   	z-index: 999;
   	height: 30px;
   }
+
+  #function-search-loading {
+		position: absolute;
+		margin-left: -20px;
+		margin-top: -2px;
+		transform: scale(0.18) !important; // override default in-html value
+		display: inline-block;
+		height: 0;
+		width: 10%;
+	}
+	#function-search-loading > div {
+		background: blanchedalmond !important;
+	}
 
   #functions {
   	.nav-buttons {

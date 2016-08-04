@@ -25,7 +25,20 @@ h2.header {
 
 
 #function-name-input {
-	width: 100%;
+	width: 90%;
+}
+
+#function-search-loading {
+	position: absolute;
+	margin-left: -30px;
+	transform: scale(0.20) !important; // override default in-html value
+	display: inline-block;
+	height: 0;
+	width: 10%;
+}
+
+#function-search-loading > div {
+	background: rgb(253,216,53) !important;
 }
 
 $button-width: 60px;
