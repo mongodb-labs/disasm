@@ -75,6 +75,7 @@ js_disassemble = Bundle(
     'js/functions.js',
     'js/disassembly_analysis.js',
     'js/instruction_events.js',
+    'js/jumps.js',
     'js/number_conversion.js',
     'js/jquery.contextMenu.js',
     'js/jquery.contextMenu.js',
@@ -334,6 +335,27 @@ def get_data_as_cstring():
     file_offset = int(request.args['file_offset'])
     filename = request.args['filename']
     return executables.get(filename).get_data_as_cstring(file_offset)
+
+# expects {"filename":"", "data": [...<all the relevant instructions>...]
+#           "function_start": "", "function_end": "" }
+@app.route('/get_jumptable', methods=["POST"])
+def get_jumptable():
+    filename = request.form["filename"]
+    function_start = int(request.form["function_start"], 16)
+    function_end = int(request.form["function_end"], 16)
+    instrs = json.loads(request.form["data"])
+    if not executables.get(filename):
+        loadExec(filename)
+    exe = executables.get(filename)
+    jumptable = exe.get_jumptable(instrs, function_start, function_end)
+
+    if jumptable == None:
+        return jsonify({})
+    else:
+        switch_reg = exe.get_jumptable_switch_reg(instrs)
+        return jsonify({"switch_reg": switch_reg, "jumptable" : jumptable})
+
+
 
 # debug=True auto reloads whenever server code changes
 if __name__ == '__main__':

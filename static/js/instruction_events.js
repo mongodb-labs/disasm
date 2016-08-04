@@ -53,7 +53,10 @@ function addressClicked(event, model) {
 }
 
 function opStrClicked(event, model) {
-  if (model.i['internal-jump'] && model.i.jumpTo) {
+  if (model.i['jump-table']) {
+    showJumptable();
+  }
+  else if (model.i['internal-jump'] && model.i.jumpTo) {
     internalJump(model.i.jumpTo[0]);
     get_stack_info(parseInt(model.i.jumpTo[0]));
   }

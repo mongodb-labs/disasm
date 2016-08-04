@@ -19,6 +19,7 @@ var URL_DIE_INFO = "/get_die_info";
 var URL_FUNCTION_ASSEMBLY = '/get_function_assembly';
 var URL_REG_CONTENTS = '/get_reg_contents';
 var URL_GET_CSTRING = '/get_data_as_cstring';
+var URL_JUMPTABLE = '/get_jumptable';
 
 // enums for register tracking/highlighting
 var READS_REG = 0;
@@ -436,126 +437,6 @@ function removeFlagsRegs(reg_array) {
   return reg_array;
 }
 
-// display jump arrows
-function handleJumpHighlighting() {
-  // load jump info
-  var reverseJumps = {}
-  for (var i = 0; i < assembly.contents.length; i++) {
-    var line = assembly.contents[i];
-    if (line['internal-jump'] && line['jump-address'] in reverseJumps) {
-      reverseJumps[line['jump-address']].push(line.address)
-    }
-    else if (line['internal-jump'] && !(line['jump-address'] in reverseJumps)) {
-      reverseJumps[line['jump-address']] = [line.address]
-    }
-  }
-
-  // load into assembly.contents
-  assembly.contents = assembly.contents.map(function(line) {
-    if (line['internal-jump']) {
-      line['jumpTo'] = [line['jump-address']]; // arr to future-proof
-    }
-    if (line.address in reverseJumps) {
-      line['jumpFrom'] = reverseJumps[line.address]
-    }
-    return line
-  });
-
-  drawJumpArrows();
-  attachInstructionHandlers(assembly.jumps);
-}
-
-// highlight the mouseover-ed or clicked jump
-function attachInstructionHandlers() {
-  var jumps = assembly.jumps;
-  $(".row.instruction").on("mouseenter", function(event) {
-    var instruc = event.currentTarget;
-    highlightJumpArrows(instruc.id);
-  });
-}
-
-function drawJumpArrows() {
-  // build array of { from: <addr>, to: <addr> }
-  assembly.jumps = [];
-  assembly.contents.map(function(line) {
-    var jumpToDiv = document.getElementById(line['jump-address']);
-    var jumpFromDiv = document.getElementById(line.address);
-    if (line['internal-jump'] && jumpToDiv) {
-      assembly.jumps.push({
-        "from": line.address,
-        "fromY": jumpFromDiv.offsetTop + (jumpFromDiv.clientHeight/2.0),
-        "to": line['jump-address'],
-        "toY": jumpToDiv.offsetTop + (jumpToDiv.clientHeight/2.0)
-      });
-    }
-  });
-
-  // actually draw arrows
-  var instructions = document.getElementsByClassName('instructions')[0];
-  var svg_height = instructions.clientHeight;
-  var svg_width = document.getElementsByClassName('jump-arrows')[0].clientWidth;
-  
-
-  // clear if anything there
-  svg.selectAll('g').remove();
-  svg.attr('height', svg_height);
-  svg.append('svg:g')
-    .attr('transform', function(jump, i) {
-      return 'scale(-1, 1) translate(-' + svg_width + ', 0)';
-    })
-    .selectAll('path')
-    .data(assembly.jumps)
-    .enter().append('svg:path')
-    .attr('d', function(jump, i) {
-      var x = 5;
-      var ext = (svg_width - x - 5) * (Math.abs(jump.fromY - jump.toY)/svg_height);
-      ext = Math.max(5, ext);
-
-      var command = "M" + x + " " + jump.fromY + " " +
-        "h " + (x+ext) + " " +      // diff horizontally
-        "V " + jump.toY + " " +     // vertical location
-        "h " + (-(x+ext)) + " "     // diff horizontally
-      return command;
-    })
-    .attr('marker-end', "url(#arrow)")
-    .attr('opacity', 0.3)
-    .attr('stroke', "gray");
-    
-}
-
-// I wanted to call highlightJumpArrows elsewhere, so I moved jumps to the assembly object, since
-// A) it seemed more appropriate since the jumps don't change within the scope of this function's
-// assembly, and B) that way I could call it from elsewhere in the code
-function highlightJumpArrows(instruc_id) {
-  var jumps = assembly.jumps;
-  var instr_active = assembly.active_instruction;
-
-  // highlight if has jump
-  svg.selectAll('g path')
-    .data(jumps)
-    .attr('opacity', function(jump, b) {
-      if (jump['from'] == instr_active || jump['to'] == instr_active) {
-        return 1;
-      }
-      else if (jump['from'] == instruc_id || jump['to'] == instruc_id) {
-        return 1;
-      }
-      else {
-        return 0.3;
-      }
-    })
-    .attr('stroke', function(jump, b) {
-      if (jump['from'] == instr_active || jump['to'] == instr_active) {
-        return "rgb(3,169,244)";
-      }
-      if (jump['from'] == instruc_id || jump['to'] == instruc_id) {
-        return "rgb(41,182,246)";
-      }
-      else {
-        return "gray";
-      }
-    });
-}
 
 // wrap numbers for base changes etc.
 function wrapAllNumbers() {
@@ -576,8 +457,7 @@ function wrapNumbersInElem(elem) {
   }
   else {
     console.log("Unknown data type:");
-    console.log(elem);
-  }
+    console.log(elem)  }
 }
 
 // wrap registers for register tracking
@@ -613,13 +493,3 @@ function textInHtmlCollection(collection, text) {
   }
   return false;
 }
-
-// adjust jump arrows when window size changes
-window.addEventListener("resize", function() {
-  var curWidth = window.innerWidth;
-  setTimeout(function() {
-    if (curWidth == window.innerWidth) {
-      drawJumpArrows();
-    }    
-  }, 150);
-});

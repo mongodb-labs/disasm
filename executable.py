@@ -21,6 +21,7 @@ from demangler import demangle
 from bisect import bisect_right
 from symbol_lookup import get_sub_symbol
 from dwarf_expr import describe_DWARF_expr, set_global_machine_arch, OpPiece
+import jump_tables as jt
 
 """
 Base class for executables
@@ -482,6 +483,12 @@ class ElfExecutable(Executable):
         print repr(cstring)
         print index
         return repr(cstring)
+
+    def get_jumptable(self, instrs, functionStart, functionEnd):
+        return jt.get_jumptable(instrs, self.f, functionStart, functionEnd)
+
+    def get_jumptable_switch_reg(self, instrs):
+        return jt.get_switch_register(instrs)
 
 
 """

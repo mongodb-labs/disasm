@@ -16,6 +16,22 @@
   cursor: default;
 }
 
+@mixin flexbox {
+	display: -webkit-box;  /* OLD - iOS 6-, Safari 3.1-6, BB7 */
+  display: -ms-flexbox;  /* TWEENER - IE 10 */
+  display: -webkit-flex; /* NEW - Safari 6.1+. iOS 7.1+, BB10 */
+  display: flex;         /* NEW, Spec - Firefox, Chrome, Opera */
+}
+
+@mixin flex-1 {
+	-webkit-box-flex: 1;   /* OLD - iOS 6-, Safari 3.1-6 */
+  width: 20%;            /* For old syntax, otherwise collapses. */
+  -webkit-flex: 1;       /* Safari 6.1+. iOS 7.1+, BB10 */
+  -ms-flex: 1;           /* IE 10 */
+  flex: 1;               /* NEW, Spec - Firefox, Chrome, Opera */
+
+}
+
 #top-half {
 	height: calc(97vh - 100px); // can't use vars for calc; match $heading-height
 }
@@ -150,6 +166,7 @@ $instruc-color-read: rgb(255,245,157);
 $instruc-color-write: rgb(255,171,145);
 .assembly-row {
 	height: 100%;
+	position: relative;
 }
 
 #status > div:hover:before {
@@ -277,7 +294,7 @@ $instruc-color-write: rgb(255,171,145);
 $file-selected-bg: aquamarine;
 $source-code-bg1: aquamarine; // highlight relevant line
 #function-analysis {
-	height: 45vh;
+	height: 49vh;
 	width: 100%;
 	bottom: 0;
 
@@ -391,6 +408,69 @@ $source-code-bg1: aquamarine; // highlight relevant line
 	height: 100%;
 	width: 100%;
 }
+
+/****************** Jumptable panel ******************/
+$jump-color1: rgb(255,245,157);
+.jt-op_str-text {
+	background-color: $jump-color1;
+}
+.jt-op_str-text:hover {
+	cursor: pointer;
+}
+
+@media screen and (max-width: 1036px) {
+	#jumptable-info {
+		width: 150px !important;
+	}
+}
+
+#jumptable-info {
+	position: absolute;
+	font-family: "Inconsolata", monospace;
+	right: 10px;
+	top: 30px;
+	max-height: calc(90% - 40px);
+	width: 250px;
+	overflow-y: scroll;
+	padding: 10px;
+	padding-right: 20px;
+	background: white;
+
+	border: 1px solid;
+
+	.content {
+		margin-left: 15px;
+		margin-top: 1.7em;
+
+		.jump, .jt-header {
+			@include flexbox;
+			justify-content: space-between;
+		}
+
+		.jt-header > span {
+			text-decoration: underline;
+		}
+
+		.jump:hover {
+			background-color: rgba($jump-color1, 0.3);
+		}
+	}
+
+	.exit {
+		position: absolute;
+		width: 0;
+		font-size: 1.7em;
+		padding-right: 15px;
+		margin-top: -7px;
+	}
+	.exit:hover {
+		font-weight: bold;
+		cursor: pointer;
+	}
+
+
+}
+
 
 /****************** Context Menu ******************/
 

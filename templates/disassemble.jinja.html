@@ -103,6 +103,26 @@
           </div> {# end instructions #}
         </div> {# end function disasm #}
 
+        <div id="jumptable-info" rv-show="jt.show_jumptable">
+          <div class="exit" onclick="hideJumptable()">&#215;</div>
+          <div class="content">
+            <h6>Jump table for { jt.active_jump_from } </h6>
+            <div class="jt-header">
+              <span class='left'>{ jt.switch_reg }</span>
+              <span class='right'>address</span>
+            </div>
+            <div rv-each-jump="jt.active_jumptable"
+              class='jump'
+              rv-on-click='jt.jump_to'>
+              <span class='jump-indices left'>
+                { jump.indices }
+              </span>
+              <span class='jump-address right'>
+                { jump.address }
+              </span>
+            </div>
+          </div>
+        </div>
 
     </div> {# end of assembly-row #}
   </div>  {# end top half #}

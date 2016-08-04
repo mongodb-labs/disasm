@@ -39,8 +39,12 @@ def disasm(exe, bytes, offset=0):
                 instr.nop = True
             # Handle jump/call instructions
             if instr.group(x86.X86_GRP_JUMP) or instr.group(x86.X86_GRP_CALL):
+                # jump table
+                if instr.operands[0].type == x86.X86_OP_REG:
+                    instr.jump_table = instr.reg_name(instr.operands[0].reg)
+
                 # We can only decode the destination if it's an immediate value
-                if instr.operands[0].type == x86.X86_OP_IMM:
+                elif instr.operands[0].type == x86.X86_OP_IMM:
                     # Ignore if it's a jump/call to an address within this function
                     func_start_addr = disassembled[0].address
                     func_end_addr = disassembled[len(disassembled)-1].address
@@ -69,8 +73,6 @@ def disasm(exe, bytes, offset=0):
             # Handle individual operands
             c = -1
             instr.regs_explicit = []
-            # instr.regs_write_explicit = []
-            # instr.regs_read_explicit = []
             for op in instr.operands:
                 c += 1
                 # Handle rip-relative operands
@@ -141,21 +143,24 @@ def disasm(exe, bytes, offset=0):
                     else:
                         instr.rip_value_ascii = "under construction..."
                 # Handle explicitly read/written registers
-                if op.type == x86.X86_OP_MEM and op.mem.base != x86.X86_REG_RIP:
+                if op.type == x86.X86_OP_MEM:
                     ptr = ["", "", ""] # using an array instead of object to guarantee ordering
                     instr.regs_ptr_explicit = []
                     if op.value.mem.base != 0:
                         regname = instr.reg_name(op.value.mem.base)
                         ptr[0] = regname
-                        instr.regs_ptr_explicit.append(regname)
+                        if regname != "rip":
+                            instr.regs_ptr_explicit.append(regname)
                     if op.value.mem.index != 0:
                         regname = instr.reg_name(op.value.mem.index)
                         ptr[1] = regname
-                        instr.regs_ptr_explicit.append(regname)
+                        if regname != "rip":
+                            instr.regs_ptr_explicit.append(regname)
                     if op.value.mem.disp != 0:
                         ptr[2] = hex(op.value.mem.disp)
 
                     instr.ptr = ptr
+                    instr.ptr_size = op.size
                     instr.regs_explicit.append(instr.ptr)
                 elif op.type == x86.X86_OP_REG:
                     instr.regs_explicit.append(instr.reg_name(op.value.reg))
@@ -212,6 +217,8 @@ def jsonify_capstone(data):
             row['rip-value-hex-64'] = i.hex_64
             row['rip-value-float'] = i.float
             row['rip-value-double'] = i.double
+        if i.jump_table:
+            row['jump-table'] = i.jump_table
         if i.internal_jump: 
             row['internal-jump'] = True
             row['jump-address'] = hex(i.jump_address)
@@ -236,6 +243,7 @@ def jsonify_capstone(data):
 
         # reading/writing registers
         row['ptr'] = i.ptr
+        row['ptr_size'] = i.ptr_size
         row['regs_write_explicit'] = []
         row['regs_read_explicit'] = [] if not i.regs_ptr_explicit else i.regs_ptr_explicit
         with open('x86operands.json', 'r') as fp:

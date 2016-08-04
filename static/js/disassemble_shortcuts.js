@@ -145,6 +145,7 @@ mainListener.register_many([
         "keys"          : "esc",
         "on_keyup"     : function() {
             hideAnalysis();
+            hideJumptable();
         }
     },
 ]);
@@ -202,6 +203,7 @@ window.addEventListener("hashchange", function() {
     }
 }, false);
 
+
 $('#function-name-input')
     .bind("focus", function() { 
         globalListener.stop_listening(); 
@@ -213,5 +215,4 @@ $('#function-name-input')
         searchListener.stop_listening();
         mainListener.listen();
     });
-
 

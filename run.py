@@ -14,6 +14,7 @@
 
 from app import app
 import gunicorn.app.base
+from gunicorn.six import iteritems
 import multiprocessing
 
 def number_of_workers():
@@ -27,13 +28,17 @@ class DisassemblerApp(gunicorn.app.base.BaseApplication):
         super(DisassemblerApp, self).__init__()
 
     def load_config(self):
-        pass
+        config = dict([(key, value) for key, value in iteritems(self.options)
+                       if key in self.cfg.settings and value is not None])
+        for key, value in iteritems(config):
+            self.cfg.set(key.lower(), value)
 
     def load(self):
         return self.application
 
 if __name__ == "__main__":
     options = {
-        "workers": number_of_workers()
+        "workers": number_of_workers(),
+        "reload": True,
     }
     DisassemblerApp(app, options).run()
