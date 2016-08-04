@@ -29,4 +29,4 @@ $("#file_selector").change(function(e) {
 });
 
 var show_error = $('#meta-data').attr("data-show-error") === "True";
-rivets.bind($('#error-message'), {show_error: show_error});
+rivets.bind($('#errors'), {show_error: show_error});

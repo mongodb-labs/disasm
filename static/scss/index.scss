@@ -49,11 +49,15 @@ h1 {
 	}
 }
 
-#error-message {
+#errors {
 	background-color: rgb(179, 0, 0);
 	/* http://howtocenterincss.com/ */
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	height: 75px;
+}
+
+#errors > .error {
+	display: block;
 }

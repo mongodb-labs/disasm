@@ -10,6 +10,7 @@ convert_func_list.py
 fix_config.sh
 temp.iaca.*
 *.log
+.metadata
 
 # Flask stuff:
 instance/

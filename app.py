@@ -18,6 +18,7 @@ from flask_assets import Environment, Bundle
 from werkzeug.utils import secure_filename
 import hurry.filesize
 import argparse
+from sets import Set
 
 import disassemble as disasm
 import iaca
@@ -25,9 +26,7 @@ from function_store import storeFunctions, getFunctionsBySubstring, hasStoredFun
 from executable import ElfExecutable, MachoExecutable, Executable
 from disassemble import disasm, jsonify_capstone
 from binascii import unhexlify
-
-FILE_LIST = 'file_list.json'
-METADATA = '.metadata'
+import metadata
 
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
@@ -105,96 +104,85 @@ executables = {}
 def index():
     if not os.path.exists(app.config['UPLOAD_DIR']):
         os.makedirs(app.config['UPLOAD_DIR'])
-    if not os.path.exists(METADATA):
-        os.makedirs(METADATA)
     # Adding a new file.
     if request.method == 'POST':
         file = request.files['file']
         filename = secure_filename(file.filename)
         full_path = os.path.abspath(os.path.join(app.config['UPLOAD_DIR'], filename))
         # Save the file in the UPLOAD_DIR directory
-        file.save(full_path)
-        with open(FILE_LIST, 'a+') as f:
-            f.seek(0)
-            # Attempt to read the (filename -> filepath) mapping from FILE_LIST
-            try:
-                file_list_data = json.load(f)
-            # If FILE_LIST does not exist, json.load() will raise a ValueError after reading an
-            # empty file.
-            # If FILE_LIST exists but does not contain a valid JSON file, json.load() will raise 
-            # a ValueError.
-            # In either case, we need to start with an empty dictionary.
-            except ValueError:
-                print "Unable to parse JSON from " + FILE_LIST
-                file_list_data = {}
-            file_list_data[filename] = full_path
-            # Store the newly updated list back into the file.
-            f.truncate(0)
-            json.dump(file_list_data, f)
-            return redirect(url_for('functions', filename=filename))
+        md = saveFile(file, full_path)
+        return redirect(url_for('functions', filename=md.UUID))
     else:
-        parser = argparse.ArgumentParser()
-        parser.add_argument('files', nargs='*')
-        cmdFileList = parser.parse_args().files
-        fileMap = {}
-        try:
-            fileMap = {os.path.basename(open(filename).name) : getFileMetadata(filename) for filename in cmdFileList}
-        except:
-            for filename in cmdFileList:
-                try:
-                    with open(filename) as f:
-                        fileMap[os.path.basename(f.name)] = getFileMetadata(filename)
-                except:
-                    fileMap[filename] = ["Error!", "Cannot find file!"]
-        existingFileList = getExistingFiles()
-        return render_template("index.jinja.html", files=dict(fileMap, **existingFileList))
+        files, errs = getExistingFiles()
+        if not errs:
+            return render_template("index.jinja.html", files=files)
+        else:
+            return render_template("index.jinja.html", 
+                files=files, 
+                show_error=True, 
+                errors=errs)
 
+
+# Saves file at full_path
+# Creates a metadata file for the file
+# Serializes the file at METADATA_DIR + UUID
+# Returns the FileMetadata object
+def saveFile(file, destPath):
+    # Writes the file into the uploads directory
+    if not os.path.isfile(destPath):
+        file.save(destPath)
+    # If the filename is already in use, the filename will be appended with '_1', '_2', ... until
+    # a usable filename is found
+    else:
+        suffix = 1
+        while os.path.isfile('%s_%d'.format(destPath, suffix)):
+            suffix += 1
+        file.save(destPath)
+    md = metadata.fromFilePath(destPath)
+    md.save()
+
+    return md
+
+# Returns a list of FileMetadata available
+# Also returns a list as a second return argument, which specifies all of the error strings resulted
+# from attempting to locate files. In particular, it will report if a file was specified on the
+# command line, but cannot be located on the system.
 def getExistingFiles():
-    res = {}
-    try:
-        with open(FILE_LIST, 'r') as f:
-            files = json.load(f)
-    # If FILE_LIST does not exist, open() will raise a ValueError. 
-    # If FILE_LIST does not contain a valid JSON file, json.load() will raise a 
-    # ValueErrormeaning.
-    # In either case, we need to start with an empty dictionary.
-    except (IOError, ValueError):
-        files = {}
-    # display file info
-    for filename, full_path in files.items():
-        res[filename] = getFileMetadata(full_path)
-    return res
+    res = []
+    err = []
+    # We create a set to keep track of all of the file paths recorded. This is used to determine if
+    # a file specified on the commandline has already been recorded so that we don't have duplicate
+    # records.
+    path_list = Set()
 
-def getFileMetadata(full_path):
-    t = os.path.getmtime(full_path)
-    timestamp = datetime.datetime.fromtimestamp(t)
-    size = os.path.getsize(full_path)
-    return [hurry.filesize.size(size), timestamp]
+    # Get executables from METADATA_DIR
+    mdList = res + metadata.getExistingMetadata()
+    for md in mdList:
+        path_list.add(md.path)
+    res = res + metadata.getExistingMetadata()
+
+    #Get executables from command line
+    parser = argparse.ArgumentParser()
+    parser.add_argument('files', nargs='*')
+    cmdFileList = parser.parse_args().files
+    for filename in cmdFileList:
+        abspath = os.path.abspath(filename)
+        # If this path is already in the results list so far, there's no need to add it again
+        if abspath in path_list:
+            continue
+        try:
+            with open(abspath) as f:
+                md = metadata.fromCommandLine(abspath)
+                md.save()
+                res.append(md)
+        except:
+            err.append("Error! Cannot find file " + filename)
+
+    return res, err
 
 def loadExec(filename):
-    # First try to find filename in FILE_LIST
-    try:
-        with open(FILE_LIST, 'r') as file_list: 
-            file_list_data = json.load(file_list)
-        path = file_list_data.get(filename)
-        if not path:
-            raise LookupError
-        f = open(path, 'rb')
-    # either FILE_LIST does not exist or path does not exist
-    except IOError as e:
-        print e
-    except ValueError:
-        print "Unable to load dict from " + FILE_LIST
-    except LookupError:
-        print "Unable to find " + filename + " in " + FILE_LIST
-    # Next try to find it in the uploads folder
-    try:
-        path = os.path.abspath(os.path.join(app.config['UPLOAD_DIR'] + filename))
-        f = open(path, 'rb')
-    # If the file still cannot be opened, there's nothing we can do, so we panic
-    # This can probably actually be handled a bit cleaner...
-    except IOError:
-        raise LookupError("Cannot find file '{}'".format(filename))
+    md = metadata.fromUUID(filename)
+    f = open(md.path, 'rb')
     a = get_executable(f)
     executables[filename] = a
     print "Done loading the executable"
@@ -217,14 +205,19 @@ def load_functions(filename):
 @app.route('/functions', methods=['GET'])
 def functions():
     load_functions(request.args['filename'])
-    return render_template('functions.jinja.html', filename=request.args['filename'])   
+    md = metadata.fromUUID(request.args['filename'])
+    return render_template('functions.jinja.html', 
+        filename=request.args['filename'], 
+        displayname=md.basename)
 
 # expects "filename", "st_value", "file_offset", "size", "func_name"
 @app.route('/disasm_function', methods=['GET'])
 def disasm_function():
     # initially empty page; load all info via ajax
+    md = metadata.fromUUID(request.args['filename'])
     return render_template("disassemble.jinja.html", 
-        filename=request.args['filename'], 
+        filename=request.args['filename'],
+        displayname=md.basename,
         st_value=request.args['st_value'],
         file_offset=request.args['file_offset'],
         func_name=request.args['func_name'],
