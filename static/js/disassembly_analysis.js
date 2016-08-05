@@ -125,12 +125,10 @@ function _tabClicked(classname) {
 }
 
 function tabStackInfoClicked(event, model) {
-  assembly.in_iaca = false;
   _tabClicked(".tab-stack-info");
 }
 
 function tabMnemonicDescClicked(event, model) {
-  assembly.in_iaca = false;
   _tabClicked(".tab-mnemonic-desc");
 }
 
