@@ -335,7 +335,7 @@ function get_function_assembly() {
         var regs_write = removeFlagsRegs(i['regs_write_implicit']);
         if (regs_write.length > 0) {
           regs_str = "W: ";
-          regs_str += "<span>" + regs_write.join(' ') + "</span>";
+          regs_str += "<span class='reg'>" + regs_write.join(' ') + "</span>";
         } 
       }
 
@@ -348,7 +348,7 @@ function get_function_assembly() {
           else if (regs_str.length == 0) {
             regs_str += " R: ";
           }
-          regs_str += "<span>" + regs_read.join(' ') + "</span>";
+          regs_str += "<span class='reg'>" + regs_read.join(' ') + "</span>";
         } 
       }
 

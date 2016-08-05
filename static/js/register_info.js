@@ -238,10 +238,11 @@ function get_variable_display(instrPtr, variableLoc, objData) {
     var offset = instrPtr[2]
     if (reg == varLoc && offset != "" && objData[varName][parseInt(offset, 16)]) {
       var sign = parseInt(offset, 16) > 0 ? "+" : "";
-      return varName + "." + objData[varName][parseInt(offset, 16)] + "=" + varLoc + sign + offset;
+      var name = varName + "." + objData[varName][parseInt(offset, 16)];
+      return name + "=" + "<span class='reg'>" + varLoc + "</span>" + sign + offset;
     }
   }
-  return varName + "=" + varLoc;
+  return varName + "=" + "<span class='reg'>" + varLoc + "</span>";
 }
 
 
