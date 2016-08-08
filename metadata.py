@@ -66,9 +66,13 @@ def getExistingMetadata():
         return []
     res = []
     parser = argparse.ArgumentParser()
-    parser.add_argument('files', nargs='*')
-    # Create a set of all of the absolute paths referenced in the commandline
-    cmdFileSet = Set([os.path.abspath(path) for path in parser.parse_args().files])
+    try:
+        parser.add_argument('-f', '--files', dest='files', nargs='+')
+        # Create a set of all of the absolute paths referenced in the commandline
+        cmdFileSet = Set([os.path.abspath(path) for path in parser.parse_args().files])
+    except:
+        cmdFileSet = Set([])
+        
     for f in os.listdir(METADATA_DIR):
         filepath = os.path.join(METADATA_DIR, f)
         if os.path.isfile(filepath):
@@ -83,6 +87,7 @@ def getExistingMetadata():
             # files may end up in the directory. To keep it from panicing, just skip it
             except:
                 pass
+
     return sorted(res, key=lambda x: x.timestamp, reverse=True)
 
 def fromUUID(UUID):

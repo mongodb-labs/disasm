@@ -9,8 +9,10 @@ There is optional IACA integration; to use it, you must first download IACA from
 
 To run:
 ```python
-gunicorn app:app
+python run.py
 ```
+
+`run.py` uses gunicorn for speed and robustness. If you don't want to use gunicorn, you can use `python app.py`.
 
 ### Known Bugs
 function search breaks if you have unmatched parens

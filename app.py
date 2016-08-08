@@ -163,21 +163,23 @@ def getExistingFiles():
 
     #Get executables from command line
     parser = argparse.ArgumentParser()
-    parser.add_argument('files', nargs='*')
-    cmdFileList = parser.parse_args().files
-    for filename in cmdFileList:
-        abspath = os.path.abspath(filename)
-        # If this path is already in the results list so far, there's no need to add it again
-        if abspath in path_list:
-            continue
-        try:
-            with open(abspath) as f:
-                md = metadata.fromCommandLine(abspath)
-                md.save()
-                res.append(md)
-        except:
-            err.append("Error! Cannot find file " + filename)
-
+    parser.add_argument('-f', '--files', dest='files', nargs='+')
+    try:
+        cmdFileList = parser.parse_args().files
+        for filename in cmdFileList:
+            abspath = os.path.abspath(filename)
+            # If this path is already in the results list so far, there's no need to add it again
+            if abspath in path_list:
+                continue
+            try:
+                with open(abspath) as f:
+                    md = metadata.fromCommandLine(abspath)
+                    md.save()
+                    res.append(md)
+            except:
+                err.append("Error! Cannot find file " + filename)
+    except:
+        pass
     return res, err
 
 def loadExec(filename):
