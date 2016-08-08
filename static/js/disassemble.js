@@ -37,7 +37,7 @@ var assembly = {
 };
 
 var assembly_ctrl = {
-  instructionClicked: instructionClicked // in disassembly_analysis
+  instructionClicked: instructionClicked 
 }
 
 rivets.formatters.isEmptyStr = function(value) {

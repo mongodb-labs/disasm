@@ -42,8 +42,8 @@ function instructionClicked(e, model) {
   // Adding else isn't necessary, but it looked cleaner and more clear to me.
   else {
     var addr = parseInt(model.i.address);
-    updateActiveInstr(model.i.address);
     showAnalysis();
+    updateActiveInstr(model.i.address);
   }
 }
 
