@@ -461,16 +461,31 @@ function handleJumpHighlighting() {
     return line
   });
 
+  drawJumpArrows();
+  attachInstructionHandlers(assembly.jumps);
+}
+
+// highlight the mouseover-ed or clicked jump
+function attachInstructionHandlers() {
+  var jumps = assembly.jumps;
+  $(".row.instruction").on("mouseenter", function(event) {
+    var instruc = event.currentTarget;
+    highlightJumpArrows(instruc.id);
+  });
+}
+
+function drawJumpArrows() {
   // build array of { from: <addr>, to: <addr> }
   assembly.jumps = [];
   assembly.contents.map(function(line) {
-    var vert_offset = 12;
-    if (line['internal-jump'] && document.getElementById(line['jump-address'])) {
+    var jumpToDiv = document.getElementById(line['jump-address']);
+    var jumpFromDiv = document.getElementById(line.address);
+    if (line['internal-jump'] && jumpToDiv) {
       assembly.jumps.push({
         "from": line.address,
-        "fromY": document.getElementById(line.address).offsetTop + vert_offset,
+        "fromY": jumpFromDiv.offsetTop + (jumpFromDiv.clientHeight/2.0),
         "to": line['jump-address'],
-        "toY": document.getElementById(line['jump-address']).offsetTop + vert_offset
+        "toY": jumpToDiv.offsetTop + (jumpToDiv.clientHeight/2.0)
       });
     }
   });
@@ -480,6 +495,9 @@ function handleJumpHighlighting() {
   var svg_height = instructions.clientHeight;
   var svg_width = document.getElementsByClassName('jump-arrows')[0].clientWidth;
   
+
+  // clear if anything there
+  svg.selectAll('path').remove();
   svg.attr('height', svg_height);
   svg.append('svg:g')
     .attr('transform', function(jump, i) {
@@ -503,17 +521,6 @@ function handleJumpHighlighting() {
     .attr('opacity', 0.3)
     .attr('stroke', "gray");
     
-
-    attachInstructionHandlers(assembly.jumps);
-}
-
-// highlight the mouseover-ed or clicked jump
-function attachInstructionHandlers() {
-  var jumps = assembly.jumps;
-  $(".row.instruction").on("mouseenter", function(event) {
-    var instruc = event.currentTarget;
-    highlightJumpArrows(instruc.id);
-  });
 }
 
 // I wanted to call highlightJumpArrows elsewhere, so I moved jumps to the assembly object, since
@@ -607,3 +614,12 @@ function textInHtmlCollection(collection, text) {
   return false;
 }
 
+// adjust jump arrows when window size changes
+window.addEventListener("resize", function() {
+  var curWidth = window.innerWidth;
+  setTimeout(function() {
+    if (curWidth == window.innerWidth) {
+      drawJumpArrows();
+    }    
+  }, 150);
+});

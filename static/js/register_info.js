@@ -182,6 +182,8 @@ function handleRegisterContent(data, address) {
     url: URL_OBJECT_MEMBERS + "?address=" + address + "&filename=" + assembly.filename
   }).done(function(objData) {
     _handleRegisterContent(data, objData);
+    // update jumps for formatting
+    drawJumpArrows();
   });
 }
 
