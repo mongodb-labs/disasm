@@ -497,7 +497,7 @@ function drawJumpArrows() {
   
 
   // clear if anything there
-  svg.selectAll('path').remove();
+  svg.selectAll('g').remove();
   svg.attr('height', svg_height);
   svg.append('svg:g')
     .attr('transform', function(jump, i) {
