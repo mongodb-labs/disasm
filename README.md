@@ -14,5 +14,3 @@ python run.py
 
 `run.py` uses gunicorn for speed and robustness. If you don't want to use gunicorn, you can use `python app.py`.
 
-### Known Bugs
-function search breaks if you have unmatched parens

@@ -59,17 +59,20 @@ class FunctionMatch():
 
 def getFunctionsBySubstring(filename, substring, start_index, num_functions, case_sensitive):
     functions = []
-    if case_sensitive:
-        prog = re.compile(substring)
-    else:
-        prog = re.compile(substring, re.IGNORECASE)
-    for function in functionsList[filename]:
-        haystack = function['name']
-        if prog.search(haystack):
-            functions.append(function)
-            if len(functions) == start_index + num_functions:
-                break
-    return functions[start_index:start_index+num_functions]
+    try:
+        if case_sensitive:
+            prog = re.compile(substring)
+        else:
+            prog = re.compile(substring, re.IGNORECASE)
+        for function in functionsList[filename]:
+            haystack = function['name']
+            if prog.search(haystack):
+                functions.append(function)
+                if len(functions) == start_index + num_functions:
+                    break
+        return functions[start_index:start_index+num_functions]
+    except:
+        return []
 
 def filterName(funcHeader):
     depth = 0
