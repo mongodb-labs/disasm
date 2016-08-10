@@ -203,7 +203,7 @@ function getNextPage(query, curr_index, num_functions) {
             functions.functionsLoading = false;
         })
         .fail(function() {
-            alert("Unable to contact server.");
+            console.log("Unable to contact server.");
         })
         .always(function() {
             console.log("Request complete.");

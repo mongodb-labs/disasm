@@ -41,6 +41,6 @@ if __name__ == "__main__":
     options = {
         "workers": number_of_workers(),
         "reload": True,
-        "timeout": 300, 
+        "timeout": 300,
     }
     DisassemblerApp(app, options).run()

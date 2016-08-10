@@ -171,14 +171,25 @@ class ElfExecutable(Executable):
         return None
 
     # given a CU and the offset of the class/struct/union type DIE, get its member DIEs
-    def _get_obj_member_info(self, CU, offset):
-        objAttrs = ["DW_TAG_structure_type", "DW_TAG_union_type", "DW_TAG_class_type"]
+    def _get_obj_members(self, CU, offset):
+        objTags = ["DW_TAG_structure_type", "DW_TAG_union_type", "DW_TAG_class_type"]
+        rabbitHoleTags = ["DW_TAG_inheritance", "DW_TAG_member"]
+
         members = []
         for die in CU.iter_DIEs():
-            if die.tag in objAttrs and die.offset == offset:
+            if die.tag in objTags and die.offset == offset:
                 for child in die.iter_children():
+                    # recursively get parent class info, if available
+                    if child.tag in rabbitHoleTags and "DW_AT_type" in child.attributes:
+                        type_die = self._parse_DIE_at_offset(child.cu, child.attributes["DW_AT_type"].value)
+                        members += self._get_obj_members(type_die.cu, type_die.offset)
                     if child.tag == "DW_TAG_member":
                         members.append(child)
+        return members
+
+    def _get_obj_member_info(self, CU, offset):
+        members = self._get_obj_members(CU, offset)
+
         memberInfo = {}
         for member in members:
             memberAttrs = member.attributes 
@@ -233,12 +244,14 @@ class ElfExecutable(Executable):
             for reg in regs:
                 if reg not in reg_contents:
                     reg_contents[reg] = []
+
+                piece_size = 0 if not piece.size else piece.size
                 reg_contents[reg].append({
                     "start": begin_addr,
                     "end": end_addr,
                     "name": name,
                     "value": piece.value,
-                    "size": piece.size
+                    "size": piece.size,
                     });
         return reg_contents
 
@@ -284,8 +297,7 @@ class ElfExecutable(Executable):
                     if loc_pieces is None:
                         continue
                     reg_contents = self._update_reg_contents(reg_contents, 
-                        hex(loc.begin_offset), hex(loc.end_offset), loc_pieces, name)
-            
+                        hex(loc.begin_offset), hex(loc.end_offset), loc_pieces, name)       
         return reg_contents
 
 

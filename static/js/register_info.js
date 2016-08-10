@@ -207,7 +207,7 @@ function _handleRegisterContent(data, objData) {
             && parseInt(instr.address) < parseInt(variable_loc.end)
           // display size only if necessary
           if (variable_loc.size) {
-            size = "(" + variable_loc.size + ")";
+            size = " (" + variable_loc.size + ")";
           }
           else {
             size = ""
@@ -237,11 +237,11 @@ function get_variable_display(instrPtr, variableLoc, objData) {
   var varLoc = variableLoc.value
   if (objData[varName] && instrPtr) {
     var reg = instrPtr[0]
-    var offset = instrPtr[2]
-    if (reg == varLoc && offset != "" && objData[varName][parseInt(offset, 16)]) {
-      var sign = parseInt(offset, 16) > 0 ? "+" : "";
-      var name = varName + "." + objData[varName][parseInt(offset, 16)];
-      return name + "=" + "<span class='reg'>" + varLoc + "</span>" + sign + offset;
+    var offset = instrPtr[2] != "" ? parseInt(instrPtr[2], 16) : 0;
+    if (reg == varLoc  && objData[varName][offset]) {
+      var sign = offset >= 0 ? "+" : "";
+      var name = varName + "." + objData[varName][offset];
+      return name + "=" + "<span class='reg'>" + varLoc + "</span>" + sign + '0x' + offset.toString(16);
     }
   }
   return varName + "=" + "<span class='reg'>" + varLoc + "</span>";

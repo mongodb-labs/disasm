@@ -320,6 +320,8 @@ def get_iaca():
 def get_reg_contents():
     address = int(request.args['address'])
     filename = request.args['filename']
+    if not executables.get(filename):
+        loadExec(filename)
     return jsonify(executables.get(filename).get_function_reg_contents(address))
 
 # expects "address", "filename"
@@ -327,6 +329,8 @@ def get_reg_contents():
 def get_obj_members():
     address = int(request.args['address'])
     filename = request.args['filename']
+    if not executables.get(filename):
+        loadExec(filename)
     return jsonify(executables.get(filename).get_obj_members(address))
 
 

@@ -255,7 +255,7 @@ function trim(val, length) {
     var i;
     for (i = 1; i <= val.length - length; i++) {
         if (signBit !== val.charAt(i)) {
-            alert("Cannot shrink this number, because doing so would result in precision/data loss");
+            console.log("Cannot shrink this number, because doing so would result in precision/data loss");
             return val;
         }
     }
