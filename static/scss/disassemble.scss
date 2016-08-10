@@ -473,8 +473,15 @@ $jump-color1: rgb(255,245,157);
 
 
 /****************** Context Menu ******************/
+.context-menu-list {
+	padding-right: 5px;
+}
 
 .context-menu-item.disabled {
 	color: #BBB;
+}
+
+.context-menu-submenu:after {
+	content: "▶";
 }
 

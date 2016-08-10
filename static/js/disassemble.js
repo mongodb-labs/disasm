@@ -93,89 +93,109 @@ $(function() {
                 ripCallback(key, opt, '.rip-value-hex');
               }
             },
-            value_signed_8: {
-              name: "8-bit Signed Integer",
-              callback: function(key, opt) {
-                ripCallback(key, opt, '.rip-value-signed-8');
-              }
+            value_signed: {
+              name: "Signed Integer",
+              items: {
+                value_signed_8: {
+                  name: "8-bit Signed Integer",
+                  callback: function(key, opt) {
+                    ripCallback(key, opt, '.rip-value-signed-8');
+                  }
+                },
+                value_signed_16: {
+                  name: "16-bit Signed Integer",
+                  callback: function(key, opt) {
+                    ripCallback(key, opt, '.rip-value-signed-16');
+                  }
+                },
+                value_signed_32: {
+                  name: "32-bit Signed Integer",
+                  callback: function(key, opt) {
+                    ripCallback(key, opt, '.rip-value-signed-32');
+                  }
+                },
+                value_signed_64: {
+                  name: "64-bit Signed Integer",
+                  callback: function(key, opt) {
+                    ripCallback(key, opt, '.rip-value-signed-64');
+                  }
+                },            
+              }, 
             },
-            value_signed_16: {
-              name: "16-bit Signed Integer",
-              callback: function(key, opt) {
-                ripCallback(key, opt, '.rip-value-signed-16');
-              }
+            value_unsigned: {
+              name: "Unsigned Integer",
+              items: {
+                value_unsigned_8: {
+                  name: "8-bit Unsigned Integer",
+                  callback: function(key, opt) {
+                    ripCallback(key, opt, '.rip-value-unsigned-8');
+                  }
+                },
+                value_unsigned_16: {
+                  name: "16-bit Unsigned Integer",
+                  callback: function(key, opt) {
+                    ripCallback(key, opt, '.rip-value-unsigned-16');
+                  }
+                },
+                value_unsigned_32: {
+                  name: "32-bit Unsigned Integer",
+                  callback: function(key, opt) {
+                    ripCallback(key, opt, '.rip-value-unsigned-32');
+                  }
+                },
+                value_unsigned_64: {
+                  name: "64-bit Unsigned Integer",
+                  callback: function(key, opt) {
+                    ripCallback(key, opt, '.rip-value-unsigned-64');
+                  }
+                },   
+              },
             },
-            value_signed_32: {
-              name: "32-bit Signed Integer",
-              callback: function(key, opt) {
-                ripCallback(key, opt, '.rip-value-signed-32');
-              }
+            value_hex: {
+              name: "Hex Integer",
+              items: {
+                value_hex_8: {
+                  name: "8-bit Hex Integer",
+                  callback: function(key, opt) {
+                    ripCallback(key, opt, '.rip-value-hex-8');
+                  }
+                },
+                value_hex_16: {
+                  name: "16-bit Hex Integer",
+                  callback: function(key, opt) {
+                    ripCallback(key, opt, '.rip-value-hex-16');
+                  }
+                },
+                value_hex_32: {
+                  name: "32-bit Hex Integer",
+                  callback: function(key, opt) {
+                    ripCallback(key, opt, '.rip-value-hex-32');
+                  }
+                },
+                value_hex_64: {
+                  name: "64-bit Hex Integer",
+                  callback: function(key, opt) {
+                    ripCallback(key, opt, '.rip-value-hex-64');
+                  }
+                },
+              },
             },
-            value_signed_64: {
-              name: "64-bit Signed Integer",
-              callback: function(key, opt) {
-                ripCallback(key, opt, '.rip-value-signed-64');
-              }
-            },
-            value_unsigned_8: {
-              name: "8-bit Unsigned Integer",
-              callback: function(key, opt) {
-                ripCallback(key, opt, '.rip-value-unsigned-8');
-              }
-            },
-            value_unsigned_16: {
-              name: "16-bit Unsigned Integer",
-              callback: function(key, opt) {
-                ripCallback(key, opt, '.rip-value-unsigned-16');
-              }
-            },
-            value_unsigned_32: {
-              name: "32-bit Unsigned Integer",
-              callback: function(key, opt) {
-                ripCallback(key, opt, '.rip-value-unsigned-32');
-              }
-            },
-            value_unsigned_64: {
-              name: "64-bit Unsigned Integer",
-              callback: function(key, opt) {
-                ripCallback(key, opt, '.rip-value-unsigned-64');
-              }
-            },
-            value_hex_8: {
-              name: "8-bit Hex Integer",
-              callback: function(key, opt) {
-                ripCallback(key, opt, '.rip-value-hex-8');
-              }
-            },
-            value_hex_16: {
-              name: "16-bit Hex Integer",
-              callback: function(key, opt) {
-                ripCallback(key, opt, '.rip-value-hex-16');
-              }
-            },
-            value_hex_32: {
-              name: "32-bit Hex Integer",
-              callback: function(key, opt) {
-                ripCallback(key, opt, '.rip-value-hex-32');
-              }
-            },
-            value_hex_64: {
-              name: "64-bit Hex Integer",
-              callback: function(key, opt) {
-                ripCallback(key, opt, '.rip-value-hex-64');
-              }
-            },
-            value_float: {
-              name: "Single-Precision Floating Point",
-              callback: function(key, opt) {
-                ripCallback(key, opt, '.rip-value-float');
-              }
-            },
-            value_double: {
-              name: "Double-Precision Floating Point",
-              callback: function(key, opt) {
-                ripCallback(key, opt, '.rip-value-double');
-              }
+            value_floating_point: {
+              name: "Floating Point",
+              items: {
+                value_float: {
+                  name: "Single-Precision Floating Point",
+                  callback: function(key, opt) {
+                    ripCallback(key, opt, '.rip-value-float');
+                  }
+                },
+                value_double: {
+                  name: "Double-Precision Floating Point",
+                  callback: function(key, opt) {
+                    ripCallback(key, opt, '.rip-value-double');
+                  }
+                },
+              },
             },
             cstring: {
               name: "Referenced Value (cString)",

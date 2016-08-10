@@ -78,7 +78,6 @@ js_disassemble = Bundle(
     'js/jumps.js',
     'js/number_conversion.js',
     'js/jquery.contextMenu.js',
-    'js/jquery.contextMenu.js',
     'js/jquery.ui.position.js',
     'js/highlight.pack.js',
     'js/tipr.js',
