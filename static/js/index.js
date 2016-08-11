@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+var URL_DELETE_FILE = '/delete_file';
 
 if ($("#file_selector").val() == "") {
     $("#file_submit").prop("disabled", true);
@@ -30,3 +31,25 @@ $("#file_selector").change(function(e) {
 
 var show_error = $('#meta-data').attr("data-show-error") === "True";
 rivets.bind($('#errors'), {show_error: show_error});
+
+$(".file").on("click", ".remove-file", function(e) {
+	var fileDiv = e.delegateTarget;
+	fileDiv.getAttribute('data-uuid');
+	// delete this file
+  $.ajax({
+    type: "DELETE",
+    url: URL_DELETE_FILE + '?' + $.param({
+    	'uuid': fileDiv.getAttribute('data-uuid')
+    }),
+  }).done(function(data) {
+  	// if successfully removed metadata for this file
+  	if (data["response"] && data["response"] == 1) {
+  		fileDiv.remove();
+  	}
+  	else { // handle error
+  		
+  	}
+  });
+});
+
+

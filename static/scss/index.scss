@@ -39,7 +39,7 @@ h1 {
 	}
 }
 
-#uploaded-files {
+#uploaded-files, #command-line-files {
 	width: 40vw;
 	min-width: 500px;
 
@@ -56,6 +56,20 @@ h1 {
 	.file > div, .title > div {
 		@include flex-1;
 	}
+
+	$remove-file-fa-offset: 20px;
+	i.remove-file {
+		line-height: inherit;
+    width: 0;
+    margin-right: $remove-file-fa-offset;
+    margin-left: -$remove-file-fa-offset;
+    color: lightgray;
+	}
+
+	i.remove-file:hover {
+		color: rgb(229,57,53);
+		cursor: pointer;
+	}	
 }
 
 #errors {

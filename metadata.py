@@ -79,12 +79,12 @@ def getExistingMetadata():
             try:
                 with open(filepath) as mdFile:
                     md = pickle.load(mdFile)
-                # If a metadata file exists for a file that was referenced on the command line, only
-                # add it to the list if that path is still being referenced on the command line now
+                    # If a metadata file exists for a file that was referenced on the command line, only
+                    # add it to the list if that path is still being referenced on the command line now
                     if not md.from_cmd or md.path in cmdFileSet:
                         res.append(md)
             # We assume all files in this directory are valid FileMetadata objects. Some unwanted
-            # files may end up in the directory. To keep it from panicing, just skip it
+            # files may end up in the directory. To keep it from panicking, just skip it
             except:
                 pass
 
@@ -94,3 +94,16 @@ def fromUUID(UUID):
     with open(os.path.join(METADATA_DIR, UUID)) as f:
         md = pickle.load(f)
         return fromFilePath(md.path)
+
+# 1 for OK, 0 for error
+def deleteFile(UUID):
+    # currently not deleting the actual file in /uploads. should we be??
+    try:
+        os.remove(os.path.join(METADATA_DIR, UUID))
+        return 1
+    except:
+        return 0
+
+
+
+

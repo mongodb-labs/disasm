@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="static/css/normalize.css">
   <link rel="stylesheet" href="static/css/colorbox.css">
   {% assets "index_css" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
+  <script src="https://use.fontawesome.com/d826d0fa82.js"></script>
   <title>Disassembler</title>
 
 
@@ -28,6 +29,26 @@
     </p>
 	</form>
 
+  {% if command_line_files|length > 0 %}
+  <div id="command-line-files">
+    <h3>Command line files</h3>
+    <div class="title">
+      <div class="filename">Filename</div>
+      <div class="size">Size</div>
+      <div class="timestamp">Created</div>
+    </div>    
+    {% for metadata in command_line_files %}
+    <div class="file" data-uuid='{{ metadata.UUID }}'>
+      <div class="filename">
+        <a href="/functions?filename={{ metadata.UUID }}">{{ metadata.basename }}</a>
+      </div>
+      <div class="size">{{ metadata.size }}</div>
+      <div class="timestamp">{{ metadata.timestamp }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <div id="uploaded-files">
     <h3>Uploaded files</h3>
     <div class="title">
@@ -35,8 +56,9 @@
       <div class="size">Size</div>
       <div class="timestamp">Uploaded</div>
     </div>
-    {% for metadata in files %}
-    <div class="file">
+    {% for metadata in uploaded_files %}
+    <div class="file" data-uuid='{{ metadata.UUID }}'>
+      <i class="fa fa-times-circle remove-file" aria-hidden="true"></i>
       <div class="filename">
         <a href="/functions?filename={{ metadata.UUID }}">{{ metadata.basename }}</a>
       </div>

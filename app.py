@@ -115,10 +115,13 @@ def index():
     else:
         files, errs = getExistingFiles()
         if not errs:
-            return render_template("index.jinja.html", files=files)
+            return render_template("index.jinja.html", 
+                uploaded_files=[file for file in files if not file.from_cmd],
+                command_line_files=[file for file in files if file.from_cmd])
         else:
             return render_template("index.jinja.html", 
-                files=files, 
+                uploaded_files=[file for file in files if not file.from_cmd], 
+                command_line_files=[file for file in files if file.from_cmd],
                 show_error=True, 
                 errors=errs)
 
@@ -143,6 +146,7 @@ def saveFile(file, destPath):
 
     return md
 
+
 # Returns a list of FileMetadata available
 # Also returns a list as a second return argument, which specifies all of the error strings resulted
 # from attempting to locate files. In particular, it will report if a file was specified on the
@@ -156,12 +160,12 @@ def getExistingFiles():
     path_list = Set()
 
     # Get executables from METADATA_DIR
-    mdList = res + metadata.getExistingMetadata()
+    mdList = metadata.getExistingMetadata()
     for md in mdList:
         path_list.add(md.path)
-    res = res + metadata.getExistingMetadata()
+    res += mdList
 
-    #Get executables from command line
+    # Get executables from command line
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--files', dest='files', nargs='+')
     try:
@@ -203,6 +207,13 @@ def load_functions(filename):
         loadExec(filename)
     functions = executables.get(filename).get_all_functions()
     storeFunctions(filename, functions)
+
+@app.route('/delete_file', methods=['DELETE'])
+def deleteFile():
+    uuid = request.args['uuid']
+    return jsonify({
+        "response": metadata.deleteFile(uuid)
+        })
 
 @app.route('/functions', methods=['GET'])
 def functions():
