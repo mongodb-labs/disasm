@@ -18,7 +18,8 @@ from gunicorn.six import iteritems
 import multiprocessing
 
 def number_of_workers():
-    return (multiprocessing.cpu_count() * 2) + 1
+    return 1
+    # return (multiprocessing.cpu_count() * 2) + 1
 
 # We are blocking gunicorn from consuming command line args
 class DisassemblerApp(gunicorn.app.base.BaseApplication):
@@ -40,5 +41,6 @@ if __name__ == "__main__":
     options = {
         "workers": number_of_workers(),
         "reload": True,
+        "timeout": 300, 
     }
     DisassemblerApp(app, options).run()

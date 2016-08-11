@@ -141,7 +141,6 @@ function tabIacaClicked(event, model) {
 }
 
 function tabTypeInfoClicked(event, model) {
-  assembly.in_iaca = true;
   _tabClicked(".tab-type-info");
 }
 /********** end tab click functions **********/
