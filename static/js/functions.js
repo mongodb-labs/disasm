@@ -163,6 +163,7 @@ var SEARCH_DELAY = 10;
 var prevRequest = "";
 
 // helper for getting functions/pagination of functions
+var functionsRequest;
 function getNextPage(query, curr_index, num_functions) {
     // If the search request has not changed from the last completed search, then don't bother
     if (query == prevRequest) {
@@ -171,7 +172,6 @@ function getNextPage(query, curr_index, num_functions) {
     searchRequest = query;
     setTimeout(function(){
         if (searchRequest !== query) {
-            console.log("Discarding request: " + query);
             return;
         }
         searchRequest = "";
@@ -184,7 +184,12 @@ function getNextPage(query, curr_index, num_functions) {
         }
 
         functions.functionsLoading = true;
-        $.get('/get_substring_matches', { 
+        // cancel any outstanding requests so that we only 
+        // deal with the latest one
+        if (functionsRequest) {
+          functionsRequest.abort();
+        }
+        functionsRequest = $.get('/get_substring_matches', { 
             filename: functions.filename,
             substring: query, 
             start_index: curr_index, 
@@ -202,13 +207,10 @@ function getNextPage(query, curr_index, num_functions) {
             prevRequest = query;
             functions.functionsLoading = false;
         })
-        .fail(function() {
-            console.log("Unable to contact server.");
-        })
         .always(function() {
             console.log("Request complete.");
         });
-    }, 10);
+    }, 100);
 }
 
 // search bar 
