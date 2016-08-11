@@ -114,6 +114,9 @@ def index():
         return redirect(url_for('functions', filename=md.UUID))
     else:
         files, errs = getExistingFiles()
+        if request.args.get("err"):
+            errs.append("Cannot find file " + request.args["err"] + 
+                ". Has it been renamed or moved?")
         if not errs:
             return render_template("index.jinja.html", 
                 uploaded_files=[file for file in files if not file.from_cmd],
@@ -217,11 +220,15 @@ def deleteFile():
 
 @app.route('/functions', methods=['GET'])
 def functions():
-    load_functions(request.args['filename'])
-    md = metadata.fromUUID(request.args['filename'])
-    return render_template('functions.jinja.html', 
-        filename=request.args['filename'], 
-        displayname=md.basename)
+    filename = request.args['filename']
+    try:
+        load_functions(filename)
+        md = metadata.fromUUID(filename)
+        return render_template('functions.jinja.html', 
+            filename=filename, 
+            displayname=md.basename)
+    except OSError as e:
+        return redirect(url_for('index', err=request.args["basename"]))
 
 # expects "filename", "st_value", "file_offset", "size", "func_name"
 @app.route('/disasm_function', methods=['GET'])

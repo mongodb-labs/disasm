@@ -40,7 +40,9 @@
     {% for metadata in command_line_files %}
     <div class="file" data-uuid='{{ metadata.UUID }}'>
       <div class="filename">
-        <a href="/functions?filename={{ metadata.UUID }}">{{ metadata.basename }}</a>
+        <a href="/functions?filename={{ metadata.UUID }}&basename={{ metadata.basename }}">
+          {{ metadata.basename }}
+        </a>
       </div>
       <div class="size">{{ metadata.size }}</div>
       <div class="timestamp">{{ metadata.timestamp }}</div>
@@ -60,7 +62,9 @@
     <div class="file" data-uuid='{{ metadata.UUID }}'>
       <i class="fa fa-times-circle remove-file" aria-hidden="true"></i>
       <div class="filename">
-        <a href="/functions?filename={{ metadata.UUID }}">{{ metadata.basename }}</a>
+        <a href="/functions?filename={{ metadata.UUID }}&basename={{ metadata.basename }}">
+          {{ metadata.basename }}
+        </a>
       </div>
       <div class="size">{{ metadata.size }}</div>
       <div class="timestamp">{{ metadata.timestamp }}</div>
