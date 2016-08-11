@@ -150,8 +150,8 @@ mainListener.register_many([
     },
 ]);
 
-var searchListener = new window.keypress.Listener();
-searchListener.register_many([
+var functionSearchListener = new window.keypress.Listener();
+functionSearchListener.register_many([
     {
         "keys"          : "up",
         "on_keydown"    : function() {
@@ -177,6 +177,37 @@ searchListener.register_many([
         }
     },
 ]);
+
+var selectedType = null;
+var typeSearchListener = new window.keypress.Listener();
+typeSearchListener.register_many([
+    {
+        "keys"          : "up",
+        "on_keydown"    : function() {
+            // functionsOnUp(functionList);
+        }
+    },
+    {
+        "keys"          : "down",
+        "on_keydown"    : function() {
+            // functionsOnDown(functionList);
+        }
+    },
+    {
+        "keys"          : "enter",
+        "on_keydown"    : function() {
+            // window.location = selectedFunction.href;
+        }
+    }, 
+    {
+        "keys"          : "esc",
+        "on_keydown"    : function() {
+            $("#type-name-input").blur();
+        }
+    },
+]);
+
+
 
 // http://stackoverflow.com/a/1844577
 var currentHash = window.location.hash;
@@ -206,13 +237,28 @@ window.addEventListener("hashchange", function() {
 
 $('#function-name-input')
     .bind("focus", function() { 
-        globalListener.stop_listening(); 
-        searchListener.listen();
+        globalListener.stop_listening();
         mainListener.stop_listening();
+        typeSearchListener.stop_listening();
+        functionSearchListener.listen();
     })
     .bind("blur", function() { 
         globalListener.listen(); 
-        searchListener.stop_listening();
         mainListener.listen();
+        typeSearchListener.stop_listening();
+        functionSearchListener.stop_listening();
     });
 
+$('#type-name-input')
+    .bind("focus", function() { 
+        globalListener.stop_listening(); 
+        mainListener.stop_listening();
+        functionSearchListener.stop_listening();
+        typeSearchListener.listen();
+    })
+    .bind("blur", function() { 
+        globalListener.listen(); 
+        mainListener.listen();
+        functionSearchListener.stop_listening();
+        typeSearchListener.stop_listening();
+    });

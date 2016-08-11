@@ -28,9 +28,10 @@ var analysis_ctrl = {
   tabStackInfoClicked: tabStackInfoClicked,
   tabMnemonicDescClicked: tabMnemonicDescClicked,
   tabIacaClicked: tabIacaClicked,
+  tabTypeInfoClicked: tabTypeInfoClicked,
   startIaca: startIaca,
   runIaca: runIaca,
-  clearIaca: clearIaca
+  clearIaca: clearIaca,
 };
 
 // The current call stack being displayed in the analysis tab
@@ -137,6 +138,11 @@ function tabIacaClicked(event, model) {
     assembly.in_iaca = true;
   }
   _tabClicked(".tab-iaca"); 
+}
+
+function tabTypeInfoClicked(event, model) {
+  assembly.in_iaca = true;
+  _tabClicked(".tab-type-info");
 }
 /********** end tab click functions **********/
 
@@ -292,3 +298,36 @@ function escapeHtml(str) {
   div.appendChild(document.createTextNode(str));
   return div.innerHTML;
 }
+
+rivets.formatters.typeDataToList = function(typeData) {
+  var list = [];
+  for (var type in typeData) {
+    list.push(type);
+  }
+  return list;
+}
+
+function typeClicked(e, model) {
+  // JS is doing this really weird thing where it tries running this function before anything is
+  // actually clicked. Since there is no actual event or model yet, the function just breaks...
+  // To avoid that, we check to make sure e and model are valid before doing anything.
+  if (e && model) {
+    var typeName = model.type;
+    var typeData = type_ctrl.typeData[typeName];
+    console.log(typeData);
+    type_ctrl.selected_type = typeData;
+  }
+}
+
+// When the type name input is changed, clear the current list of matching type names, and replace
+// it with the new request.
+$('#type-name-input').on('keyup', function() {
+  var query = this.value.toLowerCase();
+  type_ctrl.typeDataQueried = [];
+  // Iterate through the list of types to find matches.
+  for (var i = 0; i < type_ctrl.typeDataList.length; i++) {
+    if (type_ctrl.typeDataList[i].toLowerCase().indexOf(query) != -1) {
+      type_ctrl.typeDataQueried.push(type_ctrl.typeDataList[i]);
+    }
+  }
+});

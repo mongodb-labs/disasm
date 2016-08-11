@@ -20,6 +20,7 @@ var URL_FUNCTION_ASSEMBLY = '/get_function_assembly';
 var URL_REG_CONTENTS = '/get_reg_contents';
 var URL_GET_CSTRING = '/get_data_as_cstring';
 var URL_JUMPTABLE = '/get_jumptable';
+var URL_GET_TYPES = '/get_types';
 
 // enums for register tracking/highlighting
 var READS_REG = 0;
@@ -41,12 +42,23 @@ var assembly_ctrl = {
   instructionClicked: instructionClicked 
 }
 
+var type_ctrl = {
+  typeData: [],
+  typeClicked: typeClicked,
+  typeDataQueried: [],
+  selected_type: null,
+};
+
 rivets.formatters.isEmptyStr = function(value) {
   return value == "";
 }
 
 var rivetsAssemblyView = rivets.bind($("#function-disasm"), 
   {assembly: assembly, ctrl: assembly_ctrl}
+);
+
+var rivetsAnalysisView = rivets.bind($('#tab-type-info'),
+  {type_ctrl: type_ctrl}
 );
 
 assembly.instructions_loading = true;
@@ -432,6 +444,26 @@ function get_function_assembly() {
     }).done(function(data){
       handleRegisterContent(data, st_value);
       console.log(data)
+    });
+
+    // load type data.
+    var typeData;
+    $.get(URL_GET_TYPES, {
+      filename: assembly.filename,
+      addr: assembly.contents[0]['address']
+    })
+    .done(function(data) {
+      console.log("Done loading type data.");
+      typeData = data;
+    })
+    .fail(function() {
+      console.log("Unable to load type data.");
+      typeData = [];
+    })
+    .always(function() {
+      type_ctrl.typeDataList = rivets.formatters.typeDataToList(typeData);
+      type_ctrl.typeData = typeData;
+      type_ctrl.typeDataQueried = [];
     });
 
     // preload DIE info from server

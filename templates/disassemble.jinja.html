@@ -145,6 +145,10 @@
           rv-on-click='ctrl.tabIacaClicked'>
           IACA
         </span>
+        <span class='tab tab-type-info'
+          rv-on-click='ctrl.tabTypeInfoClicked'>
+          Type information
+        </span>
       </div>
     </div>
 
@@ -203,6 +207,12 @@
 
       <pre class='ten columns' id='iaca-contents'></pre>
     </div>  
+
+    <div class="tab-content tab-type-info" id="tab-type-info">
+      <div class='type-search'>
+        {% include 'type_search.partial.html' %}
+      </div>
+    </div>
   </div> {# end function analysis #}
   </main>
 

@@ -22,6 +22,7 @@ from bisect import bisect_right
 from symbol_lookup import get_sub_symbol
 from dwarf_expr import describe_DWARF_expr, set_global_machine_arch, OpPiece
 import jump_tables as jt
+from die_information import DIEInformation
 
 """
 Base class for executables
@@ -81,6 +82,8 @@ class ElfExecutable(Executable):
             self.aranges = None
 
         self.CU_offset_to_DIE = {}
+        # { addr -> { type -> die } }
+        self.type_dies = {}
 
     def get_bytes(self, start, n):
         self.f.seek(start)
@@ -490,6 +493,31 @@ class ElfExecutable(Executable):
     def get_jumptable_switch_reg(self, instrs):
         return jt.get_switch_register(instrs)
 
+    # Returns a dict of type names to type information, or None if .dwarf_info or .dwarf_aranges is
+    # not available
+    def get_type_info(self, addr):
+        if self.dwarff is None or self.aranges is None:
+            return None
+        CU_offset = self.aranges.cu_offset_at_addr(addr)
+        CU = self.dwarff._parse_CU_at_offset(CU_offset)
+
+        # WARNING: THIS IS WRONG.
+        # Currently, this assumes that if type_dies is not None, then it's correct. This may not be
+        # true when a new function from a different CU is loaded. Please please please handle this.
+        if self.type_dies.get(addr) is not None:
+            return self.type_dies.get(addr)
+
+        # self.type_dies = {}
+        type_dies = {}
+        for die in CU.iter_DIEs():
+            # For some reason, some die tags are ints...
+            if type(die.tag) is str and 'type' in die.tag:
+                dieInfo = DIEInformation(die)
+                if dieInfo:
+                    # self.type_dies.append(dieInfo)
+                    type_dies[dieInfo['name']] = dieInfo
+        self.type_dies[addr] = type_dies
+        return type_dies
 
 """
 Mach-o executable

@@ -355,10 +355,15 @@ def get_jumptable():
         return jsonify({"switch_reg": switch_reg, "jumptable" : jumptable})
 
 
+@app.route('/get_types', methods=["GET"])
+def get_types():
+    filename = request.args['filename']
+    addr = request.args['addr']
+    if not executables.get(filename):
+        loadExec(filename)
+    executable = executables[filename]
+    return jsonify(executable.get_type_info(addr))
 
 # debug=True auto reloads whenever server code changes
 if __name__ == '__main__':
     app.run(debug=True, port=8000)
-
-
-
