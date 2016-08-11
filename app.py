@@ -257,6 +257,8 @@ def get_substring_matches():
 def get_DIE_info():
     address = int(request.args['address'])
     filename = request.args['filename']
+    if not executables.get(filename):
+        loadExec(filename)
     return jsonify(executables.get(filename).get_addr_stack_info(address))
 
 # expects {"src_path": "", "lineno": ""}
