@@ -234,6 +234,9 @@ class ElfExecutable(Executable):
     # a helper function for get_function_reg_contents;
     # add the given location piece to the reg_contents accumulator 
     def _update_reg_contents(self, reg_contents, begin_addr, end_addr, loc_pieces, name):
+        # only used for variables that are split between registers
+        prev_size = 0
+        this_offset = 0
         for piece in loc_pieces:
             # sometimes it's just a const??? why????
             if not isinstance(piece, OpPiece):
@@ -252,7 +255,10 @@ class ElfExecutable(Executable):
                     "name": name,
                     "value": piece.value,
                     "size": piece.size,
+                    "var_offset": this_offset if piece.size else None,
                     });
+            prev_size = piece_size
+            this_offset += piece_size
         return reg_contents
 
     # get the mappings of registers -> variables, where available, in the given function

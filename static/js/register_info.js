@@ -232,9 +232,18 @@ function _handleRegisterContent(data, objData) {
 
 // get a variable's true name and register (+offset); 
 // use objData to replace offsets with member names
-function get_variable_display(instrPtr, variableLoc, objData) {
+function get_variable_display(instrPtr, variableLoc, objData) {  
   var varName = variableLoc.name
   var varLoc = variableLoc.value
+
+  // resolve structs that are split between registers
+  if (objData[varName] && variableLoc.hasOwnProperty('var_offset') && variableLoc['var_offset'] != null) {
+    var offset = variableLoc['var_offset'];
+    var name = varName + "." + objData[varName][offset];
+    return name + "=" + "<span class='reg'>" + varLoc + "</span>";
+  }
+
+  // resolve names for xword ptrs
   if (objData[varName] && instrPtr) {
     var reg = instrPtr[0]
     var offset = instrPtr[2] != "" ? parseInt(instrPtr[2], 16) : 0;
