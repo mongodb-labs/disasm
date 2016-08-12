@@ -18,7 +18,7 @@ from os import listdir
 from os.path import isfile, join
 import datetime
 from documentation import get_documentation
-import json
+import json, math
 from binascii import hexlify
 from struct import unpack
 
@@ -203,24 +203,24 @@ def jsonify_capstone(data):
         # If this instruction contains a rip-relative address, then assign the relevant data
         if i.rip:
             row['rip'] = True
-            row['rip-offset'] = i.rip_offset
-            row['rip-resolved'] = i.rip_resolved
+            row['rip-offset'] = i.rip_offset if not math.isnan(i.rip_offset) else "NaN"
+            row['rip-resolved'] = i.rip_resolved if not math.isnan(i.rip_resolved) else "NaN"
             row['rip-value-ascii'] = i.rip_value_ascii
             row['rip-value-hex'] = i.rip_value_hex
-            row['rip-value-signed-8'] = i.signed_8
-            row['rip-value-signed-16'] = i.signed_16
-            row['rip-value-signed-32'] = i.signed_32
-            row['rip-value-signed-64'] = i.signed_64
-            row['rip-value-unsigned-8'] = i.unsigned_8
-            row['rip-value-unsigned-16'] = i.unsigned_16
-            row['rip-value-unsigned-32'] = i.unsigned_32
-            row['rip-value-unsigned-64'] = i.unsigned_64
-            row['rip-value-hex-8'] = i.hex_8
-            row['rip-value-hex-16'] = i.hex_16
-            row['rip-value-hex-32'] = i.hex_32
+            row['rip-value-signed-8'] = i.signed_8 if not math.isnan(i.signed_8) else "NaN"
+            row['rip-value-signed-16'] = i.signed_16 if not math.isnan(i.signed_16) else "NaN"
+            row['rip-value-signed-32'] = i.signed_32 if not math.isnan(i.signed_32) else "NaN"
+            row['rip-value-signed-64'] = i.signed_64 if not math.isnan(i.signed_64) else "NaN"
+            row['rip-value-unsigned-8'] = i.unsigned_8 if not math.isnan(i.unsigned_8) else "NaN"
+            row['rip-value-unsigned-16'] = i.unsigned_16 if not math.isnan(i.unsigned_16) else "NaN"
+            row['rip-value-unsigned-32'] = i.unsigned_32 if not math.isnan(i.unsigned_32) else "NaN"
+            row['rip-value-unsigned-64'] = i.unsigned_64 if not math.isnan(i.unsigned_64) else "NaN"
+            row['rip-value-hex-8'] = i.hex_8 
+            row['rip-value-hex-16'] = i.hex_16 
+            row['rip-value-hex-32'] = i.hex_32 
             row['rip-value-hex-64'] = i.hex_64
-            row['rip-value-float'] = i.float
-            row['rip-value-double'] = i.double
+            row['rip-value-float'] = i.float if not math.isnan(i.float) else "NaN"
+            row['rip-value-double'] = i.double if not math.isnan(i.double) else "NaN"
         if i.jump_table:
             row['jump-table'] = i.jump_table
         if i.internal_jump: 

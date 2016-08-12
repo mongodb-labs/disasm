@@ -467,8 +467,11 @@ function get_function_assembly() {
     });
 
   })
-  .fail(function(data) {
-    console.log("Request failed");
+  .fail(function(xhr, options, err) {
+    assembly.instructions_loading = false;
+    console.log(xhr);
+    console.log(options)
+    console.log(err)
   });
 
   return false;
