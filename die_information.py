@@ -16,8 +16,6 @@ from elftools.dwarf.die import DIE
 
 class DIEInformation(dict):
     def __init__(self, die):
-        print die
-
         # If a type is unnamed, then it's likely a pointer, const, ref, etc. We really only care
         # about the type that it actually identifies, which will later be identified. As such, we
         # can reasonably skip unnamed types, as we don't care about pointers, references, etc.
@@ -43,7 +41,7 @@ class DIEInformation(dict):
 
                     # member name
                     if child.attributes.get('DW_AT_name'):
-                        member['name'] = child.attributes.get('DW_AT_name')
+                        member['name'] = child.attributes.get('DW_AT_name').value
                     else:
                         member['name'] = "Cannot find the name of this member"
 
@@ -57,6 +55,8 @@ class DIEInformation(dict):
                     # member offset
                     if child.attributes.get('DW_AT_data_member_location'):
                         member['offset'] = child.attributes.get('DW_AT_data_member_location').value
+                    elif child.attributes.get('DW_AT_external'):
+                        member['offset'] = "Static variable. No offset data available"
                     else:
                         member['offset'] = "Cannot find the offset of this member"
 
@@ -84,7 +84,6 @@ class DIEInformation(dict):
 def getSubtype(die):
     subtype = die
     while subtype.attributes.get('DW_AT_type'):
-        print subtype.offset - subtype.cu.cu_offset
         subtypeRef = subtype.attributes.get('DW_AT_type').value
         subtype = DIE(subtype.cu, subtype.stream, subtype.cu.cu_offset + subtypeRef)
         if subtype.attributes.get('DW_AT_name'):

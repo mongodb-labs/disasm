@@ -4,15 +4,22 @@
 <div id="selected-type">
   <div class="type-attr">Name: <span rv-text="type_ctrl.selected_type.name"></span></div>
   <div class="type-attr">Size: <span rv-text="type_ctrl.selected_type.size"></span></div>
-  <div class="type-attr">Subtype: <span rv-text="type_ctrl.selected_type.subtype"></span></div>
+  <div class="type-attr">Subtype: 
+    <span class="type" 
+    rv-text="type_ctrl.selected_type.subtype"
+    rv-on-click="type_ctrl.selectedTypeClicked"></span>
+  </div>
   <div class="type-attr">Tag: <span rv-text="type_ctrl.selected_type.tag"></span></div>
   <div class="members">Members:
     <ul>
       <li class="type-attr"
         rv-each-member="type_ctrl.selected_type.members">
-          <span class="type-member-attribute" rv-text="type.name"></span>
+          <span class="type-member-attribute" rv-text="member.name"></span>
           <div class="type-member-collapsible">
-            <span class="type-member-attribute">Type: { member.type }</span>
+            <span class="type-member-attribute">Type: 
+              <span class="type" 
+              rv-on-click="type_ctrl.memberTypeClicked">{ member.type }</span>
+            </span>
             <span class="type-member-attribute">Offset: { member.offset }</span>
           </div>
       </li>
@@ -26,11 +33,11 @@
   </div>
 
   <a rv-each-type="type_ctrl.typeDataQueried"
-    class="type"
+    class="type-wrapper"
     rv-data-name="type"
     rv-data-index="index"
     rv-on-click="type_ctrl.typeClicked">
-    <span rv-text="type">
+    <span class="type" rv-text="type">
     </span>
   </a>
 

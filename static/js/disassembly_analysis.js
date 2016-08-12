@@ -313,13 +313,30 @@ function typeClicked(e, model) {
   if (e && model) {
     var typeName = model.type;
     var typeData = type_ctrl.typeData[typeName];
-    console.log(typeData);
     type_ctrl.selected_type = typeData;
   }
 
   // Readmore is a library for creating collapsible and expandible blocks of text
   // collapsedHeight: 0 -- the div will by default show nothing until it is expanded 
   $('.type-member-collapsible').readmore({collapsedHeight: 0});
+}
+
+function memberTypeClicked(e, model) {
+  var typeName = model.member.type;
+  var typeData = type_ctrl.typeData[typeName];
+  if (typeData)
+    type_ctrl.selected_type = typeData;
+  else
+    return;
+}
+
+function selectedTypeClicked(e, model) {
+  var typeName = model.type_ctrl.selected_type.subtype;
+  var typeData = type_ctrl.typeData[typeName];
+  if (typeData)
+    type_ctrl.selected_type = typeData;
+  else
+    return;
 }
 
 // When the type name input is changed, clear the current list of matching type names, and replace

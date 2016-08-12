@@ -47,6 +47,8 @@ var type_ctrl = {
   typeClicked: typeClicked,
   typeDataQueried: [],
   selected_type: null,
+  memberTypeClicked: memberTypeClicked,
+  selectedTypeClicked: selectedTypeClicked,
 };
 
 rivets.formatters.isEmptyStr = function(value) {

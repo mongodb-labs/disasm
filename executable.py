@@ -511,8 +511,6 @@ class ElfExecutable(Executable):
             if index > 128:
                 break
             curr_byte = self.get_bytes(file_offset + index, 1)
-        print repr(cstring)
-        print index
         return repr(cstring)
 
     def get_jumptable(self, instrs, functionStart, functionEnd):
@@ -549,3 +547,8 @@ class MachoExecutable(Executable):
     def __init__(self, f):
         super(MachoExecutable, self).__init__(f)
 
+if __name__ == '__main__':
+    filename = '/Users/danharel/Downloads/mongodb-linux-x86_64-amazon-methias/mongod'
+    with open(filename, 'rb') as f:
+        ex = ElfExecutable(f)
+        ex.get_type_info(0xafd620)

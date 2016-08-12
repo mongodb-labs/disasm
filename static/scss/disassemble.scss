@@ -494,14 +494,12 @@ $jump-color1: rgb(255,245,157);
 	float:right;
 }
 .type {
-	display: block;
+	/*display: block;*/
 	text-decoration: none;
 	color: black;
-	padding-bottom: 15px;
 
 	font-family: "Space Mono", monospace;
-	cursor: pointer;
-	margin-bottom: 15px;
+	cursor: pointer;	
 	@include wrap-text;
 
 	width: 50%;
@@ -529,6 +527,11 @@ $type-bg: rgb(178,223,219);
 
 .type-attr {
 	display: block;
+}
+
+.type-wrapper {
+	display: block;
+	margin-bottom: 15px;
 }
 
 .type-member-attribute {
