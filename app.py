@@ -84,6 +84,7 @@ js_disassemble = Bundle(
     'js/tipr.js',
     'js/register_info.js',
     'js/disassemble_shortcuts.js',
+    'js/readmore.min.js',
     output='generated/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
 
@@ -383,7 +384,7 @@ def get_jumptable():
 @app.route('/get_types', methods=["GET"])
 def get_types():
     filename = request.args['filename']
-    addr = request.args['addr']
+    addr = int(request.args['addr'])
     if not executables.get(filename):
         loadExec(filename)
     executable = executables[filename]

@@ -316,6 +316,10 @@ function typeClicked(e, model) {
     console.log(typeData);
     type_ctrl.selected_type = typeData;
   }
+
+  // Readmore is a library for creating collapsible and expandible blocks of text
+  // collapsedHeight: 0 -- the div will by default show nothing until it is expanded 
+  $('.type-member-collapsible').readmore({collapsedHeight: 0});
 }
 
 // When the type name input is changed, clear the current list of matching type names, and replace

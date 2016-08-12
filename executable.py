@@ -529,20 +529,15 @@ class ElfExecutable(Executable):
         CU_offset = self.aranges.cu_offset_at_addr(addr)
         CU = self.dwarff._parse_CU_at_offset(CU_offset)
 
-        # WARNING: THIS IS WRONG.
-        # Currently, this assumes that if type_dies is not None, then it's correct. This may not be
-        # true when a new function from a different CU is loaded. Please please please handle this.
         if self.type_dies.get(addr) is not None:
             return self.type_dies.get(addr)
 
-        # self.type_dies = {}
         type_dies = {}
         for die in CU.iter_DIEs():
             # For some reason, some die tags are ints...
             if type(die.tag) is str and 'type' in die.tag:
                 dieInfo = DIEInformation(die)
                 if dieInfo:
-                    # self.type_dies.append(dieInfo)
                     type_dies[dieInfo['name']] = dieInfo
         self.type_dies[addr] = type_dies
         return type_dies

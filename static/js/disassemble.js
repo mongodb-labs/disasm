@@ -450,7 +450,7 @@ function get_function_assembly() {
     var typeData;
     $.get(URL_GET_TYPES, {
       filename: assembly.filename,
-      addr: assembly.contents[0]['address']
+      addr: parseInt(assembly.contents[0]['address'], 16)
     })
     .done(function(data) {
       console.log("Done loading type data.");

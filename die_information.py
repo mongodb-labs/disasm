@@ -39,22 +39,35 @@ class DIEInformation(dict):
         if die.has_children:
             for child in die.iter_children():
                 if child.tag == 'DW_TAG_member':
-                    print child
-                    memberRef = child.attributes.get('DW_AT_type').value
-                    memberType = DIE(die.cu, die.stream, die.cu.cu_offset + memberRef)
-                    child = {'name': None, 'type': None}
-                    if memberType.attributes.get('DW_AT_name'):
-                        members.append(memberType.attributes.get('DW_AT_name').value)
+                    member = {'name': None, 'type': None, 'offset': None}
+
+                    # member name
+                    if child.attributes.get('DW_AT_name'):
+                        member['name'] = child.attributes.get('DW_AT_name')
                     else:
-                        subtype = getSubtype(memberType)
-                        if subtype:
-                            members.append(subtype)
-                        else:
-                            members.append("Cannot determine the type of this member")
+                        member['name'] = "Cannot find the name of this member"
+
+                    # member type
+                    childType = getSubtype(child)
+                    if childType:
+                        member['type'] = childType
+                    else:
+                        member['type'] = "Cannot find the type of this member"
+
+                    # member offset
+                    if child.attributes.get('DW_AT_data_member_location'):
+                        member['offset'] = child.attributes.get('DW_AT_data_member_location').value
+                    else:
+                        member['offset'] = "Cannot find the offset of this member"
+
+                    members.append(member)
+
                 elif child.tag == 'DW_TAG_subprogram':
-                    print child
+                    # member function
+                    pass
                 else:
-                    print child
+                    # neither a member variable nor a member function
+                    pass
 
         dict.__init__(self, 
             tag=tag,

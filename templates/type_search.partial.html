@@ -9,8 +9,12 @@
   <div class="members">Members:
     <ul>
       <li class="type-attr"
-        rv-each-member="type_ctrl.selected_type.members"
-        rv-text="member">
+        rv-each-member="type_ctrl.selected_type.members">
+          <span class="type-member-attribute" rv-text="type.name"></span>
+          <div class="type-member-collapsible">
+            <span class="type-member-attribute">Type: { member.type }</span>
+            <span class="type-member-attribute">Offset: { member.offset }</span>
+          </div>
       </li>
     </ul>
   </div>
