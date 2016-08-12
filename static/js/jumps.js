@@ -20,7 +20,13 @@ var jumptable = {
   switch_reg: "",
   active_jump_from: "",
   jump_to: function(event, model) {
-    updateActiveInstr(model.jump.address);
+    if (!assembly.in_iaca) {
+      updateActiveInstr(model.jump.address);
+    }
+    else if (assembly.in_iaca) {
+      handleIacaJumpTo(model.jump.address);
+      hideJumptable();
+    }
   },
 }
 
@@ -208,6 +214,19 @@ function handleJumpTable(i) {
 }
 
 function showJumptable() {
+  if (jumptable.show_jumptable) {
+    // clear animation and reset after a (short) timeout
+    $("#jumptable-info").css({
+      "-webkit-animation": "none",
+      "animation": "none",
+    });
+    setTimeout(function() {
+      $("#jumptable-info").css({
+        "-webkit-animation": "",
+        "animation": "",
+      });
+    }, 10);
+  } 
   jumptable.show_jumptable = true;
 }
 

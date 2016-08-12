@@ -50,6 +50,7 @@ assets.register('functions_css', functions_scss)
 disassemble_scss = Bundle(
     'scss/general.scss',
     'scss/disassemble.scss',
+    'css/bounce.css',
     filters='pyscss', 
     output='generated/disassemble_all.css')
 assets.register('disassemble_css', disassemble_scss)

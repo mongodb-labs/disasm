@@ -424,6 +424,7 @@ $jump-color1: rgb(255,245,157);
 	}
 }
 
+
 #jumptable-info {
 	position: absolute;
 	font-family: "Inconsolata", monospace;
@@ -437,6 +438,10 @@ $jump-color1: rgb(255,245,157);
 	background: white;
 
 	border: 1px solid;
+
+	// in bounce.css
+  -webkit-animation: jelly 1000ms linear both; 
+  animation: jelly 1000ms linear both;
 
 	.content {
 		margin-left: 15px;
@@ -467,10 +472,7 @@ $jump-color1: rgb(255,245,157);
 		font-weight: bold;
 		cursor: pointer;
 	}
-
-
 }
-
 
 /****************** Context Menu ******************/
 .context-menu-list {
@@ -484,6 +486,7 @@ $jump-color1: rgb(255,245,157);
 .context-menu-submenu:after {
 	content: "▶";
 }
+
 
 /****************** Type Search *******************/
 #selected-type {

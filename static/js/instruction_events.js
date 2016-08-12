@@ -109,7 +109,10 @@ function appendIacaBytes(e, model) {
   if (analysis.iaca_bytes.length == 0) {
     instruc.style.backgroundColor = bgColor;
     analysis.iaca_bytes.push(model.i);
-    if (model.i['internal-jump'] && model.i.jumpTo) {
+    if (model.i['jump-table']) {
+      showJumptable();
+    }
+    else if (model.i['internal-jump'] && model.i.jumpTo) {
       handleIacaJumpTo(model.i.jumpTo[0], bgColor);
     }
     return;
@@ -126,7 +129,10 @@ function appendIacaBytes(e, model) {
   }
 
   // if you clicked a jump, also add the jumpTo instruction
-  if (this_index > last_index && model.i['internal-jump'] && model.i.jumpTo) {
+  if (this_index > last_index && model.i['jump-table']) {
+    showJumptable();
+  }
+  else if (this_index > last_index && model.i['internal-jump'] && model.i.jumpTo) {
     handleIacaJumpTo(model.i.jumpTo[0], bgColor)
   }
 
@@ -134,6 +140,10 @@ function appendIacaBytes(e, model) {
 
 // only called in appendIacaBytes; handle scrolling and bg highlighting of jumpTo instruc
 function handleIacaJumpTo(targetAddr, bgColor) {
+  if (!bgColor) {
+    bgColor = 'rgb(200,230,201)';
+  }
+  
   scrollToJump(targetAddr);
   var jumpToObj = assembly.contents.filter(function(i) {
     return i.address == targetAddr;
