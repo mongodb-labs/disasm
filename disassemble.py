@@ -81,27 +81,31 @@ def disasm(exe, bytes, offset=0):
                     instr.rip_offset = op.mem.disp
                     instr.rip_resolved = disassembled[i+1].address + instr.rip_offset
 
+                    # file offset depends on section
+                    section = exe.get_section_from_offset(instr.rip_resolved)
+                    file_offset = instr.rip_resolved - section["sh_addr"] + section["sh_offset"]
+
                     # Read in and unpack the first byte at the offset
-                    val_8 = exe.get_bytes(instr.rip_resolved, 1)
+                    val_8 = exe.get_bytes(file_offset, 1)
                     instr.signed_8 = unpack('b', val_8)[0]
                     instr.unsigned_8 = unpack('B', val_8)[0]
                     instr.hex_8 = hex(instr.unsigned_8)
 
                     # Read in and unpack the first two bytes at the offset
-                    val_16 = exe.get_bytes(instr.rip_resolved, 2)
+                    val_16 = exe.get_bytes(file_offset, 2)
                     instr.signed_16 = unpack('h', val_16)[0]
                     instr.unsigned_16 = unpack('H', val_16)[0]
                     instr.hex_16 = hex(instr.unsigned_16)
 
                     # Read in and unpack the first four bytes at the offset
-                    val_32 = exe.get_bytes(instr.rip_resolved, 4)
+                    val_32 = exe.get_bytes(file_offset, 4)
                     instr.signed_32 = unpack('i', val_32)[0]
                     instr.unsigned_32 = unpack('I', val_32)[0]
                     instr.hex_32 = hex(instr.unsigned_32)
                     instr.float = unpack('f', val_32)[0]
 
                     # Read in and unpack the first eight bytes at the offset
-                    val_64 = exe.get_bytes(instr.rip_resolved, 8)
+                    val_64 = exe.get_bytes(file_offset, 8)
                     instr.signed_64 = unpack('q', val_64)[0]
                     instr.unsigned_64 = unpack('Q', val_64)[0]
                     instr.hex_64 = hex(instr.unsigned_64)
@@ -120,7 +124,7 @@ def disasm(exe, bytes, offset=0):
                         #     isntr.rip_resolved - symbol['st_value'])
                         if field_name:
                             instr.comment += '.' + field_name
-                    bytes = exe.get_bytes(instr.rip_resolved, op.size)
+                    bytes = exe.get_bytes(file_offset, op.size)
                     instr.rip_value_hex = ""
                     space = ""
                     for char in bytes:

@@ -89,6 +89,16 @@ class ElfExecutable(Executable):
         self.f.seek(start)
         return self.f.read(n)
 
+    def get_section_from_offset(self, offset):
+        dest_section = None
+        dest_section_addr = 0
+        for section in self.elff.iter_sections():
+            if section['sh_addr'] < offset and section['sh_addr'] > dest_section_addr:
+                dest_section = section
+                dest_section_addr = section['sh_addr']
+        return dest_section
+
+
     def get_all_functions(self):
         function_syms = self.get_function_syms()
 
