@@ -12,13 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime, json, math, time
 from capstone import Cs, CsError, CS_ARCH_X86, CS_MODE_64, x86, CS_OPT_SYNTAX_ATT
 from demangler import demangle
+from documentation import get_documentation
 from os import listdir
 from os.path import isfile, join
-import datetime
-from documentation import get_documentation
-import json, math
 from binascii import hexlify
 from struct import unpack
 
@@ -46,6 +45,7 @@ def disasm(exe, bytes, offset=0):
 
                 # We can only decode the destination if it's an immediate value
                 elif instr.operands[0].type == x86.X86_OP_IMM:
+                    starttime = time.clock()
                     # Ignore if it's a jump/call to an address within this function
                     func_start_addr = disassembled[0].address
                     func_end_addr = disassembled[len(disassembled)-1].address
@@ -62,13 +62,18 @@ def disasm(exe, bytes, offset=0):
                             sect_addr = text_sect['sh_addr']
                             sect_offset = text_sect['sh_offset']
                             
-                            instr.external_jump = True
-                            instr.jump_address = dest_addr
-                            instr.jump_function_name = demangle(symbol.name)
-                            instr.jump_function_address = dest_addr
-                            instr.jump_function_offset = dest_addr - sect_addr + sect_offset
-                            instr.jump_function_size = symbol['st_size']
                             instr.comment = demangle(symbol.name)
+                            # only follow call address if it is a known location
+                            if symbol['st_size'] > 0:
+                                instr.external_jump = True
+                                instr.jump_address = symbol["st_value"]
+                                instr.jump_function_name = demangle(symbol.name)
+                                instr.jump_function_address = symbol["st_value"]
+                                instr.jump_function_offset = symbol["st_value"] - sect_addr + sect_offset
+                                instr.jump_function_size = symbol['st_size']
+                            
+                    print ("call time is " + str(time.clock() - starttime))
+
             if instr.group(x86.X86_GRP_RET):
                 instr.return_type = True
             # Handle individual operands
@@ -115,14 +120,10 @@ def disasm(exe, bytes, offset=0):
                     symbol, field_name = exe.get_symbol_by_addr(
                         instr.rip_resolved, 
                         instr.address,
+                        instr_size=op.size,
                         get_sub_symbol=True)
                     if symbol:
                         instr.comment = demangle(symbol.name)
-
-                        # field_name = exe.get_member_name(
-                        #     symbol.name.split(':')[-1],
-                        #     instr.address,
-                        #     isntr.rip_resolved - symbol['st_value'])
                         if field_name:
                             instr.comment += '.' + field_name
                     bytes = exe.get_bytes(file_offset, op.size)
@@ -184,6 +185,21 @@ def disasm(exe, bytes, offset=0):
                     f.write('[{}] : {} : {} : {}\n'.format(str(datetime.datetime.now()), instr.mnemonic, instr.docfile, instr.short_desc))
         return disassembled
 
+    except CsError as e:
+        print("ERROR: %s" %e)
+
+def disasm_plt(bytes, offset=0):
+    try:
+        md = Cs(CS_ARCH_X86, CS_MODE_64)
+        md.detail = True
+        disassembled = list(md.disasm(bytes, offset))
+        instruc = disassembled[0]
+
+        # get rip relative address
+        for op in instruc.operands:
+            if op.type == x86.X86_OP_MEM and op.mem.base == x86.X86_REG_RIP:
+                return disassembled[1].address + op.mem.disp, op.size
+        return None, None
     except CsError as e:
         print("ERROR: %s" %e)
 

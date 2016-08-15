@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import sys
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
+from elftools.elf.relocation import RelocationHandler
 from elftools.dwarf.descriptions import describe_form_class
 from elftools.dwarf.die import DIE
 from demangler import demangle
@@ -23,6 +23,7 @@ from symbol_lookup import get_sub_symbol
 from dwarf_expr import describe_DWARF_expr, set_global_machine_arch, OpPiece
 import jump_tables as jt
 from die_information import DIEInformation, reset_die_list
+import resolve_relocations as relocs
 
 """
 Base class for executables
@@ -471,12 +472,13 @@ class ElfExecutable(Executable):
     #   (symbol_name, sub_symbol)
     #   sub_symbol will always be None if get_sub_symbol is false or if .dwarf_info or 
     #   .dwarf_aranges doesn't exist
-    def get_symbol_by_addr(self, symbol_addr, instr_addr, get_sub_symbol=False):
+    def get_symbol_by_addr(self, symbol_addr, instr_addr, instr_size=0, get_sub_symbol=False):
         symtab = self.elff.get_section_by_name('.symtab')
         if self._symbol_addr_map is None:
             self._symbol_addr_map = list(symtab.iter_symbols())
             self._symbol_addr_map.sort(key=lambda symbol: symbol.entry['st_value'])
             self._symbol_addr_map_keys = [symbol.entry['st_value'] for symbol in self._symbol_addr_map]
+        
         index = bisect_right(self._symbol_addr_map_keys, symbol_addr) - 1
         sym = self._symbol_addr_map[index]
         if sym.entry['st_value'] <= symbol_addr < (sym.entry['st_value'] + sym.entry['st_size']):
@@ -488,8 +490,29 @@ class ElfExecutable(Executable):
                 return (sym, member_name,)
             else:
                 return (sym, None)
+
+        # relocation
+        section = self.get_section_from_offset(symbol_addr)
+        sym = None
+        if section.name == ".plt":
+            sym = relocs.resolve_plt(symbol_addr, section, self)
+        elif section.name == ".dyn":
+            print "found a .dyn!!!!"
+        return (sym, None)
+
+    def sym_from_symtab(self, symbol_addr):
+        symtab = self.elff.get_section_by_name('.symtab')
+        if self._symbol_addr_map is None:
+            self._symbol_addr_map = list(symtab.iter_symbols())
+            self._symbol_addr_map.sort(key=lambda symbol: symbol.entry['st_value'])
+            self._symbol_addr_map_keys = [symbol.entry['st_value'] for symbol in self._symbol_addr_map]
+        
+        index = bisect_right(self._symbol_addr_map_keys, symbol_addr) - 1
+        sym = self._symbol_addr_map[index]
+        if sym.entry['st_value'] <= symbol_addr < (sym.entry['st_value'] + sym.entry['st_size']):
+            return sym
         else:
-            return (None, None)
+            return None 
 
     def get_sub_symbol_by_offset(self, symbol_name, offset, instr_addr):
         if self.dwarff is None or self.aranges is None:
@@ -554,8 +577,3 @@ class MachoExecutable(Executable):
     def __init__(self, f):
         super(MachoExecutable, self).__init__(f)
 
-if __name__ == '__main__':
-    filename = '/Users/danharel/Downloads/mongodb-linux-x86_64-amazon-methias/mongod'
-    with open(filename, 'rb') as f:
-        ex = ElfExecutable(f)
-        ex.get_type_info(0xafd620)
