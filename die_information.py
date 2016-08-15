@@ -41,12 +41,12 @@ class MemberInformation(dict):
 
         # member offset
         offsetAttr = child.attributes.get('DW_AT_data_member_location')
-        if offsetAttr and offset is not None:
+        if child.attributes.get('DW_AT_external'):
+            # If a child is external, then it's not an instance variable, so we don't care. Return
+            # None and handle this in the next level up.
+            return None
+        elif offsetAttr and offset is not None:
             offset += offsetAttr.value 
-        elif child.attributes.get('DW_AT_external'):
-            # Later on, we may want to handle this so that we can explicitly show the user that this
-            # member is externally defined.
-            offset = None
         else:
             offset = None
         
@@ -121,8 +121,12 @@ def getMembers(die, offset=0):
         memberInfo = None
         if child.tag == 'DW_TAG_member':
             memberInfo = MemberInformation.member(child, offset)
+            if memberInfo is None:
+                continue
         elif child.tag == 'DW_TAG_inheritance':
             memberInfo = MemberInformation.parent(child, offset)
+            if memberInfo is None:
+                continue
         else:
             continue
         if memberInfo:

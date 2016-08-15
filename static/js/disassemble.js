@@ -63,6 +63,10 @@ var rivetsAssemblyView = rivets.bind($("#function-disasm"),
   {assembly: assembly, ctrl: assembly_ctrl}
 );
 
+rivets.formatters.displayData = function(data) {
+  return data != null && data != undefined;
+}
+
 assembly.instructions_loading = true;
 get_function_assembly();
 
