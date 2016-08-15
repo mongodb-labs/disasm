@@ -141,6 +141,7 @@ function tabIacaClicked(event, model) {
 }
 
 function tabTypeInfoClicked(event, model) {
+  assembly.in_iaca = true;
   _tabClicked(".tab-type-info");
 }
 /********** end tab click functions **********/
@@ -332,15 +333,6 @@ function memberTypeClicked(e, model) {
 
 function selectedTypeClicked(e, model) {
   var typeName = model.type_ctrl.selected_type.subtype;
-  var typeData = type_ctrl.typeData[typeName];
-  if (typeData)
-    type_ctrl.selected_type = typeData;
-  else
-    return;
-}
-
-function selectedParentClicked(e, model) {
-  var typeName = model.type_ctrl.selected_type.parent;
   var typeData = type_ctrl.typeData[typeName];
   if (typeData)
     type_ctrl.selected_type = typeData;

@@ -44,6 +44,8 @@ class MemberInformation(dict):
         if offsetAttr and offset is not None:
             offset += offsetAttr.value 
         elif child.attributes.get('DW_AT_external'):
+            # Later on, we may want to handle this so that we can explicitly show the user that this
+            # member is externally defined.
             offset = None
         else:
             offset = None
@@ -82,12 +84,7 @@ class DIEInformation(dict):
         else:
             subtype = "Cannot find the type"
 
-        members = []
-        if die.has_children:
-            members = getMembers(die,0)
-
-        if name == '_BufBuilder<mongo::StackAllocator>':
-            print members
+        members = getMembers(die)
 
         dict.__init__(self, 
             tag=tag,
@@ -103,23 +100,22 @@ class DIEInformation(dict):
 # If a type defines the DW_AT_type attribute, I call that the subtype.
 # This concept was removed. Say you have a Foo struct. One of its members is of type Foo*. The
 # subtype of this member will show up as Foo. This would cause infinite recursion in 
-# executable._getMembers.
+# executable._getMembers. Instead, this currently only returns the top-level type name, or None if
+# there is no top-level type or if the type does not have a name.
 def getSubtype(die):
-    subtype = die
-    subtypeRef = subtype.attributes.get('DW_AT_type').value
-    subtype = DIE(subtype.cu, subtype.stream, subtype.cu.cu_offset + subtypeRef)
-    if subtype.attributes.get('DW_AT_name'):
-        return subtype.attributes.get('DW_AT_name').value
+    subtype = die.attributes.get('DW_AT_type')
+    if subtype:
+        subtypeRef = subtype.value
     else:
         return None
-    # while subtype.attributes.get('DW_AT_type'):
-    #     subtypeRef = subtype.attributes.get('DW_AT_type').value
-    #     subtype = DIE(subtype.cu, subtype.stream, subtype.cu.cu_offset + subtypeRef)
-    #     if subtype.attributes.get('DW_AT_name'):
-    #         return subtype.attributes.get('DW_AT_name').value
+    die = DIE(die.cu, die.stream, die.cu.cu_offset + subtypeRef)
+    if die.attributes.get('DW_AT_name'):
+        return die.attributes.get('DW_AT_name').value
+    else:
+        return None
 
 # Given a type die, get a list of MemberInformation dicts for the members of that type
-def getMembers(die, offset):
+def getMembers(die, offset=0):
     members = []
     for child in die.iter_children():
         memberInfo = None
@@ -131,9 +127,4 @@ def getMembers(die, offset):
             continue
         if memberInfo:
             members.append(memberInfo)
-            if offset and memberInfo['offset']:
-                _offset = offset + memberInfo['offset']
-                
-            else:
-                _offset = None
     return members

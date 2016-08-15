@@ -16,22 +16,14 @@
         rv-each-member="type_ctrl.selected_type.members">
         <span class="indent" rv-each-depth="member.depth">&emsp;</span>
         {member.name}:
-        <span class="type" 
+        <span class="type"
+        rv-show="member.type"
         rv-on-click="type_ctrl.memberTypeClicked" 
         rv-text="member.type"></span>
+        <span class="type-unknown"
+        rv-hide="member.type">(type unknown)</span>
         &lt;+{member.offset}&gt;
       </li>
-      <!-- <li class="type-attr"
-        rv-each-member="type_ctrl.selected_type.members">
-          <span class="type-member-attribute" rv-text="member.name"></span>
-          <div class="type-member-collapsible">
-            <span class="type-member-attribute">Type: 
-              <span class="type" 
-              rv-on-click="type_ctrl.memberTypeClicked">{ member.type }</span>
-            </span>
-            <span class="type-member-attribute">Offset: { member.offset }</span>
-          </div>
-      </li> -->
     </ul>
   </div>
 </div>

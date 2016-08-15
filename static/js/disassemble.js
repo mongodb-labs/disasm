@@ -49,9 +49,11 @@ var type_ctrl = {
   selected_type: null,
   memberTypeClicked: memberTypeClicked,
   selectedTypeClicked: selectedTypeClicked,
-  selectedParentClicked: selectedParentClicked,
-  test: 6,
 };
+
+var rivetsAnalysisView = rivets.bind($('#tab-type-info'),
+  {type_ctrl: type_ctrl}
+);
 
 rivets.formatters.isEmptyStr = function(value) {
   return value == "";
@@ -59,10 +61,6 @@ rivets.formatters.isEmptyStr = function(value) {
 
 var rivetsAssemblyView = rivets.bind($("#function-disasm"), 
   {assembly: assembly, ctrl: assembly_ctrl}
-);
-
-var rivetsAnalysisView = rivets.bind($('#tab-type-info'),
-  {type_ctrl: type_ctrl}
 );
 
 assembly.instructions_loading = true;
@@ -470,12 +468,15 @@ function get_function_assembly() {
       type_ctrl.typeDataQueried = [];
     });
 
+    // preload DIE info from server
+    $.ajax({
+      type: "GET",
+      url: URL_DIE_INFO + "?address=" + st_value + "&filename=" + assembly.filename
+    });
+
   })
-  .fail(function(xhr, options, err) {
-    assembly.instructions_loading = false;
-    console.log(xhr);
-    console.log(options)
-    console.log(err)
+  .fail(function(data) {
+    console.log("Request failed");
   });
 
   return false;

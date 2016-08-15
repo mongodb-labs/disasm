@@ -537,15 +537,8 @@ class ElfExecutable(Executable):
                 dieInfo = DIEInformation(die)
                 if dieInfo:
                     type_dies[dieInfo['name']] = dieInfo
-                    if dieInfo['name'] == '_BufBuilder<mongo::StackAllocator>':
-                        print die
-                        for child in die.iter_children():
-                            print child
-                            if child.tag == 'DW_TAG_inheritance':
-                                print getSubtype(child)
-                        print dieInfo
-                        import pdb
-                        # pdb.set_trace()
+        # Since type_dies is being both accessed and modified in each iteration, we make a copy so
+        # that the original data can be maintained.
         type_dies_copy = type_dies.copy()
         for typeName, info in type_dies_copy.iteritems():
             type_dies[typeName]['members'] = _getMembers(type_dies.copy(), info['name'], 0, 0, CU)
@@ -556,8 +549,6 @@ class ElfExecutable(Executable):
 
 def _getMembers(typeList, typeName, depth, offset, cu):
     info = typeList[typeName]
-    if typeName == '_BufBuilder<mongo::StackAllocator>':
-            print info['members']
     members_list = []
     for member in info['members']:
         newMember = member.copy()
