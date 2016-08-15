@@ -70,7 +70,7 @@ $heading-bg: rgb(128,203,196);
 	.func-name {
 		font-size: 1.3em;
 		color: white;
-		margin-top: 12px;
+		margin-top: 6px;
 
 		white-space: nowrap;
 		overflow-x: scroll;
@@ -79,9 +79,35 @@ $heading-bg: rgb(128,203,196);
 
 
 /****************** Function search bar ******************/
+$function-input-width: 100%;
+$placeholder-color: rgba(255, 255, 255, 0.6);
+input#function-name-input, 
+input#function-name-input:focus + .bottom-border {
+	width: $function-input-width !important;
+	border-top-color: rgb(0,150,136) !important;
+	border-top-width: 2px;
+	max-width: 575px;
+}
+.bottom-border {
+	width: 0% !important;
+}
+
+::-webkit-input-placeholder {
+	color: $placeholder-color;
+}
+:-moz-placeholder {
+	color: $placeholder-color;
+}
+::-moz-placeholder {
+	color: $placeholder-color;
+}
+:-ms-input-placeholder {
+	color: $placeholder-color;
+}
+
 .function-search {
-	z-index: 99;
 	width: 50%;
+	z-index: 99;
 	margin-left: 20px;
 	font-size: 14px;
 	position: relative;
@@ -95,9 +121,13 @@ $heading-bg: rgb(128,203,196);
 	}
 
   input#function-name-input {
+  	color: white;
   	width: 100%;
   	z-index: 999;
   	height: 30px;
+  	border-bottom-color: ghostwhite;
+  	border-bottom-width: 2px;
+  	font-size: 18px;
   }
 
   #function-search-loading {
@@ -129,21 +159,22 @@ $heading-bg: rgb(128,203,196);
 		display: none; // don't display unless ur focused in the input
 
   	// top-left, top-right, bottom-right, bottom-left
-    -webkit-border-radius: 10px;
-    -moz-border-radius: 10px;
-    border-radius: 10px;
+    -webkit-border-radius: 0px 0px 1px 1px;
+    -moz-border-radius: 0px 0px 1px 1px;
+    border-radius: 0px 0px 1px 1px;
 
-    -webkit-box-shadow: 1px 1px 8px 0px rgba(8,170,199,0.39);
-		-moz-box-shadow: 1px 1px 8px 0px rgba(8,170,199,0.39);
-		box-shadow: 1px 1px 8px 0px rgba(8,170,199,0.39);
+    -webkit-box-shadow: 1px 1px 8px 0px rgba(0,0,0,0.39);
+		-moz-box-shadow: 1px 1px 8px 0px rgba(0,0,0,0.39);
+		box-shadow: 1px 1px 8px 0px rgba(0,0,0,0.39);
 	}
 
 	#functions .function {
 		display: block;
 		text-decoration: none;
 		color: darkslategray;
+		font-family: "Open Sans", "Helvetica Neue", sans-serif;
 
-		padding-left: 5px;
+		padding-left: 12px;
 		padding-top: 5px;
 		margin-bottom: 10px;
 		@include wrap-text;
@@ -291,8 +322,8 @@ $instruc-color-write: rgb(255,171,145);
 
 /****************** Analysis ******************/
 
-$file-selected-bg: aquamarine;
-$source-code-bg1: aquamarine; // highlight relevant line
+$file-selected-bg: rgba(100,255,218, 0.9);
+$source-code-bg1: rgba(100,255,218, 0.9); // highlight relevant line
 #function-analysis {
 	height: 49vh;
 	width: 100%;

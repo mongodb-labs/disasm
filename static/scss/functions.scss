@@ -11,7 +11,8 @@ div#functions-wrapper {
 }
 
 h2.header {
-  padding-top: 30px;
+  padding-top: 40px;
+  margin-bottom: 30px;
 
   .title {
   	font-size: .6em;
@@ -23,9 +24,13 @@ h2.header {
   }
 }
 
-
-#function-name-input {
-	width: 90%;
+$function-input-width: 80%;
+input#function-name-input, 
+input#function-name-input:focus + .bottom-border {
+	width: $function-input-width !important;
+}
+.bottom-border {
+	width: 0% !important;
 }
 
 #function-search-loading {

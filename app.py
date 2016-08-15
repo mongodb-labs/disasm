@@ -43,6 +43,7 @@ assets.register('index_css', index_scss)
 functions_scss = Bundle(
     'scss/general.scss',
     'scss/functions.scss', 
+    'scss/function_input.scss',
     filters='pyscss', 
     output='generated/functions_all.css')
 assets.register('functions_css', functions_scss)
@@ -50,6 +51,7 @@ assets.register('functions_css', functions_scss)
 disassemble_scss = Bundle(
     'scss/general.scss',
     'scss/disassemble.scss',
+    'scss/function_input.scss',
     'css/bounce.css',
     filters='pyscss', 
     output='generated/disassemble_all.css')

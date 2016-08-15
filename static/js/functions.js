@@ -165,10 +165,6 @@ var prevRequest = "";
 // helper for getting functions/pagination of functions
 var functionsRequest;
 function getNextPage(query, curr_index, num_functions) {
-    // If the search request has not changed from the last completed search, then don't bother
-    if (query == prevRequest) {
-      return;
-    }
     searchRequest = query;
     setTimeout(function(){
         if (searchRequest !== query) {

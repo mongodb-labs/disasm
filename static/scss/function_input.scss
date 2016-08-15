@@ -1,0 +1,27 @@
+$main-teal: rgb(0,150,136);
+$border-width: 3px;
+
+input#function-name-input {
+	font-size: 1.5em;
+	background-color: rgba(0,0,0,0);
+
+  border-bottom: solid $border-width lightgray;
+  border-radius: 0;
+  border-left: none;
+  border-top: none;
+  border-right: none;	
+}
+
+// set width in the respective page scss files.
+.bottom-border {
+	transition: width 500ms;
+}
+
+input#function-name-input:focus + .bottom-border {
+	border-top: solid $border-width rgba($main-teal, 0.8);
+  margin: 0;
+  margin-top: -$border-width;
+  clear: both;
+  
+  transition: width 500ms;
+}
