@@ -14,6 +14,53 @@
 
 from elftools.dwarf.die import DIE
 
+class MemberInformation(dict):
+    def __init__(self, name, type, offset):
+        return dict.__init__(self,
+            name=name,
+            type=type,
+            offset=offset,
+            depth=None)
+
+    @staticmethod
+    def member(child, offset):
+        name = None
+        typeName = None
+
+        if child.attributes.get('DW_AT_name'):
+            name = child.attributes.get('DW_AT_name').value
+        else:
+            name = "Cannot find the name of this member"
+
+        # member type
+        childType = getSubtype(child)
+        if childType:
+            typeName = childType
+        else:
+            typeName = None
+
+        # member offset
+        offsetAttr = child.attributes.get('DW_AT_data_member_location')
+        if offsetAttr and offset is not None:
+            offset += offsetAttr.value 
+        elif child.attributes.get('DW_AT_external'):
+            offset = None
+        else:
+            offset = None
+        
+        return MemberInformation(name, typeName, offset)
+
+    @staticmethod
+    def parent(parent_die, offset):
+        if offset:
+            offsetAttr = parent_die.attributes.get('DW_AT_data_member_location')
+            offset = offset.value if offsetAttr else None
+        return MemberInformation(
+            '(parent)',
+            getSubtype(parent_die),
+            offset)
+
+
 class DIEInformation(dict):
     def __init__(self, die):
         # If a type is unnamed, then it's likely a pointer, const, ref, etc. We really only care
@@ -32,42 +79,15 @@ class DIEInformation(dict):
         subtype = None
         if die.attributes.get('DW_AT_type'):
             subtype = getSubtype(die)
+        else:
+            subtype = "Cannot find the type"
 
         members = []
         if die.has_children:
-            for child in die.iter_children():
-                if child.tag == 'DW_TAG_member':
-                    member = {'name': None, 'type': None, 'offset': None}
+            members = getMembers(die,0)
 
-                    # member name
-                    if child.attributes.get('DW_AT_name'):
-                        member['name'] = child.attributes.get('DW_AT_name').value
-                    else:
-                        member['name'] = "Cannot find the name of this member"
-
-                    # member type
-                    childType = getSubtype(child)
-                    if childType:
-                        member['type'] = childType
-                    else:
-                        member['type'] = "Cannot find the type of this member"
-
-                    # member offset
-                    if child.attributes.get('DW_AT_data_member_location'):
-                        member['offset'] = child.attributes.get('DW_AT_data_member_location').value
-                    elif child.attributes.get('DW_AT_external'):
-                        member['offset'] = "Static variable. No offset data available"
-                    else:
-                        member['offset'] = "Cannot find the offset of this member"
-
-                    members.append(member)
-
-                elif child.tag == 'DW_TAG_subprogram':
-                    # member function
-                    pass
-                else:
-                    # neither a member variable nor a member function
-                    pass
+        if name == '_BufBuilder<mongo::StackAllocator>':
+            print members
 
         dict.__init__(self, 
             tag=tag,
@@ -81,10 +101,39 @@ class DIEInformation(dict):
 # DW_TAG_pointer_type with a DW_AT_type attribute that points to DW_TAG_base_type with a
 # DW_AT_name attribute of "int". 
 # If a type defines the DW_AT_type attribute, I call that the subtype.
+# This concept was removed. Say you have a Foo struct. One of its members is of type Foo*. The
+# subtype of this member will show up as Foo. This would cause infinite recursion in 
+# executable._getMembers.
 def getSubtype(die):
     subtype = die
-    while subtype.attributes.get('DW_AT_type'):
-        subtypeRef = subtype.attributes.get('DW_AT_type').value
-        subtype = DIE(subtype.cu, subtype.stream, subtype.cu.cu_offset + subtypeRef)
-        if subtype.attributes.get('DW_AT_name'):
-            return subtype.attributes.get('DW_AT_name').value
+    subtypeRef = subtype.attributes.get('DW_AT_type').value
+    subtype = DIE(subtype.cu, subtype.stream, subtype.cu.cu_offset + subtypeRef)
+    if subtype.attributes.get('DW_AT_name'):
+        return subtype.attributes.get('DW_AT_name').value
+    else:
+        return None
+    # while subtype.attributes.get('DW_AT_type'):
+    #     subtypeRef = subtype.attributes.get('DW_AT_type').value
+    #     subtype = DIE(subtype.cu, subtype.stream, subtype.cu.cu_offset + subtypeRef)
+    #     if subtype.attributes.get('DW_AT_name'):
+    #         return subtype.attributes.get('DW_AT_name').value
+
+# Given a type die, get a list of MemberInformation dicts for the members of that type
+def getMembers(die, offset):
+    members = []
+    for child in die.iter_children():
+        memberInfo = None
+        if child.tag == 'DW_TAG_member':
+            memberInfo = MemberInformation.member(child, offset)
+        elif child.tag == 'DW_TAG_inheritance':
+            memberInfo = MemberInformation.parent(child, offset)
+        else:
+            continue
+        if memberInfo:
+            members.append(memberInfo)
+            if offset and memberInfo['offset']:
+                _offset = offset + memberInfo['offset']
+                
+            else:
+                _offset = None
+    return members

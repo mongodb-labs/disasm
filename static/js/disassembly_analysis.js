@@ -339,6 +339,15 @@ function selectedTypeClicked(e, model) {
     return;
 }
 
+function selectedParentClicked(e, model) {
+  var typeName = model.type_ctrl.selected_type.parent;
+  var typeData = type_ctrl.typeData[typeName];
+  if (typeData)
+    type_ctrl.selected_type = typeData;
+  else
+    return;
+}
+
 // When the type name input is changed, clear the current list of matching type names, and replace
 // it with the new request.
 $('#type-name-input').on('keyup', function() {

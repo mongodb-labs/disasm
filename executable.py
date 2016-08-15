@@ -22,7 +22,7 @@ from bisect import bisect_right
 from symbol_lookup import get_sub_symbol
 from dwarf_expr import describe_DWARF_expr, set_global_machine_arch, OpPiece
 import jump_tables as jt
-from die_information import DIEInformation
+from die_information import DIEInformation, getSubtype
 
 """
 Base class for executables
@@ -537,8 +537,47 @@ class ElfExecutable(Executable):
                 dieInfo = DIEInformation(die)
                 if dieInfo:
                     type_dies[dieInfo['name']] = dieInfo
+                    if dieInfo['name'] == '_BufBuilder<mongo::StackAllocator>':
+                        print die
+                        for child in die.iter_children():
+                            print child
+                            if child.tag == 'DW_TAG_inheritance':
+                                print getSubtype(child)
+                        print dieInfo
+                        import pdb
+                        # pdb.set_trace()
+        type_dies_copy = type_dies.copy()
+        for typeName, info in type_dies_copy.iteritems():
+            type_dies[typeName]['members'] = _getMembers(type_dies.copy(), info['name'], 0, 0, CU)
+
+
         self.type_dies[addr] = type_dies
         return type_dies
+
+def _getMembers(typeList, typeName, depth, offset, cu):
+    info = typeList[typeName]
+    if typeName == '_BufBuilder<mongo::StackAllocator>':
+            print info['members']
+    members_list = []
+    for member in info['members']:
+        newMember = member.copy()
+
+        newMember['depth'] = ['@']*depth
+
+        # Update the offset to be relative to the top-level DIE
+        if offset is not None and newMember['offset'] is not None:
+            newMember['offset'] = newMember['offset'] + offset
+        else:
+            newMember['offset'] = None
+
+        members_list.append(newMember)
+        if member['type']:
+            members_list += _getMembers(typeList, member['type'], depth+1, newMember['offset'], cu)
+    return members_list
+
+def printChildren(die):
+    for child in die.iter_children():
+        print child
 
 """
 Mach-o executable
