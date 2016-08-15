@@ -345,7 +345,7 @@ class ExprParser(ExprDumper):
     def _handle_2arg_exception(self, opcode, arg1, arg2):
         divider = self.opcode_dividers[opcode]
         new = OpPiece(arg1.format, 
-                [arg1.key, arg2.key], arg1.value + " " + divider + " " + arg2.value, arg1.size)
+                [arg1.key, arg2.key], arg1.value + divider + arg2.value, arg1.size)
         return new
 
 

@@ -205,15 +205,8 @@ function _handleRegisterContent(data, objData) {
         data[instr_reg].forEach(function(variable_loc) {
           var instr_in_loc = parseInt(variable_loc.start) <= parseInt(instr.address) 
             && parseInt(instr.address) < parseInt(variable_loc.end)
-          // display size only if necessary
-          if (variable_loc.size) {
-            size = " (" + variable_loc.size + ")";
-          }
-          else {
-            size = ""
-          }
           // is the instruction in the variable's range?
-          var comment_content_base = get_variable_display(instr.ptr, variable_loc, objData) + size;
+          var comment_content_base = get_variable_display(instr.ptr, variable_loc, objData);
           if (instr_in_loc && instr.comment_html) {
             var comment_content = "<span class='comment'>, " + comment_content_base + "</span>";
             $("#" + instr.address).find(".comments").append(comment_content);

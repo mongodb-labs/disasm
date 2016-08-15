@@ -466,12 +466,6 @@ function get_function_assembly() {
       type_ctrl.typeDataQueried = [];
     });
 
-    // preload DIE info from server
-    $.ajax({
-      type: "GET",
-      url: URL_DIE_INFO + "?address=" + st_value + "&filename=" + assembly.filename
-    });
-
   })
   .fail(function(data) {
     console.log("Request failed");
