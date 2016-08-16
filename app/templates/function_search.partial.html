@@ -16,7 +16,8 @@
   </div>
 
   <a rv-each-func="functions.contents"
-    class="function"
+    class="function" 
+    rv-class-zerosize="func | has_zero_size"
     rv-href="func | function_href"
     rv-data-st-value="func.st_value"
     rv-data-offset="func.offset"
@@ -24,7 +25,7 @@
     rv-on-click='ctrl.functionClicked'
     rv-on-mouseover="ctrl.hoverCollapsable"
     rv-on-mouseout="ctrl.removeHoverCollapsable">
-
+    <span rv-show="func.undef">(dynamic) </span>
     <span rv-each-part="func.name"
       rv-class-hovered="part.hovered"
       rv-class-expandable="part.expandable"

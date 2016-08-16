@@ -1,10 +1,19 @@
-/******* used in assembly and in functions pages *******/
 
 $body-left: 50px;
+$lightteal: rgb(77,182,172);
+$teal: rgb(0,150,136);
 
 main {
   padding-left: $body-left;
   padding-right: $body-left;
+}
+
+a {
+	text-decoration: none;
+	color: inherit;
+}
+a:hover {
+	color: inherit;
 }
 
 // override highlight.js
@@ -21,4 +30,19 @@ main {
 
 .context-menu-list {
 	padding-top: 8px;
+}
+
+.navbar {
+  position: absolute;
+  right: 29px;
+  font-size: 24px;
+  top: 12px;
+}
+.navbar > div {
+	display: inline-block;
+	margin-left: 10px;
+}
+.navbar > div:hover {
+	color: $lightteal;
+	cursor: pointer;
 }

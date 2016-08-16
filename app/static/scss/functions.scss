@@ -3,6 +3,8 @@ $max-content-height: 80vh;
 $expandable-color: rgb(77,182,172);
 $collapsable-color: rgb(240,98,146);
 $func-bg: rgb(178,223,219);
+$gray-out: rgb(158,158,158);
+$dark-teal: rgb(38,166,154);
 
 div#functions-wrapper {
 	height: 97vh;
@@ -16,7 +18,7 @@ h2.header {
 
   .title {
   	font-size: .6em;
-  	color: rgb(158,158,158);
+  	color: $gray-out;
   }
 
   .filename {
@@ -93,7 +95,7 @@ $button-color: rgba(128,203,196, 0.8);
 
 $func-offsetTop: 161px;
 #functions {
-	height: calc(100% - 161px);
+	height: calc(100% - 220px);
 	overflow-y: scroll;
 	margin-left: 0; // override skeleton.css
 

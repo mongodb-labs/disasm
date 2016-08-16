@@ -13,22 +13,28 @@
   <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet">
   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
   <script src="https://use.fontawesome.com/d826d0fa82.js"></script>
-  <title>Disassembler</title>
+  <title>Disasm | {{ func_name }}</title>
 </head>
 
 
 <body>
+  <div class='navbar'>
+    <div class='function-search'>
+      <i class="fa fa-search" aria-hidden="true"></i>
+      {% include 'function_search.partial.html' %}
+    </div>
+    <div title="Home" class="nav home-button">
+      <a href='/'><i class="fa fa-home" aria-hidden="true"></i></a>
+    </div>
+    <div title="Help" class="nav help-button">
+      <i class="fa fa-question-circle-o" aria-hidden="true"></i>
+    </div>
+  </div>
 
   <div class='heading-row row'>
     <div class="heading">
       <div class='top-row'>
-        <a href="/">
-          <i class="fa fa-home" aria-hidden="true"></i> 
-        </a>
         <div class='filename'>{{ displayname }}</div>
-        <div class='function-search'>
-          {% include 'function_search.partial.html' %}
-        </div>
       </div>
       <div class='func-name'>{{ func_name }}</div>
     </div>

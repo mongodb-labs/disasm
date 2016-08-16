@@ -25,3 +25,7 @@ input#function-name-input:focus + .bottom-border {
   
   transition: width 500ms;
 }
+
+.function.zerosize > span {
+  color: rgb(158,158,158);
+}

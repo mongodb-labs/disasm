@@ -32,6 +32,7 @@ $("#file_selector").change(function(e) {
 var show_error = $('#meta-data').attr("data-show-error") === "True";
 rivets.bind($('#errors'), {show_error: show_error});
 
+// bind remove file
 $(".file").on("click", ".remove-file", function(e) {
 	var fileDiv = e.delegateTarget;
 	fileDiv.getAttribute('data-uuid');
@@ -52,4 +53,10 @@ $(".file").on("click", ".remove-file", function(e) {
   });
 });
 
-
+// question/help
+$(".help-button").on('click', function() {
+  $.colorbox({
+    href: "static/html/help.html", 
+  });
+});
+            

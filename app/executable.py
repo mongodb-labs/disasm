@@ -116,6 +116,7 @@ class ElfExecutable(Executable):
             func["st_value"] = sym["st_value"]
             func["size"] = sym["st_size"]
             func["name"] = demangle(sym.name)
+            func["undef"] = sym["st_shndx"] == "SHN_UNDEF"
             functions.append(func)
         return functions
 

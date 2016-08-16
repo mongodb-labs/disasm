@@ -56,6 +56,12 @@ h1 {
 	.file > div, .title > div {
 		@include flex-1;
 	}
+	.file .filename {
+		color: rgb(0,188,212);
+	}
+	.file .filename:hover {
+		color: #1EAEDB;
+	}
 
 	$remove-file-fa-offset: 20px;
 	i.remove-file {

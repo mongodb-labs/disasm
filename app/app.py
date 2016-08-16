@@ -37,6 +37,7 @@ JS_THIRDPARTY_DIR = 'js/thirdparty/'
 
 # relative to static dir
 index_scss = Bundle(
+    'scss/general.scss',
     'scss/index.scss', 
     filters='pyscss', 
     output='generated/index_all.css')

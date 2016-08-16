@@ -32,6 +32,15 @@
 
 }
 
+.navbar > .nav {
+	color: white;
+	opacity: 0.9;
+}
+.navbar > .nav:hover {
+	color: white;
+	opacity: 1;
+}
+
 #top-half {
 	height: calc(97vh - 100px); // can't use vars for calc; match $heading-height
 }
@@ -52,25 +61,15 @@ $heading-bg: rgb(128,203,196);
 	$filename-color: ghostwhite;
 	.filename {
 		font-size: 1.6em;
-	}
-	.filename, .fa.fa-home {
 		color: $filename-color;
-		display: inline-block;
 	}
-	.fa.fa-home:hover {
-		color: white;
-		cursor: pointer;
-	}
-	.fa.fa-home {
+	.filename {
 		font-size: 2em;
-	}
-	.function-search {
 		display: inline-block;
 	}
 	.func-name {
 		font-size: 1.3em;
 		color: white;
-		margin-top: 6px;
 
 		white-space: nowrap;
 		overflow-x: scroll;
@@ -105,12 +104,38 @@ input#function-name-input:focus + .bottom-border {
 	color: $placeholder-color;
 }
 
+
+// for animating
+.function-search.focused {
+	transition: width 1s;
+	-webkit-transition: width 1s;
+
+	width: 550px;
+	max-width: 80vw;
+}
+
 .function-search {
-	width: 35%;
 	z-index: 99;
-	margin-left: 20px;
+	width: 200px;
 	font-size: 14px;
 	position: relative;
+
+	transition: width 1s;
+	-webkit-transition: width 1s;
+
+	i.fa {
+		font-size: 22px;
+    color: ghostwhite;
+    position: absolute;
+    bottom: 0;
+	}
+
+	.input.row {
+		position: absolute;
+    display: inline-block;
+    width: 100%;
+    bottom: -5px;
+	}
 
 	.input.row.focused + #functions {
 		display: block;
@@ -125,6 +150,7 @@ input#function-name-input:focus + .bottom-border {
   	width: 100%;
   	z-index: 999;
   	height: 30px;
+  	padding-left: 28px;
   	border-bottom-color: ghostwhite;
   	border-bottom-width: 2px;
   	font-size: 18px;
@@ -149,7 +175,7 @@ input#function-name-input:focus + .bottom-border {
   	}
 
   	position: absolute;
-  	margin-top: -3px;
+  	margin-top: 4px;
     z-index: -1;
 
   	width: 100%;

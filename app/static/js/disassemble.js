@@ -77,8 +77,10 @@ tabStackInfoClicked();
 // show or hide #functions
 $("#function-name-input").focusin(function() {
   $(".input.row").addClass("focused");
+  $(".function-search").addClass("focused");
 }).focusout(function() {
   $(".input.row").removeClass("focused");
+  $(".function-search").removeClass("focused");
 });
 
 /* END INIT */

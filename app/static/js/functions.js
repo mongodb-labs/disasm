@@ -64,6 +64,10 @@ rivets.formatters.function_href = function(func) {
   return URL_DISASM_FUNCTION + '?' + $.param(request_params);
 }
 
+rivets.formatters.has_zero_size = function(func) {
+  return func['size'] == 0;
+}
+
 var curr_index = 0;
 var NUM_FUNCTIONS = 100;
 
@@ -335,3 +339,11 @@ function collapseFunctionName(event, el) {
   // splice into func.name
   func.name = func.name.slice(0, first).concat([newPart], func.name.slice(last+1));
 }
+
+
+// question/help
+$(".help-button").on('click', function() {
+  $.colorbox({
+    href: "static/html/help.html", 
+  });
+});

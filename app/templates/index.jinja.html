@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="static/css/colorbox.css">
   {% assets "index_css" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
   <script src="https://use.fontawesome.com/d826d0fa82.js"></script>
-  <title>Disassembler</title>
+  <title>Disasm</title>
 
 
 </head>
@@ -19,6 +19,13 @@
     <div class="error">{{ error }}</div>
     {% endfor %}
   </div>
+
+  <div class='navbar'>
+    <div title="Help" class="help-button">
+      <i class="fa fa-question-circle-o" aria-hidden="true"></i>
+    </div>
+  </div>
+  
   <h1>Disassemble</h1>
 	<form id="file-uploader" action="" method="post" enctype="multipart/form-data">
     <p>
