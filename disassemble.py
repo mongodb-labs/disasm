@@ -37,10 +37,11 @@ def disasm(exe, bytes, offset=0):
             # Handle no-op instructions
             if instr.id == x86.X86_INS_NOP:
                 instr.nop = True
-            # Handle jump/call instructions
-            if instr.group(x86.X86_GRP_JUMP) or instr.group(x86.X86_GRP_CALL):
+
+            # Handle jump/call instructions            
+            elif instr.group(x86.X86_GRP_JUMP) or instr.group(x86.X86_GRP_CALL):
                 # jump table
-                if instr.operands[0].type == x86.X86_OP_REG:
+                if instr.group(x86.X86_GRP_JUMP) and instr.operands[0].type == x86.X86_OP_REG: 
                     instr.jump_table = instr.reg_name(instr.operands[0].reg)
 
                 # We can only decode the destination if it's an immediate value
