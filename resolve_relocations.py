@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from disassemble import disasm_plt
+from demangler import demangle
 from elftools.elf.relocation import RelocationSection
 import struct, time
 
@@ -27,12 +28,9 @@ def resolve_plt(addr, plt_section, exe):
 
     # update rela_addr if it's in the reloc table
     reloc_section = exe.elff.get_section_by_name(".rela.plt")
-    symtab = exe.elff.get_section(reloc_section['sh_link'])
-    for reloc in reloc_section.iter_relocations():
-        if reloc["r_offset"] == rela_addr:
-            sym = symtab.get_symbol(reloc['r_info_sym'])
+    sym = sym_from_reloc_section(exe, rela_addr, reloc_section)
     if sym: # found in reloc table
-        sym.name = sym.name + " (.plt)"
+        sym.name = demangle(sym.name) + " (.plt)"
         return sym
 
     else: # not in relocation table
@@ -44,5 +42,27 @@ def resolve_plt(addr, plt_section, exe):
             print "Unhandled section: " + section.name
             return None
 
+def resolve_got(addr, got_section, exe):
+    # is GOT always populated by .dyn?? unclear. TODO
+    reloc_section = exe.elff.get_section_by_name(".rela.dyn")
+    sym = sym_from_reloc_section(exe, addr, reloc_section)
+    if sym:
+        sym.name = demangle(sym.name) + " (.got)"
+        return sym
+
+    else:
+        print "not in reloc table"
+        return None
+
+
+# given relocation address (the address into .got or .plt)
+# and the relevant relocation section, get the symbol
+def sym_from_reloc_section(exe, rela_addr, reloc_section):
+    symtab = exe.elff.get_section(reloc_section['sh_link'])
+    for reloc in reloc_section.iter_relocations():
+        if reloc["r_offset"] == rela_addr:
+            sym = symtab.get_symbol(reloc['r_info_sym'])
+            return sym
+    return None
 
 
