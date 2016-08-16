@@ -494,9 +494,11 @@ class ElfExecutable(Executable):
     def get_sub_symbol_by_offset(self, symbol_name, offset, instr_addr):
         if self.dwarff is None or self.aranges is None:
             return None
+
+        top_DIE = self._get_top_DIE(instr_addr)
         return get_sub_symbol(
             self.dwarff,
-            self.aranges,
+            top_DIE,
             symbol_name,
             offset,
             instr_addr)

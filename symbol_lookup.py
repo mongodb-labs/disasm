@@ -1,7 +1,6 @@
 from elftools.elf.elffile import ELFFile
-from  elftools.common.py3compat import iteritems
+from elftools.common.py3compat import iteritems
 from demangler import demangle
-import pdb
 
 # Get all top-level members of a given DIE
 def get_members(die):
@@ -55,20 +54,18 @@ def get_size_attr(die):
 #   Address that the instruction belongs to.
 #   Technically this isn't required, but without it we'd have to search EVERY die. By using the 
 #   instruction address, we're able to use the aranges to narrow down our search to a single CU.
-def get_sub_symbol(dwarfinfo, aranges, symbol, offset, addr):
+def get_sub_symbol(dwarfinfo, top_DIE, symbol, offset, addr):
     global die_list
     die_list = {}
 
-    cu_offset = aranges.cu_offset_at_addr(addr)
-    CU = dwarfinfo._parse_CU_at_offset(cu_offset)
+    CU = top_DIE.cu
 
     for die in CU.iter_DIEs():
         die_list[die.offset - CU.cu_offset] = die
 
     for die in CU.iter_DIEs():
-        for attrname, attrval in iteritems(die.attributes):
-            if attrval.value == symbol:
-                return _get_sub_symbol(die, offset)
+        if "DW_AT_name" in die.attributes and die.attributes["DW_AT_name"].value == symbol:
+            return _get_sub_symbol(die, offset)
 
 # die : type(elftools.dwarf.die.DIE)
 #   DIE that represents the symbol we're searching.
@@ -93,17 +90,3 @@ def _get_sub_symbol(die, offset):
     else:
         print "FIELD CANNOT BE FOUND"
         return None
-
-def main():
-    global elffile
-
-    filename = '/Users/danharel/Downloads/mongodb-linux-x86_64-amazon-methias/mongod'
-    with open(filename, 'rb') as f:
-
-        elffile = ELFFile(f)
-        
-        print get_field_name(elffile, 'queryOperatorMap', 0, 0x7a5019)
-
-if __name__ == '__main__':
-    # test_stuff()
-    main()
