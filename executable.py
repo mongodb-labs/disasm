@@ -496,8 +496,10 @@ class ElfExecutable(Executable):
         sym = None
         if section.name == ".plt":
             sym = relocs.resolve_plt(symbol_addr, section, self)
-        elif section.name == ".dyn":
-            print "found a .dyn!!!!"
+        elif section.name == ".rela.dyn":
+            print "found a .rela.dyn"
+        elif section.name == ".rela.plt":
+            print "found a .rela.plt"
         return (sym, None)
 
     def sym_from_symtab(self, symbol_addr):
