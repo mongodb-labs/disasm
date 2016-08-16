@@ -73,7 +73,7 @@ def get_sub_symbol(dwarfinfo, top_DIE, symbol, offset, addr):
 #   DIE that represents the symbol we're searching.
 # offset : type(int)
 #   Offset into the memory that the symbol occupies.
-def _get_sub_symbol(die, offset):
+def _get_sub_symbol(die, offset, prev_offset=None):
     members = get_members(die)
     if len(members) == 0:
         return None
@@ -86,9 +86,13 @@ def _get_sub_symbol(die, offset):
     size = get_size_attr(member_within)
     name = member_within.attributes.get('DW_AT_name').value
 
+    # prevent infinite recursion
+    if offset == prev_offset:
+        return name
+
     if member_offset <= offset < member_offset + size:
-        sub_member_name = _get_sub_symbol(member_within, offset - member_offset)
-        if sub_member_name is None:
+        sub_member_name = _get_sub_symbol(member_within, offset - member_offset, offset)
+        if sub_member_name is None: 
             return name
         else:
             return name + '.' + sub_member_name
