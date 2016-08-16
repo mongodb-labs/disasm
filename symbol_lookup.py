@@ -23,6 +23,8 @@ def get_member_within(members, offset):
     curr_highest_member = None
     curr_highest_offset = None
     for member in members:
+        if not member.attributes.get('DW_AT_data_member_location'):
+            continue
         if curr_highest_member is None:
             curr_highest_member = member
             curr_highest_offset = member.attributes.get('DW_AT_data_member_location').value
@@ -77,6 +79,9 @@ def _get_sub_symbol(die, offset):
         return None
 
     member_within, member_offset = get_member_within(members, offset)
+    if not member_within:
+        return None
+
     # print member_within
     size = get_size_attr(member_within)
     name = member_within.attributes.get('DW_AT_name').value
