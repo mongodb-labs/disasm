@@ -14,7 +14,7 @@
     <ul>
       <li class="type-attr"
         rv-each-member="type_ctrl.selected_type.members">
-        <span class="indent" rv-each-depth="member.depth">&emsp;</span>
+        <span class="indent" rv-text="member.depth | formatIndentation"></span>
         <!-- Offset -->
         <span class="offset"
         rv-show="member.offset | displayData">&lt;+{member.offset}&gt;</span>

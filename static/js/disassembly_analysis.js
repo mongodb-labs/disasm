@@ -299,6 +299,15 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+var tabStr = String.fromCharCode(160) + String.fromCharCode(160) + String.fromCharCode(160) + String.fromCharCode(160);
+rivets.formatters.formatIndentation = function(depth) {
+  indentationStr = "";
+
+  for (var i = 0; i < depth; i++)
+    indentationStr += tabStr;
+  return indentationStr;
+}
+
 rivets.formatters.typeDataToList = function(typeData) {
   var list = [];
   for (var type in typeData) {

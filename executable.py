@@ -22,7 +22,7 @@ from bisect import bisect_right
 from symbol_lookup import get_sub_symbol
 from dwarf_expr import describe_DWARF_expr, set_global_machine_arch, OpPiece
 import jump_tables as jt
-from die_information import DIEInformation, getSubtype
+from die_information import DIEInformation, reset_die_list
 
 """
 Base class for executables
@@ -533,40 +533,15 @@ class ElfExecutable(Executable):
             return self.type_dies.get(addr)
 
         type_dies = {}
+        reset_die_list(CU)
         for die in CU.iter_DIEs():
             # For some reason, some die tags are ints...
             if type(die.tag) is str and 'type' in die.tag:
                 dieInfo = DIEInformation(die)
                 if dieInfo:
                     type_dies[dieInfo['name']] = dieInfo
-        # Since type_dies is being both accessed and modified in each iteration, we make a copy so
-        # that the original data can be maintained.
-        type_dies_copy = type_dies.copy()
-        for typeName, info in type_dies_copy.iteritems():
-            type_dies[typeName]['members'] = _getMembers(type_dies.copy(), info['name'], 0, 0, CU)
-
-
         self.type_dies[addr] = type_dies
         return type_dies
-
-def _getMembers(typeList, typeName, depth, offset, cu):
-    info = typeList[typeName]
-    members_list = []
-    for member in info['members']:
-        newMember = member.copy()
-
-        newMember['depth'] = ['@']*depth
-
-        # Update the offset to be relative to the top-level DIE
-        if offset is not None and newMember['offset'] is not None:
-            newMember['offset'] = newMember['offset'] + offset
-        else:
-            newMember['offset'] = None
-
-        members_list.append(newMember)
-        if member['type']:
-            members_list += _getMembers(typeList, member['type'], depth+1, newMember['offset'], cu)
-    return members_list
 
 def printChildren(die):
     for child in die.iter_children():

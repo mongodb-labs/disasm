@@ -14,16 +14,29 @@
 
 from elftools.dwarf.die import DIE
 
+# Maps of each DIE offset to the corresponding DIE.
+# Used when trying to follow DIE type references, i.e., a DW_TAG_typedef DIE that has a DW_AT_type
+# attribute that refers to a DW_TAG_base_type DIE.
+die_list = {}
+
+# Clears the die then maps each DIE offset to the corresponding DIE.
+def reset_die_list(cu):
+    global die_list
+    # Would it be better to do die_list.clear()?
+    die_list = {}
+    for die in cu.iter_DIEs():
+        die_list[die.offset] = die
+
 class MemberInformation(dict):
-    def __init__(self, name, type, offset):
+    def __init__(self, name, type, depth, offset):
         return dict.__init__(self,
             name=name,
             type=type,
-            offset=offset,
-            depth=None)
+            depth=depth,
+            offset=offset)
 
     @staticmethod
-    def member(child, offset):
+    def member(child, depth, offset):
         name = None
         typeName = None
 
@@ -50,28 +63,34 @@ class MemberInformation(dict):
         else:
             offset = None
         
-        return MemberInformation(name, typeName, offset)
+        return MemberInformation(
+            name, 
+            typeName, 
+            depth, 
+            offset)
 
     @staticmethod
-    def parent(parent_die, offset):
+    def parent(parent_die, depth, offset):
         if offset:
             offsetAttr = parent_die.attributes.get('DW_AT_data_member_location')
-            offset = offset.value if offsetAttr else None
+            offset = offsetAttr.value if offsetAttr else None
         return MemberInformation(
             '(parent)',
             getSubtype(parent_die),
+            depth,
             offset)
 
 
 class DIEInformation(dict):
     def __init__(self, die):
-        # If a type is unnamed, then it's likely a pointer, const, ref, etc. We really only care
-        # about the type that it actually identifies, which will later be identified. As such, we
-        # can reasonably skip unnamed types, as we don't care about pointers, references, etc.
-        if not die.attributes.get('DW_AT_name'):
-            return
+        # If a type is an unnamed union, we can handle that as a separate special case
+        if die.attributes.get('DW_AT_name'):
+            name = die.attributes.get('DW_AT_name').value
+        elif die.tag == 'DW_TAG_union_type':
+            name = "(anonymous union)"
+        else:
+            return None
 
-        name = die.attributes.get('DW_AT_name').value
         tag = die.tag
 
         size = None
@@ -87,9 +106,9 @@ class DIEInformation(dict):
         members = getMembers(die)
 
         dict.__init__(self, 
+            name=name,
             tag=tag,
             size=size,
-            name=name,
             subtype=subtype,
             members=members)
 
@@ -115,20 +134,27 @@ def getSubtype(die):
         return None
 
 # Given a type die, get a list of MemberInformation dicts for the members of that type
-def getMembers(die, offset=0):
+def getMembers(typeDie, depth=0, offset=0):
+    global die_list
     members = []
-    for child in die.iter_children():
-        memberInfo = None
+    for child in typeDie.iter_children():
         if child.tag == 'DW_TAG_member':
-            memberInfo = MemberInformation.member(child, offset)
-            if memberInfo is None:
-                continue
+            memberInfo = MemberInformation.member(child, depth, offset)
         elif child.tag == 'DW_TAG_inheritance':
-            memberInfo = MemberInformation.parent(child, offset)
-            if memberInfo is None:
-                continue
+            memberInfo = MemberInformation.parent(child, depth, offset)
         else:
             continue
-        if memberInfo:
-            members.append(memberInfo)
+
+        if memberInfo is None:
+            continue
+        members.append(memberInfo)
+
+        if memberInfo['offset'] is not None and offset is not None:
+            _offset = memberInfo['offset'] + offset
+        else:
+            _offset = None
+        if child.attributes.get('DW_AT_type'):
+            typeRef = child.attributes.get('DW_AT_type').value
+            typeDie = die_list[child.cu.cu_offset + typeRef]
+            members += getMembers(typeDie, depth+1, _offset)
     return members
