@@ -202,16 +202,13 @@ function getNextPage(query, curr_index, num_functions) {
 
             prevRequest = query;
             functions.functionsLoading = false;
-        })
-        .always(function() {
-            console.log("Request complete.");
         });
     }, 100);
 }
 
 // search bar 
 $('#function-name-input').on('keyup', function() {
-  if (this.value.length >= 3) {
+  if (this.value.length >= 3 && this.value != prevRequest) {
     getNextPage(this.value, 0, NUM_FUNCTIONS);
   }
 });
