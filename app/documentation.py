@@ -15,9 +15,11 @@
 from capstone import x86
 from collections import namedtuple
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join, dirname
 from bs4 import BeautifulSoup
-soup = BeautifulSoup(open('static/inst_ref/index.html'), 'lxml')
+
+INST_REF_PATH = join(dirname(__file__), 'static/inst_ref/')
+soup = BeautifulSoup(open(INST_REF_PATH + '/index.html'), 'lxml')
 
 # Maps an instruction mnemonic to a namedtuple (short_desc, doc_file)
 # DO NOT ACCESS DIRECTLY. Instead us the get_documentation_map() function
@@ -135,9 +137,8 @@ def set_short_descriptions():
 
 def set_doc_files():
     global documentation_map
-    dir_path = 'static/inst_ref'
     # http://stackoverflow.com/questions/3207219/how-to-list-all-files-of-a-directory-in-python
-    filelist = [f for f in listdir(dir_path) if isfile(join(dir_path, f))]
+    filelist = [f for f in listdir(INST_REF_PATH) if isfile(join(INST_REF_PATH, f))]
     for f in filelist:
         mnemonics = f[:-5].lower().split(':')
         for mnemonic in mnemonics:

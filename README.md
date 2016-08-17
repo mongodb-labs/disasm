@@ -12,5 +12,5 @@ To run:
 python run.py
 ```
 
-`run.py` uses gunicorn for speed and robustness. If you don't want to use gunicorn, you can use `python app.py`.
+`run.py` uses gunicorn for speed and robustness. If you don't want to use gunicorn, you can use `python app/app.py`.
 

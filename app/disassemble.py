@@ -17,11 +17,13 @@ from capstone import Cs, CsError, CS_ARCH_X86, CS_MODE_64, x86, CS_OPT_SYNTAX_AT
 from demangler import demangle
 from documentation import get_documentation
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join, dirname
 from binascii import hexlify
 from struct import unpack
 
+CUR_PATH = dirname(__file__)
 INSTR_REF_DIRECTORY = 'static/inst_ref/'
+REG_DATA_PATH = join(CUR_PATH, 'register_data/')
 
 # given a sequence of bytes and an optional offset within the file (for display
 # purposes) return assembly for those bytes
@@ -181,7 +183,7 @@ def disasm(exe, bytes, offset=0):
             # Add in documentation meta-data
             instr.short_desc, instr.docfile = get_documentation(instr)
             if instr.docfile is None or instr.short_desc is None:
-                with open('missing_docs.log', 'a+') as f:
+                with open(CUR_PATH + 'missing_docs.log', 'a+') as f:
                     f.write('[{}] : {} : {} : {}\n'.format(str(datetime.datetime.now()), instr.mnemonic, instr.docfile, instr.short_desc))
         return disassembled
 
@@ -267,7 +269,7 @@ def jsonify_capstone(data):
         row['ptr_size'] = i.ptr_size
         row['regs_write_explicit'] = []
         row['regs_read_explicit'] = [] if not i.regs_ptr_explicit else i.regs_ptr_explicit
-        with open('x86operands.json', 'r') as fp:
+        with open(REG_DATA_PATH + 'x86operands.json', 'r') as fp:
             op_data = json.load(fp)
         try:
             readwrites = op_data[i.mnemonic][str(len(i.regs_explicit))]
@@ -284,7 +286,7 @@ def jsonify_capstone(data):
 
         row['regs_write_implicit'] = i.regs_write_implicit
         row['regs_read_implicit'] = i.regs_read_implicit
-        with open('x86registers.json', 'r') as fp:
+        with open(REG_DATA_PATH + 'x86registers.json', 'r') as fp:
             reg_data = json.load(fp)
         try:
             row['flags'] = parse_flags(reg_data[i.mnemonic])

@@ -21,7 +21,8 @@ import argparse
 from sets import Set
 
 METADATA = '.metadata'
-METADATA_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), METADATA)
+PARENT_PATH = os.path.dirname(os.path.dirname(__file__))
+METADATA_DIR = os.path.join(PARENT_PATH, METADATA)
 
 class FileMetadata:
     def __init__(self, path, from_cmd=False):

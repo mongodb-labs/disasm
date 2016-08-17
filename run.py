@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from app import app
+from app.app import app
 import gunicorn.app.base
 from gunicorn.six import iteritems
 import multiprocessing
@@ -44,3 +44,5 @@ if __name__ == "__main__":
         "timeout": 300,
     }
     DisassemblerApp(app, options).run()
+
+    

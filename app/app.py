@@ -29,9 +29,11 @@ from binascii import unhexlify
 import metadata
 
 app = Flask(__name__)
-app.config.from_pyfile('config.py')
+app.config.from_pyfile('../config.py')
 
 assets = Environment(app)
+
+JS_THIRDPARTY_DIR = 'js/thirdparty/'
 
 # relative to static dir
 index_scss = Bundle(
@@ -74,29 +76,29 @@ assets.register('js_functions', js_functions)
 # Javascript files that are used in disassemble.jinja.html
 js_disassemble = Bundle(
     'js/disassemble.js', 
-    'js/biginteger.js',
     'js/functions.js',
     'js/disassembly_analysis.js',
     'js/instruction_events.js',
     'js/jumps.js',
     'js/number_conversion.js',
-    'js/jquery.contextMenu.js',
-    'js/jquery.ui.position.js',
-    'js/highlight.pack.js',
-    'js/tipr.js',
     'js/register_info.js',
     'js/disassemble_shortcuts.js',
-    'js/readmore.min.js',
+    JS_THIRDPARTY_DIR + 'biginteger.js',
+    JS_THIRDPARTY_DIR + 'jquery.contextMenu.js',
+    JS_THIRDPARTY_DIR + 'jquery.ui.position.js',
+    JS_THIRDPARTY_DIR + 'highlight.pack.js',
+    JS_THIRDPARTY_DIR + 'tipr.js',
+    JS_THIRDPARTY_DIR + 'readmore.min.js',
     output='generated/disassemble_all.js')
 assets.register('js_disassemble', js_disassemble)
 
 # Javascript files that are used on all pages.
 js_global = Bundle(
-    'js/keypress.js',
-    'js/rivets.js',
+    JS_THIRDPARTY_DIR + 'keypress.js',
+    JS_THIRDPARTY_DIR + 'rivets.js',
+    JS_THIRDPARTY_DIR + 'jquery.colorbox-min.js',
     'js/global_shortcuts.js',
     'js/functions_shortcut_helpers.js',
-    'js/jquery.colorbox-min.js',
     output='generated/global_all.js')
 assets.register('js_global', js_global)
 
