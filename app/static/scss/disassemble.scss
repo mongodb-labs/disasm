@@ -315,6 +315,11 @@ $instruc-color-write: rgb(255,171,145);
 				margin-left: -6px;
 			}
 			/* end flag */
+
+			.op_str-text a {
+				text-decoration: underline;
+    		color: #1EAEDB;
+			}
 		}
 		.instruction.row:hover {
 			background-color: rgba($instruc-color2, 0.3);
