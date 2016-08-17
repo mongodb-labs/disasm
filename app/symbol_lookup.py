@@ -60,6 +60,8 @@ def get_sub_symbol(dwarfinfo, top_DIE, symbol, offset, addr):
     global die_list
     die_list = {}
 
+    if top_DIE is None:
+        return None
     CU = top_DIE.cu
 
     for die in CU.iter_DIEs():

@@ -158,7 +158,10 @@ class ElfExecutable(Executable):
         CU = self.dwarff._parse_CU_at_offset(CU_offset)
         # preload tree of DIEs
         if not CU_offset in self.CU_offset_to_DIE:
-            self.CU_offset_to_DIE[CU_offset] = CU.get_top_DIE() # save
+            try:
+                self.CU_offset_to_DIE[CU_offset] = CU.get_top_DIE() # save
+            except:
+                return None
         
         return self.CU_offset_to_DIE[CU_offset]
 
@@ -561,7 +564,9 @@ class ElfExecutable(Executable):
             return self.type_dies.get(addr)
 
         type_dies = {}
-        reset_die_list(CU)
+        success = reset_die_list(CU)
+        if not success:
+            return None
         for die in CU.iter_DIEs():
             # For some reason, some die tags are ints...
             if type(die.tag) is str and 'type' in die.tag:

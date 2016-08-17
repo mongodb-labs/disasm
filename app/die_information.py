@@ -33,8 +33,12 @@ def reset_die_list(cu):
     global die_list
     # Would it be better to do die_list.clear()?
     die_list = {}
-    for die in cu.iter_DIEs():
-        die_list[die.offset] = die
+    try:
+        for die in cu.iter_DIEs():
+            die_list[die.offset] = die
+        return True
+    except:
+        return False
 
 class MemberInformation(dict):
     def __init__(self, name, type, depth, offset, modifiers=None):
