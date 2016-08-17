@@ -45,15 +45,16 @@ var assembly_ctrl = {
 var type_ctrl = {
   typeData: [],
   typeClicked: typeClicked,
-  typeDataQueried: [],
   selected_type: null,
   memberTypeClicked: memberTypeClicked,
   selectedTypeClicked: selectedTypeClicked,
   showTypeSearchResults: true,
 };
 
+var typeDataQuery = "";
+
 var rivetsAnalysisView = rivets.bind($('#tab-type-info'),
-  {type_ctrl: type_ctrl}
+  {type_ctrl: type_ctrl, typeDataQuery : typeDataQuery}
 );
 
 rivets.formatters.isEmptyStr = function(value) {
@@ -470,9 +471,7 @@ function get_function_assembly() {
       typeData = [];
     })
     .always(function() {
-      type_ctrl.typeDataList = rivets.formatters.typeDataToList(typeData);
       type_ctrl.typeData = typeData;
-      type_ctrl.typeDataQueried = [];
       
       // For some FASCINATING, unknown reason, despite defaulting to true, the related data will
       // appear as though showTypeSearchResults were false. This can be fixed by setting it to false

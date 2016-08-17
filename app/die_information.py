@@ -34,6 +34,11 @@ def reset_die_list(cu):
     # Would it be better to do die_list.clear()?
     die_list = {}
     try:
+        # TODO: This process breaks around DIE-offset 1093103
+        # See https://github.com/eliben/pyelftools/issues/112 for more information
+        # For now we will stop the process altogether if the DIE tree cannot be fully parsed.
+        # Realistically, however, the program should be able to return a partial solution on partial
+        # success, instead of completely failing.
         for die in cu.iter_DIEs():
             die_list[die.offset] = die
         return True

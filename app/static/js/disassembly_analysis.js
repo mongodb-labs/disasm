@@ -308,14 +308,6 @@ rivets.formatters.formatIndentation = function(depth) {
   return indentationStr;
 }
 
-rivets.formatters.typeDataToList = function(typeData) {
-  var list = [];
-  for (var type in typeData) {
-    list.push(type);
-  }
-  return list;
-}
-
 function typeClicked(e, model) {
   // JS is doing this really weird thing where it tries running this function before anything is
   // actually clicked. Since there is no actual event or model yet, the function just breaks...
@@ -353,13 +345,30 @@ function selectedTypeClicked(e, model) {
 // When the type name input is changed, clear the current list of matching type names, and replace
 // it with the new request.
 $('#type-name-input').on('keyup', function() {
-  var query = this.value.toLowerCase();
-  type_ctrl.typeDataQueried = [];
+  query = this.value.toLowerCase();
+  type_ctrl.queryResults = [];
   // Iterate through the list of types to find matches.
-  for (var i = 0; i < type_ctrl.typeDataList.length; i++) {
-    if (type_ctrl.typeDataList[i].toLowerCase().indexOf(query) != -1) {
-      type_ctrl.typeDataQueried.push(type_ctrl.typeDataList[i]);
+  for (var typeName in type_ctrl.typeData) {
+    if (typeName.toLowerCase().indexOf(query) != -1) {
+      type_ctrl.queryResults.push(typeName);
     }
   }
   type_ctrl.showTypeSearchResults = true;
 });
+
+rivets.formatters.getQueryResults = function(query) {
+  var queryResults = [];
+  // Iterate through the list of types to find matches.
+  for (var typeName in type_ctrl.typeData) {
+    if (typeName.toLowerCase().indexOf(query) != -1) {
+      queryResults.push(type_ctrl.typeData[typeName]);
+    }
+  }
+  return queryResults;
+  // for (var i = 0; i < type_ctrl.typeDataList.length; i++) {
+  //   if (type_ctrl.typeDataList[i].toLowerCase().indexOf(query) != -1) {
+  //     type_ctrl.typeDataQueried.push(type_ctrl.typeDataList[i]);
+  //   }
+  // }
+  
+};

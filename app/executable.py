@@ -560,8 +560,8 @@ class ElfExecutable(Executable):
         CU_offset = self.aranges.cu_offset_at_addr(addr)
         CU = self.dwarff._parse_CU_at_offset(CU_offset)
 
-        if self.type_dies.get(addr) is not None:
-            return self.type_dies.get(addr)
+        if self.type_dies.get(CU.cu_offset) is not None:
+            return self.type_dies.get(CU.cu_offset)
 
         type_dies = {}
         success = reset_die_list(CU)
@@ -573,8 +573,10 @@ class ElfExecutable(Executable):
                 dieInfo = DIEInformation(die)
                 if dieInfo:
                     type_dies[dieInfo['name']] = dieInfo
-        self.type_dies[addr] = type_dies
-        return type_dies
+        self.type_dies[CU.cu_offset] = type_dies
+        print len(type_dies.keys())
+        # return {}
+        return type_dies 
 
 def printChildren(die):
     for child in die.iter_children():
