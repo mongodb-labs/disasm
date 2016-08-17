@@ -50,7 +50,7 @@ function updateAnalysis() {
     if (active_instr != assembly.active_instruction) {
       return;
     }
-    get_stack_info(parseInt(assembly.active_instruction), assembly.filename);
+    get_stack_info(parseInt(assembly.active_instruction));
     var selectedInstruction = document.getElementById(assembly.active_instruction);
     var model = assembly.contents[selectedInstruction.getAttribute('data-index')];
     showFullDescription(model.docfile);
@@ -58,8 +58,9 @@ function updateAnalysis() {
 }
 
 // Update the stack information in the Stack Info tab of the analysis menu
-function get_stack_info(addr, filename) {
+function get_stack_info(addr) {
   // info from DIE
+  filename = assembly.filename;
   $.ajax({
     type: "GET",
     url: URL_DIE_INFO + "?address=" + addr + "&filename=" + filename
