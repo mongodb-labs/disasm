@@ -323,6 +323,7 @@ function typeClicked(e, model) {
     var typeName = model.type;
     var typeData = type_ctrl.typeData[typeName];
     type_ctrl.selected_type = typeData;
+    type_ctrl.showTypeSearchResults = false; 
   }
 
   // Readmore is a library for creating collapsible and expandible blocks of text
@@ -359,4 +360,5 @@ $('#type-name-input').on('keyup', function() {
       type_ctrl.typeDataQueried.push(type_ctrl.typeDataList[i]);
     }
   }
+  type_ctrl.showTypeSearchResults = true;
 });

@@ -1,7 +1,7 @@
 <div class="row input">
   <input type="text" placeholder="Search for data type" id="type-name-input" class='ten columns'> 
 </div>
-<div id="selected-type">
+<div id="selected-type" rv-hide="type_ctrl.showTypeSearchResults">
   <div class="type-attr">Name: <span rv-text="type_ctrl.selected_type.name"></span></div>
   <div class="type-attr">Size: <span rv-text="type_ctrl.selected_type.size"></span></div>
   <div class="type-attr">Subtype: 
@@ -43,10 +43,7 @@
 </div>
 
 {# all types #}
-<div id='data-types' data-filename="{{ filename }}">
-  <div class='spacer'></div>
-  </div>
-
+<div id='data-types' data-filename="{{ filename }}" rv-show="type_ctrl.showTypeSearchResults">
   <a rv-each-type="type_ctrl.typeDataQueried"
     class="type-wrapper"
     rv-data-name="type"
@@ -55,6 +52,4 @@
     <span class="type" rv-text="type">
     </span>
   </a>
-
-
 </div>

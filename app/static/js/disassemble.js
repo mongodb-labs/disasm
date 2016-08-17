@@ -49,6 +49,7 @@ var type_ctrl = {
   selected_type: null,
   memberTypeClicked: memberTypeClicked,
   selectedTypeClicked: selectedTypeClicked,
+  showTypeSearchResults: true,
 };
 
 var rivetsAnalysisView = rivets.bind($('#tab-type-info'),
@@ -470,6 +471,12 @@ function get_function_assembly() {
       type_ctrl.typeDataList = rivets.formatters.typeDataToList(typeData);
       type_ctrl.typeData = typeData;
       type_ctrl.typeDataQueried = [];
+      
+      // For some FASCINATING, unknown reason, despite defaulting to true, the related data will
+      // appear as though showTypeSearchResults were false. This can be fixed by setting it to false
+      // then back to true.
+      type_ctrl.showTypeSearchResults = false;
+      type_ctrl.showTypeSearchResults = true;
     });
 
     // preload DIE info from server

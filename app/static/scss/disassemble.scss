@@ -520,20 +520,13 @@ $jump-color1: rgb(255,245,157);
 
 
 /****************** Type Search *******************/
-#selected-type {
-	width: 50%;
-	float:right;
-}
 .type {
-	/*display: block;*/
 	text-decoration: none;
 	color: black;
 
 	font-family: "Space Mono", monospace;
 	cursor: pointer;	
 	@include wrap-text;
-
-	width: 50%;
 }
 
 $type-bg: rgb(178,223,219);
@@ -548,8 +541,10 @@ $type-bg: rgb(178,223,219);
 	background-color: rgba($type-bg, 1);
 }
 
-#data-types a:nth-child(3) {
-	margin-top: 60px;
+#data-types {
+	height: 100%;
+	overflow-y: scroll;
+	max-height: 40vh;
 }
 
 #data-types a:last-child {
