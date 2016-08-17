@@ -92,3 +92,34 @@ h1 {
 #errors > .error {
 	display: block;
 }
+
+/***** loading display *****/
+.overlay {
+	display: none;
+	position: absolute;
+	left:0;
+	top:0;
+	right:0;
+	bottom:0;
+
+	background-color: white;
+	opacity: 0.7;
+}
+
+.pacman {
+	display: none;
+	position: absolute;
+	left:0;
+	top:0;
+	right:0;
+	bottom:0;
+
+	text-align: center;
+	span {
+	  font-family: "Open Sans", sans-serif;
+    font-size: 40px;
+    display: block;
+    margin-top: 15%;
+    margin-bottom: 50px;		
+	}
+}

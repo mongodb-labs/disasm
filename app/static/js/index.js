@@ -53,6 +53,12 @@ $(".file").on("click", ".remove-file", function(e) {
   });
 });
 
+// fire off loading screen when you click a file, or when you upload a file
+$(".file, .file_submit").on("click", function() {
+  $('.overlay').fadeIn();
+  $('.pacman').fadeIn();
+});
+
 // question/help
 $(".help-button").on('click', function() {
   $.colorbox({
