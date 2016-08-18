@@ -15,7 +15,7 @@
 # If we can import from demangler, then do so.
 # Otherwise, use the version of demangle we have
 
-import sys
+import sys, os
 from subprocess import Popen, PIPE
 
 def get_cppfilt_process():
