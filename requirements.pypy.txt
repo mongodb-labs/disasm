@@ -1,5 +1,5 @@
 beautifulsoup4==4.4.1
-capstone==3.0.4
+-e git+https://github.com/aquynh/capstone.git@252d9b79242d22e1884b3d9da26b964b06358c3c#egg=capstone&subdirectory=bindings/python
 cffi==1.7.0
 click==6.6
 construct==2.5.2
