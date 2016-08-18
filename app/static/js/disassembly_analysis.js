@@ -308,22 +308,6 @@ rivets.formatters.formatIndentation = function(depth) {
   return indentationStr;
 }
 
-function typeClicked(e, model) {
-  // JS is doing this really weird thing where it tries running this function before anything is
-  // actually clicked. Since there is no actual event or model yet, the function just breaks...
-  // To avoid that, we check to make sure e and model are valid before doing anything.
-  if (e && model) {
-    var typeName = model.type;
-    var typeData = type_ctrl.typeData[typeName];
-    type_ctrl.selected_type = typeData;
-    type_ctrl.showTypeSearchResults = false; 
-  }
-
-  // Readmore is a library for creating collapsible and expandible blocks of text
-  // collapsedHeight: 0 -- the div will by default show nothing until it is expanded 
-  $('.type-member-collapsible').readmore({collapsedHeight: 0});
-}
-
 function memberTypeClicked(e, model) {
   var typeName = model.member.type;
   var typeData = type_ctrl.typeData[typeName];
@@ -346,11 +330,41 @@ function selectedTypeClicked(e, model) {
 // it with the new request.
 $('#type-name-input').on('keyup', function() {
   query = this.value.toLowerCase();
+  type_ctrl.queryString = query;
   type_ctrl.queryResults = [];
+
+  // First empty the list.
+  dataTypesEl = document.getElementById('data-types');
+  while (dataTypesEl.firstChild) {
+    dataTypesEl.removeChild(dataTypesEl.firstChild);
+  }
+
   // Iterate through the list of types to find matches.
   for (var typeName in type_ctrl.typeData) {
     if (typeName.toLowerCase().indexOf(query) != -1) {
       type_ctrl.queryResults.push(typeName);
+
+      // Finally, add these matches to the list.
+      var newRes = document.createElement('a');
+        var innerSpan = document.createElement('span');
+        innerSpan.innerText = typeName;
+        innerSpan.className = 'type';
+      newRes.setAttribute('data-name', typeName);
+      newRes.className = 'type-wrapper';
+      newRes.appendChild(innerSpan);
+      $(newRes).click(function(event) {
+        debugger;
+        var typeName = event.toElement.parentElement.getAttribute('data-name');
+        var typeData = type_ctrl.typeData[typeName];
+        if (typeData) {
+          type_ctrl.selected_type = typeData;
+          type_ctrl.showTypeSearchResults = false; 
+        }
+        else
+          return;
+      });
+
+      dataTypesEl.appendChild(newRes);
     }
   }
   type_ctrl.showTypeSearchResults = true;
@@ -365,10 +379,10 @@ rivets.formatters.getQueryResults = function(query) {
     }
   }
   return queryResults;
-  // for (var i = 0; i < type_ctrl.typeDataList.length; i++) {
-  //   if (type_ctrl.typeDataList[i].toLowerCase().indexOf(query) != -1) {
-  //     type_ctrl.typeDataQueried.push(type_ctrl.typeDataList[i]);
-  //   }
-  // }
   
 };
+
+rivets.binders.querystring = function(el, queryString) {
+    console.log(queryString);
+    debugger;
+}

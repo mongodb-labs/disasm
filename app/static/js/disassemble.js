@@ -42,28 +42,26 @@ var assembly_ctrl = {
   instructionClicked: instructionClicked 
 }
 
+var rivetsAssemblyView = rivets.bind($("#function-disasm"), 
+  {assembly: assembly, ctrl: assembly_ctrl}
+);
+
 var type_ctrl = {
   typeData: [],
-  typeClicked: typeClicked,
   selected_type: null,
   memberTypeClicked: memberTypeClicked,
   selectedTypeClicked: selectedTypeClicked,
   showTypeSearchResults: true,
+  queryString: "",
 };
 
-var typeDataQuery = "";
-
 var rivetsAnalysisView = rivets.bind($('#tab-type-info'),
-  {type_ctrl: type_ctrl, typeDataQuery : typeDataQuery}
+  {type_ctrl: type_ctrl}
 );
 
 rivets.formatters.isEmptyStr = function(value) {
   return value == "";
 }
-
-var rivetsAssemblyView = rivets.bind($("#function-disasm"), 
-  {assembly: assembly, ctrl: assembly_ctrl}
-);
 
 rivets.formatters.displayData = function(data) {
   return data != null && data != undefined;
