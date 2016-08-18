@@ -353,7 +353,6 @@ $('#type-name-input').on('keyup', function() {
       newRes.className = 'type-wrapper';
       newRes.appendChild(innerSpan);
       $(newRes).click(function(event) {
-        debugger;
         var typeName = event.toElement.parentElement.getAttribute('data-name');
         var typeData = type_ctrl.typeData[typeName];
         if (typeData) {
@@ -384,5 +383,4 @@ rivets.formatters.getQueryResults = function(query) {
 
 rivets.binders.querystring = function(el, queryString) {
     console.log(queryString);
-    debugger;
 }

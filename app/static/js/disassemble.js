@@ -42,6 +42,10 @@ var assembly_ctrl = {
   instructionClicked: instructionClicked 
 }
 
+rivets.formatters.isEmptyStr = function(value) {
+  return value == "";
+}
+
 var rivetsAssemblyView = rivets.bind($("#function-disasm"), 
   {assembly: assembly, ctrl: assembly_ctrl}
 );
@@ -55,17 +59,13 @@ var type_ctrl = {
   queryString: "",
 };
 
-var rivetsAnalysisView = rivets.bind($('#tab-type-info'),
-  {type_ctrl: type_ctrl}
-);
-
-rivets.formatters.isEmptyStr = function(value) {
-  return value == "";
-}
-
 rivets.formatters.displayData = function(data) {
   return data != null && data != undefined;
 }
+
+var rivetsAnalysisView = rivets.bind($('#tab-type-info'),
+  {type_ctrl: type_ctrl}
+);
 
 assembly.instructions_loading = true;
 get_function_assembly();
