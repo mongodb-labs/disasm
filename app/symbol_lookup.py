@@ -1,6 +1,6 @@
 from elftools.elf.elffile import ELFFile
 from elftools.common.py3compat import iteritems
-from demangler import demangle
+from disasm_demangler import demangle
 
 # Get all top-level members of a given DIE
 def get_members(die):

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from disassemble import disasm_plt
-from demangler import demangle
+from disasm_demangler import demangle
 from elftools.elf.relocation import RelocationSection
 import struct, time
 

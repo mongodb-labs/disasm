@@ -11,13 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import sys
+import sys, time
 from elftools.elf.elffile import ELFFile
 from elftools.elf.sections import SymbolTableSection
 from elftools.elf.relocation import RelocationHandler
 from elftools.dwarf.descriptions import describe_form_class
 from elftools.dwarf.die import DIE
-from demangler import demangle
+from disasm_demangler import demangle
 from bisect import bisect_right
 from symbol_lookup import get_sub_symbol
 from dwarf_expr import describe_DWARF_expr, set_global_machine_arch, OpPiece

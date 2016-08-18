@@ -14,7 +14,7 @@
 
 import datetime, json, math, time
 from capstone import Cs, CsError, CS_ARCH_X86, CS_MODE_64, x86, CS_OPT_SYNTAX_ATT
-from demangler import demangle
+from disasm_demangler import demangle
 from documentation import get_documentation
 from os import listdir
 from os.path import isfile, join, dirname
@@ -220,7 +220,7 @@ def jsonify_capstone(data):
         }
 
         # If this instruction contains a rip-relative address, then assign the relevant data
-        if i.rip:
+        if getattr(i, 'rip', None):
             row['rip'] = True
             row['rip-offset'] = i.rip_offset if not math.isnan(i.rip_offset) else "NaN"
             row['rip-resolved'] = i.rip_resolved if not math.isnan(i.rip_resolved) else "NaN"
@@ -240,35 +240,41 @@ def jsonify_capstone(data):
             row['rip-value-hex-64'] = i.hex_64
             row['rip-value-float'] = i.float if not math.isnan(i.float) else "NaN"
             row['rip-value-double'] = i.double if not math.isnan(i.double) else "NaN"
-        if i.jump_table:
+        if getattr(i, 'jump_table', None):
             row['jump-table'] = i.jump_table
-        if i.internal_jump: 
+        if getattr(i, 'internal_jump', None): 
             row['internal-jump'] = True
             row['jump-address'] = hex(i.jump_address)
-        if i.external_jump:
+        if getattr(i, 'external_jump', None): 
             row['external-jump'] = True
-            row['jump-function'] = i.jump_function
-            row['jump-address'] = i.jump_address
-            row['jump-function-name'] = i.jump_function_name
-            row['jump-function-address'] = i.jump_function_address
-            row['jump-function-offset'] = i.jump_function_offset
-            row['jump-function-size'] = i.jump_function_size
-        if i.comment:
+            row['jump-function'] = getattr(i, "jump_function", None)
+            row['jump-address'] = getattr(i, "jump_address", None)
+            row['jump-function-name'] = getattr(i, "jump_function_name", None)
+            row['jump-function-address'] = getattr(i, "jump_function_address", None)
+            row['jump-function-offset'] = getattr(i, "jump_function_offset", None)
+            row['jump-function-size'] = getattr(i, "jump_function_size", None)
+        if getattr(i, 'comment', None):
             row['comment'] = i.comment
-        if i.nop:
+        if getattr(i, "nop", None):
             row['nop'] = True
-        if i.return_type:
+        if getattr(i, "return_type", None):
             row['return'] = True
-        if i.short_desc:
+        if getattr(i, "short_desc", None):
             row['short_description'] = i.short_desc
-        if i.docfile:
+        if getattr(i, "docfile", None):
             row['docfile'] = INSTR_REF_DIRECTORY + i.docfile
 
         # reading/writing registers
-        row['ptr'] = i.ptr
-        row['ptr_size'] = i.ptr_size
+        if getattr(i, "ptr", None):
+            row['ptr'] = i.ptr
+            row['ptr_size'] = i.ptr_size
+
+        if getattr(i, "regs_ptr_explicit", None):
+            row['regs_read_explicit'] = i.regs_ptr_explicit
+        else:
+            row['regs_read_explicit'] = []
+
         row['regs_write_explicit'] = []
-        row['regs_read_explicit'] = [] if not i.regs_ptr_explicit else i.regs_ptr_explicit
         with open(REG_DATA_PATH + 'x86operands.json', 'r') as fp:
             op_data = json.load(fp)
         try:
