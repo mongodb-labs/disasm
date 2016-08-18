@@ -17,12 +17,14 @@ from demangler import demangle
 from elftools.elf.relocation import RelocationSection
 import struct, time
 
+MAX_INSTR_SIZE = 16
+
 def resolve_plt(addr, plt_section, exe):
     sym = None
     plt_offset = addr - plt_section['sh_addr'] + plt_section['sh_offset']
     plt_section.stream.seek(plt_offset)
     # "execute" instructions in .plt to find indirection
-    rela_addr, size = disasm_plt(plt_section.stream.read(), addr)
+    rela_addr, size = disasm_plt(plt_section.stream.read(MAX_INSTR_SIZE), addr)
     if not rela_addr:
         return None
 
