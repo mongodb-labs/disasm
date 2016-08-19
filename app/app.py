@@ -311,7 +311,7 @@ def source_code_from_path():
     if request.form['lineno'] == "":
         return jsonify({})
 
-    path = os.path.join(app.config['SRC_DIR'] + request.form['src_path'])
+    path = os.path.join(app.config['SRC_DIR'], request.form['src_path'])
     lineno = int(request.form['lineno'])
 
     before = ""

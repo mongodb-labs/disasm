@@ -14,6 +14,8 @@
 
 from elftools.dwarf.die import DIE
 
+from dwarf_expr import describe_DWARF_expr
+
 # Maps of each DIE offset to the corresponding DIE.
 # Used when trying to follow DIE type references, i.e., a DW_TAG_typedef DIE that has a DW_AT_type
 # attribute that refers to a DW_TAG_base_type DIE.
@@ -52,7 +54,7 @@ class MemberInformation(dict):
             type=type,
             depth=depth,
             offset=offset,
-            modifiers=modifiers)
+            modifiers=modifiers,)
 
     @staticmethod
     def member(child, depth, offset):
@@ -95,6 +97,9 @@ class MemberInformation(dict):
             modifiers)
 
     # Creates a MemberInformation dict for a DIE that's known to be the parent of another DIE.
+    # The only real difference is that we repalce the name field with '(parent)', and that we can
+    # assume that it won't be an anonymous union.
+    # Since most of the code is so similar, this should later be refactored.
     @staticmethod
     def parent(parent, depth, offset):
         if offset:
@@ -144,12 +149,15 @@ class DIEInformation(dict):
 
         members = getMembers(die)
 
+        vtable = getVtable(die)
+
         dict.__init__(self, 
             name=name,
             tag=tag,
             size=size,
             subtype=subtype,
-            members=members)
+            members=members,
+            vtable=vtable)
 
 # Given a type DIE, get the full name of that type, e.g, mongo::Value
 def getFullTypeName(die):
@@ -221,3 +229,35 @@ def isType(die, typeName):
     if typeDie.tag == typeName:
         return True
     return False
+
+def getVtable(typeDie):
+    global die_list
+    vtable = {}
+    for child in typeDie.iter_children():
+        # Get the vtable entries from the parents
+        if child.tag == 'DW_TAG_inheritance':
+            parentRef = child.attributes.get('DW_AT_type').value
+            parentDie = die_list[child.cu.cu_offset + parentRef]
+            parentVtable = getVtable(parentDie)
+            vtable = dict(vtable.items() + parentVtable.items())
+    for child in typeDie.iter_children():
+        if child.tag == 'DW_TAG_subprogram' \
+        and child.attributes.get('DW_AT_virtuality') \
+        and child.attributes.get('DW_AT_vtable_elem_location'):
+            elem_location = child.attributes.get('DW_AT_vtable_elem_location')
+            if elem_location.form == 'DW_FORM_exprloc':
+                loc_pieces = describe_DWARF_expr(elem_location.value, child.cu.structs)
+                # Not 100% sure what loc_pieces represents right now...
+                index = loc_pieces[0]
+                if child.attributes.get('DW_AT_linkage_name'):
+                    name = child.attributes.get('DW_AT_linkage_name').value
+                elif child.attributes.get('DW_AT_name'):
+                    name = child.attributes.get('DW_AT_name').value
+                else:
+                    name = "(Cannot determine name)"
+                vtable[index] = name
+            elif elem_location.form == 'DW_FORM_loclistptr':
+                print 'Cannot currently handle form DW_FORM_loclistptr'
+            else:
+                print 'Unexpected form {} for vtable_elem_location'.format(elem_location.form)
+    return vtable

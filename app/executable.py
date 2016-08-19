@@ -579,7 +579,6 @@ class ElfExecutable(Executable):
                     type_dies[dieInfo['name']] = dieInfo
         self.type_dies[CU.cu_offset] = type_dies
         print len(type_dies.keys())
-        # return {}
         return type_dies 
 
 def printChildren(die):
