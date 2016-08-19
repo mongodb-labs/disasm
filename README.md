@@ -4,7 +4,6 @@ Interactive Disassembler GUI
 * [About](#about)
 * [Before running](#before-running)
     * [IACA](#iaca)
-    * [Gunicorn](#gunicorn)
     * [Pypy](#pypy)
 * [Running](#running)
     * [Options](#options)
@@ -38,10 +37,6 @@ There is optional IACA integration. To use it, you must first download IACA from
     * Use pip_pypy
         * `pip_pypy install -r requirements.pypy.txt` (regular pip doesn't install to a directory that pypy can find)
     * Use virtualenv and pip
-        * `mkvirtualenv -p /path/to/pypy my-virtual-env`
-        * `virtualenv my-virtual-env/venv`
-        * `source my-virtual-env/venv/bin/activate`
-        * `pip install -r requirements.txt`
 2. Ensure that you have either `c++filt` or `gc++filt` on your machine/in your `$PATH` (The demangler library we use does not work with pypy. If you know of a python demangler library that can run on pypy, let us know!)
 
 Running
