@@ -39,7 +39,7 @@ There is optional IACA integration. To use it, you must first download IACA from
         * `pip_pypy install -r requirements.pypy.txt` (regular pip doesn't install to a directory that pypy can find)
     * Use virtualenv and pip
         * `mkvirtualenv -p /path/to/pypy name-of-virtualenv`
-        * pip install -r requirements.txt
+        * `pip install -r requirements.txt`
 2. Ensure that you have either `c++filt` or `gc++filt` on your machine/in your `$PATH` (The demangler library we use does not work with pypy. If you know of a python demangler library that can run on pypy, let us know!)
 
 Running
@@ -51,7 +51,7 @@ The best way to run the application is the following way:
 python run.py
 ```
 
-This will run the server on top of Gunicorn, a faster, more reliable, and more robust server than Werkzeug, the default Flask server. There are known issues with Werkzeug that cause the application to work suboptimally, namely the lack of multi-threading. If Gunicorn isn't working for you, or if you'd like to use Werkzeug for any other reason, you can do so by running:
+This will run the server on top of Gunicorn, a faster, more reliable, and more robust server than Werkzeug, the default Flask server. If Gunicorn isn't working for you, or if you'd like to use Werkzeug for any other reason, you can do so by running:
 
 ```python
 python app/app.py
