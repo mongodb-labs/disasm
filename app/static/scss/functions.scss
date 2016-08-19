@@ -23,6 +23,16 @@ h2.header {
 
   .filename {
   	margin-top: -10px;
+  	display: inline-block;
+  }
+
+  .warning {
+  	display: inline-block;
+  	color: darkorange;
+
+  	div {
+  		font-size: 16px;
+  	}
   }
 }
 

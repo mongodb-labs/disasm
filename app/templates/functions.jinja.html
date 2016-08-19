@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="static/css/skeleton.css">
   <link rel="stylesheet" href="static/css/normalize.css">
   <link rel="stylesheet" href="static/css/colorbox.css">
+  <link rel="stylesheet" href="static/css/tipr.css">
   {% assets "functions_css" %} <link rel="stylesheet" href="{{ ASSET_URL }}"> {% endassets %}
   <link href="https://fonts.googleapis.com/css?family=Space+Mono" rel="stylesheet">
   <script src="https://use.fontawesome.com/d826d0fa82.js"></script>
@@ -29,6 +30,14 @@
       <h2 class='header'> 
         <div class='title'>filename:</div>
         <div class='filename'>{{ displayname }}</div>
+        {% if warning | length > 0 %}
+        <div class="warning">
+          <i class="fa fa-exclamation-circle tip" 
+            aria-hidden="true"
+            data-tip="{{displayname}} has {{ warning }}"
+            ></i>
+        </div>
+        {% endif %}
       </h2>
 
       {% include 'function_search.partial.html' %}
@@ -39,7 +48,16 @@
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 {% assets "js_global" %} <script src="{{ ASSET_URL }}"></script> {% endassets %}
-{% assets "js_functions" %} <script src="{{ ASSET_URL }}"></script> {% endassets %}
+{% assets "js_functions" %} <script src="{{ ASSET_URL }}"></script> 
+{% endassets %}
+<script type="text/javascript">
+  $(document).ready(function() {
+    // initialize tooltips
+    $('.tip').tipr({
+      'speed': 100,
+    });
+  });
+</script>
 
 </body>
 

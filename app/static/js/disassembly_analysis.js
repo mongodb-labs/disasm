@@ -67,7 +67,8 @@ function get_stack_info(addr) {
   })
   .done(function(data) {
     if (data == null || data[0] == null) {
-      analysis.stack_info = [["No stack info for this instruction", ""]];
+      analysis.stack_info = 
+      [["No stack info for this instruction. This executable may not have a .debug_info section", ""]];
     }
     else {
       analysis.stack_info = data;

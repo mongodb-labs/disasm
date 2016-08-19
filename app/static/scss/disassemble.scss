@@ -60,12 +60,15 @@ $heading-bg: rgb(128,203,196);
 
 	$filename-color: ghostwhite;
 	.filename {
-		font-size: 1.6em;
-		color: $filename-color;
-	}
-	.filename {
 		font-size: 2em;
+		color: $filename-color;
 		display: inline-block;
+	}
+	.warning {
+		display: inline-block;
+		color: rgb(255,245,157);
+		font-size: 2em;
+		margin-left: 5px;
 	}
 	.func-name {
 		font-size: 1.3em;
@@ -308,7 +311,6 @@ $instruc-color-write: rgb(255,171,145);
 			.flag-read i.arrow,
 			.flag-write i.arrow {
 				font-weight: bold;
-				font-size: 1.2em;
 			}
 			.flag-read i.flag,
 			.flag-write i.flag {

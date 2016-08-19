@@ -450,8 +450,10 @@ function get_function_assembly() {
       type: "GET",
       url: URL_REG_CONTENTS + "?address=" + st_value + "&filename=" + assembly.filename
     }).done(function(data){
-      handleRegisterContent(data, st_value);
-      console.log(data)
+      if (data) {
+        handleRegisterContent(data, st_value);
+        console.log(data)
+      }
     });
 
     // load type data.

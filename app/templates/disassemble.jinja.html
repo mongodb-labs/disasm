@@ -35,6 +35,14 @@
     <div class="heading">
       <div class='top-row'>
         <div class='filename'>{{ displayname }}</div>
+        {% if warning | length > 0 %}
+        <div class="warning">
+          <i class="fa fa-exclamation-circle tip" 
+            aria-hidden="true"
+            data-tip="{{ displayname }} has {{ warning }}"
+            ></i>
+        </div>
+        {% endif %}
       </div>
       <div class='func-name'>{{ func_name }}</div>
     </div>

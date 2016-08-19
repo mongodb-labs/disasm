@@ -69,6 +69,7 @@ assets.register('js_index', js_index)
 
 # Javascript files that are used in functions.jinja.html
 js_functions = Bundle(
+    JS_THIRDPARTY_DIR + 'tipr.js',
     'js/functions.js',
     'js/functions_shortcuts.js',
     output='generated/functions_all.js')
@@ -231,9 +232,16 @@ def functions():
     try:
         load_functions(filename)
         md = metadata.fromUUID(filename)
+
+        warning = []
+        if not executables.get(filename).dwarff:
+            warning.append("no .debug_info")
+        if not executables.get(filename).aranges:
+            warning.append("no .debug_aranges")
         return render_template('functions.jinja.html', 
             filename=filename, 
-            displayname=md.basename)
+            displayname=md.basename,
+            warning="; ".join(warning))
     except OSError as e:
         return redirect(url_for('index', err=request.args["basename"]))
 
@@ -241,6 +249,15 @@ def functions():
 @app.route('/disasm_function', methods=['GET'])
 def disasm_function():
     # initially empty page; load all info via ajax
+    filename = request.args['filename']
+    warning = []
+    if not executables.get(filename):
+        loadExec(filename)
+    if not executables.get(filename).dwarff:
+        warning.append("no .debug_info")
+    if not executables.get(filename).aranges:
+        warning.append("no .debug_aranges")
+
     md = metadata.fromUUID(request.args['filename'])
     return render_template("disassemble.jinja.html", 
         filename=request.args['filename'],
@@ -248,7 +265,8 @@ def disasm_function():
         st_value=request.args['st_value'],
         file_offset=request.args['file_offset'],
         func_name=request.args['func_name'],
-        size=request.args['size'])
+        size=request.args['size'],
+        warning="; ".join(warning))
 
 
 # expects "filename", "st_value", "file_offset", "size", 
