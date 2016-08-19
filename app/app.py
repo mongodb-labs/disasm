@@ -311,7 +311,7 @@ def source_code_from_path():
     if request.form['lineno'] == "":
         return jsonify({})
 
-    path = app.config['SRC_DIR'] + request.form['src_path']
+    path = os.path.join(app.config['SRC_DIR'] + request.form['src_path'])
     lineno = int(request.form['lineno'])
 
     before = ""
@@ -321,7 +321,10 @@ def source_code_from_path():
     try:
         fp = open(path)
     except:
-        return jsonify({})
+        try:
+            fp = open(request.form['src_path'])
+        except:
+            return jsonify({})
         
     for fake_index, line in enumerate(fp):
         # because of how enumerate numbers lines
