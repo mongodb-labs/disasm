@@ -1,5 +1,7 @@
-UPLOAD_DIR = './uploads/'	# location of uploaded executables
-SRC_DIR = '../mongo/'		# dir containing src code
+UPLOAD_DIR = './uploads/'   # location of uploaded executables 
+                            # (this directory will be created at runtime if it does not already exist)
+
+SRC_DIR = '../mongo/'       # directory containing source code
 
 # IACA_PATH and DYLD_LIBRARY_PATH are optional and used for iaca
 # integration. Uncomment and fill in the appropriate paths if 

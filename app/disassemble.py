@@ -47,7 +47,6 @@ def disasm(exe, bytes, offset=0):
 
                 # We can only decode the destination if it's an immediate value
                 elif instr.operands[0].type == x86.X86_OP_IMM:
-                    starttime = time.clock()
                     # Ignore if it's a jump/call to an address within this function
                     func_start_addr = disassembled[0].address
                     func_end_addr = disassembled[len(disassembled)-1].address
@@ -73,8 +72,6 @@ def disasm(exe, bytes, offset=0):
                                 instr.jump_function_address = symbol["st_value"]
                                 instr.jump_function_offset = symbol["st_value"] - sect_addr + sect_offset
                                 instr.jump_function_size = symbol['st_size']
-                            
-                    print ("call time is " + str(time.clock() - starttime))
 
             if instr.group(x86.X86_GRP_RET):
                 instr.return_type = True

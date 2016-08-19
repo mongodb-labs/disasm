@@ -41,5 +41,5 @@ def demangle(mangled):
     process.stdin.flush()
     demangled = process.stdout.readline()
     # strip the newline that is returned
-    return demangled[:-2] 
+    return demangled[:-1] 
 
