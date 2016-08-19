@@ -1,35 +1,22 @@
 Interactive Disassembler GUI
 ============================
 
+* [About](#about)
 * [Before running](#before-running)
     * [IACA](#iaca)
     * [Gunicorn](#gunicorn)
     * [Pypy](#pypy)
 * [Running](#running)
     * [Options](#options)
-* [About](#about)
 * [Features](#features)
-    * [Disassembly](#disassembly)
-    * [Source code stack trace](#source-code-stack-trace-)
-    * [IACA integration](#iaca-integration)
-    * [Register contents](#register-contents-)
-    * [Register tracking](#register-tracking-)
-    * [Flags read/written](#flags-readwritten)
-    * [Jump table resolution](#jump-table-resolution)
-    * [Rip-relative address resolution and interpretation](#rip-relative-address-resolution-and-interpretation)
-    * [Type analysis](#type-analysis-)
-    * [Jumping](#jumping)
-    * [Number conversion](#number-conversion)
-    * [Instruction documentation](#instruction-documentation)
-    * [File upload](#file-upload)
-    * [NOP byte size](#nop-byte-size)
-    * [Keyboard shortcuts](#keyboard-shortcuts)
-        * [Function search](#function-search)
-        * [Disassembly](#disassembly-1)
-            * [Analysis window open](#analysis-window-open)
 * [Bugs](#bugs)
 * [Contributors](#contributors)
 * [License](#license)
+
+About
+-----
+
+Disasm is a web application written in Flask. It allows you to disassemble ELF files that have been assembled as Intel x86 assembly. The assembly and analysis can be displayed in a browser so that you can click around and interact with it.
 
 Before running
 -----------------
@@ -42,12 +29,6 @@ Before running
 ### IACA
 
 There is optional IACA integration. To use it, you must first download IACA from [Intel's website](https://software.intel.com/en-us/articles/intel-architecture-code-analyzer-download) and update variables in your config.py accordingly.
-
-### Gunicorn
-
-[Gunicorn](http://gunicorn.org/) is a fast and robust server, and requires little setup. It's also far more reliable; there are known issues with using Werkzeug (the default Flask server) that cause that server to crash if you send too many requests in a short amount of time.
-
-Run `pip install gunicorn` to install it.
 
 ### PyPy
 
@@ -64,39 +45,19 @@ Run `pip install gunicorn` to install it.
 Running
 -------
 
-The simplest way to run the application is the following way:
+The best way to run the application is the following way:
+
+```python
+python run.py
+```
+
+This will run the server on top of Gunicorn, a faster, more reliable, and more robust server than Werkzeug, the default Flask server. There are known issues with Werkzeug that cause the application to work suboptimally, namely the lack of multi-threading. If Gunicorn isn't working for you, or if you'd like to use Werkzeug for any other reason, you can do so by running:
 
 ```python
 python app/app.py
 ```
 
-This approach does not require you to download or install anything more than the dependencies listed in requirements.txt, but it is also the slowest and least reliable.
-
-If Gunicorn is installed, you can start the application by running the following:
-
-```python
-python run.py
-python run.py -f <file(s)>
-```
-
-<<<<<<< f48072ddc62aa0b7be3fdebe42d3a5d8284c0928
-`run.py` uses gunicorn for speed and robustness. 
-
----
-
-#### Using PyPy for speed
-[PyPy](http://pypy.org/) is an alternative implementation of python that provides a considerable speedup. To use it, there is a little more setup involved.
-
-1. `pip_pypy install -r requirements.pypy.txt` (regular pip doesn't install to a directory that pypy can find)
-2. Ensure that you have either `c++filt` or `gc++filt` on your machine/in your `$PATH` (The demangler library we use does not work with pypy. If you know of a python demangler library that can run on pypy, let us know!)
-=======
 If Pypy is installed, then you can run the application by running pypy instead of python:
-
-```python
-pypy app/app.py
-```
-
-You can also combine Gunicorn and Pypy to form the best experience:
 
 ```python
 pypy run.py
@@ -106,11 +67,6 @@ pypy run.py
 
 * -f <file(s)>, --files <file(s)>
     * File(s) that you want to appear on the homepage to disassemble.
-
-About
------
-
-Disasm is a web application written in Flask. It allows you to disassemble ELF files that have been assembled as Intel x86 assembly. The assembly and analysis can be displayed in a browser so that you can click around and interact with it.
 
 Features
 --------
@@ -269,8 +225,6 @@ you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
   http://www.apache.org/licenses/LICENSE-2.0
->>>>>>> readme
->>>>>>> Updated README
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
