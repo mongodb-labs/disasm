@@ -25,13 +25,14 @@ from dwarf_expr import describe_DWARF_expr, set_global_machine_arch, OpPiece
 import jump_tables as jt
 from die_information import DIEInformation, reset_die_list
 import resolve_relocations as relocs
+import mmap
 
 """
 Base class for executables
 """
 class Executable(object):
     def __init__(self, f):
-        self.f = f
+        self.f = mmap.mmap(f.fileno(), 0, prot=mmap.PROT_READ)
         self._symbol_addr_map = None
 
     @staticmethod

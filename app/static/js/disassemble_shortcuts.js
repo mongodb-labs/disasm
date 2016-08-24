@@ -16,6 +16,7 @@
 
 var instructionList = document.getElementById('function-disasm');
 var functionList = document.getElementById('functions');
+var typeList = document.getElementById('data-types');
 
 var mainListener = new window.keypress.Listener();
 mainListener.register_many([
@@ -184,19 +185,50 @@ typeSearchListener.register_many([
     {
         "keys"          : "up",
         "on_keydown"    : function() {
-            // functionsOnUp(functionList);
+          var prev = selectedType.previousSibling;
+          if (prev && $(prev).hasClass('type')) {
+              $(selectedType).removeClass('selected');
+              $(prev).addClass('selected');
+              selectedType = prev;
+          }
+
+          // If the selected element is off-screen, scroll s.t. the selected element is at the 
+          // to of the function list.
+          var selectedTop = selectedType.getBoundingClientRect().top;
+          var selectedBot = selectedType.getBoundingClientRect().bottom;
+          var functionsTop = typeList.getBoundingClientRect().top;
+          var functionsBot = typeList.getBoundingClientRect().bottom;
+          if (selectedTop < functionsTop || selectedBot > functionsBot) {
+              typeList.scrollTop += selectedTop - functionsTop;
+          }
         }
     },
     {
         "keys"          : "down",
         "on_keydown"    : function() {
-            // functionsOnDown(functionList);
+            var next = selectedType.nextSibling;
+            if (next && $(next).hasClass('type')) {
+                $(selectedType).removeClass('selected');
+                $(next).addClass('selected');
+                selectedType = next;
+            }
+            // If the selected element is off-screen, scroll s.t. the selected element is at the 
+            // bottom of the function list.
+            var selectedTop = selectedType.getBoundingClientRect().top;
+            var selectedBot = selectedType.getBoundingClientRect().bottom;
+            var functionsTop = typeList.getBoundingClientRect().top;
+            var functionsBot = typeList.getBoundingClientRect().bottom;
+            if (selectedBot > functionsBot || selectedTop < functionsTop) {
+              typeList.scrollTop += selectedBot - functionsBot;
+            }
         }
     },
     {
         "keys"          : "enter",
         "on_keydown"    : function() {
-            // window.location = selectedFunction.href;
+            if (selectedType) {
+                _selectedTypeClicked(selectedType.getAttribute("data-name"));
+            }
         }
     }, 
     {

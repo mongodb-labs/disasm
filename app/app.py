@@ -199,8 +199,8 @@ def getExistingFiles():
 
 def loadExec(filename):
     md = metadata.fromUUID(filename)
-    f = open(md.path, 'rb')
-    a = get_executable(f)
+    with open(md.path, 'rb') as f:
+        a = get_executable(f)
     executables[filename] = a
     print "Done loading the executable"
 

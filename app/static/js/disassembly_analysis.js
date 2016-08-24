@@ -309,28 +309,35 @@ rivets.formatters.formatIndentation = function(depth) {
   return indentationStr;
 }
 
+function _selectedTypeClicked(typeName) {
+  var typeData = type_ctrl.typeData[typeName];
+    if (typeData) {
+      type_ctrl.selected_type = typeData;
+      type_ctrl.showTypeSearchResults = false;
+    }
+    else
+      return;  
+}
+
 function memberTypeClicked(e, model) {
   var typeName = model.member.type;
-  var typeData = type_ctrl.typeData[typeName];
-  if (typeData)
-    type_ctrl.selected_type = typeData;
-  else
-    return;
+  _selectedTypeClicked(typeName);
 }
 
 function selectedTypeClicked(e, model) {
   var typeName = model.type_ctrl.selected_type.subtype;
-  var typeData = type_ctrl.typeData[typeName];
-  if (typeData)
-    type_ctrl.selected_type = typeData;
-  else
-    return;
+  _selectedTypeClicked(typeName);
 }
 
 // When the type name input is changed, clear the current list of matching type names, and replace
 // it with the new request.
+var prevQuery = "";
 $('#type-name-input').on('keyup', function() {
   query = this.value.toLowerCase();
+  if (prevQuery == query) {
+    return;
+  }
+  prevQuery = query;
   type_ctrl.queryString = query;
   type_ctrl.queryResults = [];
 
@@ -347,14 +354,13 @@ $('#type-name-input').on('keyup', function() {
 
       // Finally, add these matches to the list.
       var newRes = document.createElement('a');
+      newRes.setAttribute('data-name', typeName);
+      newRes.className = 'type';
         var innerSpan = document.createElement('span');
         innerSpan.innerText = typeName;
-        innerSpan.className = 'type';
-      newRes.setAttribute('data-name', typeName);
-      newRes.className = 'type-wrapper';
       newRes.appendChild(innerSpan);
       $(newRes).click(function(event) {
-        var typeName = event.toElement.parentElement.getAttribute('data-name');
+        var typeName = event.delegateTarget.getAttribute('data-name');
         var typeData = type_ctrl.typeData[typeName];
         if (typeData) {
           type_ctrl.selected_type = typeData;
@@ -367,6 +373,8 @@ $('#type-name-input').on('keyup', function() {
       dataTypesEl.appendChild(newRes);
     }
   }
+  dataTypesEl.firstChild.className += " selected";
+  selectedType = dataTypesEl.firstChild;
   type_ctrl.showTypeSearchResults = true;
 });
 

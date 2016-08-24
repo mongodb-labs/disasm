@@ -94,27 +94,27 @@ input#function-name-input:focus + .bottom-border {
 	width: 0% !important;
 }
 
-::-webkit-input-placeholder {
+.function-search ::-webkit-input-placeholder {
 	color: $placeholder-color;
 }
-:-moz-placeholder {
+.function-search :-moz-placeholder {
 	color: $placeholder-color;
 }
-::-moz-placeholder {
+.function-search ::-moz-placeholder {
 	color: $placeholder-color;
 }
-:-ms-input-placeholder {
+.function-search :-ms-input-placeholder {
 	color: $placeholder-color;
 }
 
 
 // for animating
 .function-search.focused {
-	transition: width 1s;
-	-webkit-transition: width 1s;
+	transition: width 500ms;
+	-webkit-transition: width 500ms;
 
 	width: 550px;
-	max-width: 80vw;
+	max-width: 60vw;
 }
 
 .function-search {
@@ -123,8 +123,8 @@ input#function-name-input:focus + .bottom-border {
 	font-size: 14px;
 	position: relative;
 
-	transition: width 1s;
-	-webkit-transition: width 1s;
+	transition: width 500ms;
+	-webkit-transition: width 500ms;
 
 	i.fa {
 		font-size: 22px;
@@ -553,6 +553,22 @@ $jump-color1: rgb(255,245,157);
 
 
 /****************** Type Search *******************/
+.type-search > .row.input {
+	margin-bottom: 15px;
+}
+
+input#type-name-input {
+	font-size: 1.2em !important;
+}
+
+// input#type-name-input, 
+// input#type-name-input:focus + .bottom-border {
+// 	width: 80% !important;
+// }
+// .bottom-border {
+// 	width: 0% !important;
+// }
+
 .type {
 	text-decoration: none;
 	color: black;
@@ -578,19 +594,28 @@ $type-bg: rgb(178,223,219);
 	height: 100%;
 	overflow-y: scroll;
 	max-height: 40vh;
+	margin-left: 0;
+
+	a.type {
+		display: block;
+		margin-bottom: 15px;
+	}
+	a:last-child {
+		padding-bottom: 15px;
+	}
 }
 
-#data-types a:last-child {
-	padding-bottom: 15px;
-}
-
-.type-attr {
+.type-attr, .members {
+	font-weight: bold;
 	display: block;
+	span {
+		font-weight: normal;
+		font-family: "Space Mono", monospace;
+	}
 }
 
-.type-wrapper {
-	display: block;
-	margin-bottom: 15px;
+li.type-attr {
+	margin-bottom: 3px;
 }
 
 .type-member-attribute {

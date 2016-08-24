@@ -1,7 +1,8 @@
 $main-teal: rgb(0,150,136);
 $border-width: 3px;
 
-input#function-name-input {
+input#function-name-input,
+input#type-name-input {
 	font-size: 1.5em;
 	background-color: rgba(0,0,0,0);
 
@@ -17,7 +18,8 @@ input#function-name-input {
 	transition: width 500ms;
 }
 
-input#function-name-input:focus + .bottom-border {
+input#function-name-input:focus + .bottom-border,
+input#type-name-input:focus + .bottom-border {
 	border-top: solid $border-width rgba($main-teal, 0.8);
   margin: 0;
   margin-top: -$border-width;
