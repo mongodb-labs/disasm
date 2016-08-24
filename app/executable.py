@@ -18,6 +18,7 @@ from elftools.elf.relocation import RelocationHandler
 from elftools.dwarf.descriptions import describe_form_class
 from elftools.dwarf.die import DIE
 from disasm_demangler import demangle
+from CU_ranges import CURanges
 from bisect import bisect_right
 from symbol_lookup import get_sub_symbol
 from dwarf_expr import describe_DWARF_expr, set_global_machine_arch, OpPiece
@@ -81,6 +82,9 @@ class ElfExecutable(Executable):
         else:
             self.dwarff = None
             self.aranges = None
+
+        if self.dwarff and not self.aranges:
+            self.aranges = CURanges(self.dwarff)
 
         self.CU_offset_to_DIE = {}
         # { addr -> { type -> die } }
@@ -432,7 +436,6 @@ class ElfExecutable(Executable):
                 file_AT = "DW_AT_call_file"
                 line_AT = "DW_AT_call_line"
             else:
-                print "No valid file number"
                 continue
             fileno = entry.attributes[file_AT].value
             file_entry = lineprog['file_entry'][fileno - 1]

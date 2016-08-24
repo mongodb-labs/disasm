@@ -403,7 +403,6 @@ def get_jumptable():
         switch_reg = exe.get_jumptable_switch_reg(instrs)
         return jsonify({"switch_reg": switch_reg, "jumptable" : jumptable})
 
-
 @app.route('/get_types', methods=["GET"])
 def get_types():
     filename = request.args['filename']
