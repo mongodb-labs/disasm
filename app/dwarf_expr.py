@@ -78,7 +78,7 @@ class ExprParser(ExprDumper):
     def parse_stack(self, parts=None):
         if not parts:
             parts = self._parts
-            
+
         stack = [] # stack of DwarfOps
         for part in parts:
             try: # fail with unimplemented dwarf expressions

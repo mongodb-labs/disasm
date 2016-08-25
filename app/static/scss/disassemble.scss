@@ -466,6 +466,10 @@ $source-code-bg1: rgba(100,255,218, 0.9); // highlight relevant line
 		}
 	}
 
+	.tab-content.tab-type-info {
+		
+	}
+
 }
 
 #full_desc {
@@ -605,8 +609,15 @@ $type-bg: rgb(178,223,219);
 	}
 }
 
+#selected-type {
+	overflow-y: scroll;
+}
+
 .type-attr, .members {
 	font-weight: bold;
+}
+
+.type-attr {
 	display: block;
 	span {
 		font-weight: normal;

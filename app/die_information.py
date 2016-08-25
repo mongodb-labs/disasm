@@ -234,20 +234,13 @@ def getVtable(typeDie):
     global die_list
     vtable = {}
     for child in typeDie.iter_children():
-        # Get the vtable entries from the parents
-        if child.tag == 'DW_TAG_inheritance':
-            parentRef = child.attributes.get('DW_AT_type').value
-            parentDie = die_list[child.cu.cu_offset + parentRef]
-            parentVtable = getVtable(parentDie)
-            vtable = dict(vtable.items() + parentVtable.items())
-    for child in typeDie.iter_children():
         if child.tag == 'DW_TAG_subprogram' \
         and child.attributes.get('DW_AT_virtuality') \
         and child.attributes.get('DW_AT_vtable_elem_location'):
             elem_location = child.attributes.get('DW_AT_vtable_elem_location')
             if elem_location.form == 'DW_FORM_exprloc':
                 loc_pieces = describe_DWARF_expr(elem_location.value, child.cu.structs)
-                # Not 100% sure what loc_pieces represents right now...
+                print loc_pieces, child.attributes["DW_AT_name"].value
                 index = loc_pieces[0]
                 if child.attributes.get('DW_AT_linkage_name'):
                     name = child.attributes.get('DW_AT_linkage_name').value
