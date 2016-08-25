@@ -57,6 +57,8 @@ var type_ctrl = {
   selectedTypeClicked: selectedTypeClicked,
   showTypeSearchResults: true,
   queryString: "",
+  expandMember: expandMember,
+  collapseMember: collapseMember,
 };
 
 rivets.formatters.displayData = function(data) {
@@ -463,7 +465,6 @@ function get_function_assembly() {
       addr: parseInt(assembly.contents[0]['address'], 16)
     })
     .done(function(data) {
-      console.log("Done loading type data.");
       typeData = data;
     })
     .fail(function() {
@@ -471,8 +472,26 @@ function get_function_assembly() {
       typeData = [];
     })
     .always(function() {
+      // add member expandable, mark top-level as default expanded
+      Object.keys(typeData).forEach(function(typeName) {
+        var members = typeData[typeName]["members"];
+        members = members.map(function(member, i) {
+          if (member.depth == 0) {
+            member["expanded"] = true;
+          }
+          if (i == members.length - 1) {
+            member["expandable"] = false;
+          }
+          else {
+            var memberHasChildren = members[i+1]["depth"] > member["depth"];
+            member["expandable"] = memberHasChildren;
+          }
+          return member;
+        });
+      });
+
       type_ctrl.typeData = typeData;
-      
+
       // For some FASCINATING, unknown reason, despite defaulting to true, the related data will
       // appear as though showTypeSearchResults were false. This can be fixed by setting it to false
       // then back to true.
@@ -521,9 +540,6 @@ function wrapNumbersInElem(elem) {
   else if (charOne >= '0' && charTwo <= '9') {
     elem.setAttribute('value', 'twosCompDec64');
   }
-  else {
-    console.log("Unknown data type:");
-    console.log(elem)  }
 }
 
 // wrap registers for register tracking

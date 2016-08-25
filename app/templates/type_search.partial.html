@@ -16,15 +16,31 @@
   </div>
   <div class="type-attr">Tag: <span rv-text="type_ctrl.selected_type.tag"></span></div>
   <div class="members">Members:
+    <span class='change-all collapse-all'>collapse all</span>
+    <span class='change-all expand-all'>expand all</span>
     <ul>
-      <li class="type-attr"
-        rv-each-member="type_ctrl.selected_type.members">
+      <li class="member"
+        rv-each-member="type_ctrl.selected_type.members"
+        rv-show="member.expanded">
         <span class="indent" rv-text="member.depth | formatIndentation"></span>
+        
+        <span class='expand' rv-show="member.expandable">
+          <i class="fa fa-plus-square-o" aria-hidden="true"
+            rv-on-click="type_ctrl.expandMember"></i>
+        </span>
+        <span class='collapse' rv-show="member.collapsable">
+          <i class="fa fa-minus-square-o" aria-hidden="true"
+            rv-on-click="type_ctrl.collapseMember"></i>
+        </span>
+        <span rv-show="member | endOfLine" style="opacity:0;">
+          <i class="fa fa-square-o" aria-hidden="true"></i>
+        </span>
+
         <!-- Offset -->
         <span class="offset"
-        rv-show="member.offset | displayData">&lt;+{member.offset}&gt;</span>
+        rv-show="member.offset | displayData">&lt;{member.offset}&gt;</span>
         <span class="offset-unknown"
-        rv-hide="member.offset | displayData">(offset unknown)</span>
+        rv-hide="member.offset | displayData">&lt;?&gt;</span>
         <!-- Member name -->
         <span class="name"
         rv-show="member.name | displayData"

@@ -311,12 +311,12 @@ rivets.formatters.formatIndentation = function(depth) {
 
 function _selectedTypeClicked(typeName) {
   var typeData = type_ctrl.typeData[typeName];
-    if (typeData) {
-      type_ctrl.selected_type = typeData;
-      type_ctrl.showTypeSearchResults = false;
-    }
-    else
-      return;  
+  if (typeData) {
+    type_ctrl.selected_type = typeData;
+    type_ctrl.showTypeSearchResults = false;
+  }
+  else
+    return;  
 }
 
 function memberTypeClicked(e, model) {
@@ -361,15 +361,8 @@ $('#type-name-input').on('keyup', function() {
       newRes.appendChild(innerSpan);
       $(newRes).click(function(event) {
         var typeName = event.delegateTarget.getAttribute('data-name');
-        var typeData = type_ctrl.typeData[typeName];
-        if (typeData) {
-          type_ctrl.selected_type = typeData;
-          type_ctrl.showTypeSearchResults = false; 
-        }
-        else
-          return;
+        _selectedTypeClicked(typeName);
       });
-
       dataTypesEl.appendChild(newRes);
     }
   }
@@ -387,9 +380,65 @@ rivets.formatters.getQueryResults = function(query) {
     }
   }
   return queryResults;
-  
 };
 
-rivets.binders.querystring = function(el, queryString) {
-    console.log(queryString);
+
+rivets.formatters.endOfLine = function(member) {
+  return !member.expandable && !member.collapsable;
 }
+
+function expandMember(event, model) {
+  var members = type_ctrl.selected_type.members;
+  var thisDepth = model.member.depth;
+  var i = model.index + 1;
+  while (members[i].depth > thisDepth) {
+    if (members[i].depth == thisDepth + 1) {
+      members[i].expanded = true;
+    }
+    i += 1;
+  members[model.index].expandable = false;
+  members[model.index].collapsable = true;
+  }
+}
+
+function collapseMember(event, model) {
+  var members = type_ctrl.selected_type.members;
+  var thisDepth = model.member.depth;
+  var i = model.index + 1;
+  while (members[i].depth > thisDepth) {
+    members[i].expanded = false;
+    if (members[i].collapsable) {
+      members[i].expandable = true;
+      members[i].collapsable = false;
+    }
+    i += 1;
+    members[model.index].expandable = true;
+    members[model.index].collapsable = false;
+  }  
+}
+
+// handlers for collapsing/expanding all
+$(".collapse-all").on("click", function() {
+  type_ctrl.selected_type.members.forEach(function(member) {
+    if (member.collapsable) {
+      member.collapsable = false;
+      member.expandable = true;
+    }
+    member.expanded = member.depth == 0;
+  });
+});
+
+$(".expand-all").on("click", function() {
+  type_ctrl.selected_type.members.forEach(function(member) {
+    if (member.expandable) {
+      member.collapsable = true;
+      member.expandable = false;
+    }    
+    member.expanded = true;
+  });
+});
+
+
+
+
+

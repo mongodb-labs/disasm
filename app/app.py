@@ -415,6 +415,5 @@ def get_types():
     executable = executables[filename]
     return jsonify(executable.get_type_info(addr))
 
-# debug=True auto reloads whenever server code changes
 if __name__ == '__main__':
     app.run(debug=True, port=8000)

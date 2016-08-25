@@ -578,7 +578,7 @@ class ElfExecutable(Executable):
                 if dieInfo:
                     type_dies[dieInfo['name']] = dieInfo
         self.type_dies[CU.cu_offset] = type_dies
-        return type_dies 
+        return type_dies
 
 def printChildren(die):
     for child in die.iter_children():

@@ -148,7 +148,6 @@ class DIEInformation(dict):
             subtype = "(cannot find the type)"
 
         members = getMembers(die)
-
         vtable = getVtable(die)
 
         dict.__init__(self, 
@@ -240,7 +239,6 @@ def getVtable(typeDie):
             elem_location = child.attributes.get('DW_AT_vtable_elem_location')
             if elem_location.form == 'DW_FORM_exprloc':
                 loc_pieces = describe_DWARF_expr(elem_location.value, child.cu.structs)
-                print loc_pieces, child.attributes["DW_AT_name"].value
                 index = loc_pieces[0]
                 if child.attributes.get('DW_AT_linkage_name'):
                     name = child.attributes.get('DW_AT_linkage_name').value
