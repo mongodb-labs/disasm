@@ -15,7 +15,8 @@
     rv-on-click="type_ctrl.selectedTypeClicked"></span>
   </div>
   <div class="type-attr">Tag: <span rv-text="type_ctrl.selected_type.tag"></span></div>
-  <div class="members">Members:
+  <div class="members type-attr"
+    rv-show="type_ctrl.selected_type.members | arrHasContent">Members:
     <span class='change-all collapse-all'>collapse all</span>
     <span class='change-all expand-all'>expand all</span>
     <ul>
@@ -57,9 +58,23 @@
         rv-hide="member.type | displayData">(type unknown)</span>
         <span class="type-modifiers"
         rv-show="member.modifiers"
-        rv-text="member.modifiers">>
+        rv-text="member.modifiers">
       </li>
     </ul>
+  </div> <!-- end members -->
+
+  <div class="vtable type-attr" 
+    rv-show="type_ctrl.selected_type.vtable | arrHasContent">
+    Vtable:
+    <div class='vtable-header row'>
+      <span class="vtable-index one column">Slot</span>
+      <span class="vtable-function eight columns">Function</span>
+    </div>
+    <div class='vtable-entry entry row'
+      rv-each-vtableentry='type_ctrl.selected_type.vtable'>
+      <span class='vtable-index one column'>{vtableentry.index}</span>
+      <span class='vtable-function eight columns'>{vtableentry.name}</span>
+    </div>
   </div>
 </div>
 

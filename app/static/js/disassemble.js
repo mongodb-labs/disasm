@@ -65,6 +65,10 @@ rivets.formatters.displayData = function(data) {
   return data != null && data != undefined;
 }
 
+rivets.formatters.arrHasContent = function(arr) {
+  return arr != undefined && arr.constructor === Array && arr.length > 0;
+}
+
 var rivetsAnalysisView = rivets.bind($('#tab-type-info'),
   {type_ctrl: type_ctrl}
 );

@@ -648,5 +648,20 @@ $type-bg: rgb(178,223,219);
 			}
 		}
 	}
+
+	.vtable {
+		.vtable-header span {
+			font-family: "Open Sans";
+		}
+
+		.vtable-index {
+			text-align: right;
+		}
+		.vtable-function {
+			text-align: left;
+		}
+	}
 }
+
+
 

@@ -15,6 +15,7 @@
 from elftools.dwarf.die import DIE
 
 from dwarf_expr import describe_DWARF_expr
+from disasm_demangler import demangle
 
 # Maps of each DIE offset to the corresponding DIE.
 # Used when trying to follow DIE type references, i.e., a DW_TAG_typedef DIE that has a DW_AT_type
@@ -231,7 +232,7 @@ def isType(die, typeName):
 
 def getVtable(typeDie):
     global die_list
-    vtable = {}
+    vtable = []
     for child in typeDie.iter_children():
         if child.tag == 'DW_TAG_subprogram' \
         and child.attributes.get('DW_AT_virtuality') \
@@ -246,7 +247,7 @@ def getVtable(typeDie):
                     name = child.attributes.get('DW_AT_name').value
                 else:
                     name = "(Cannot determine name)"
-                vtable[index] = name
+                vtable.append({"index": index, "name": demangle(name)});
             elif elem_location.form == 'DW_FORM_loclistptr':
                 print 'Cannot currently handle form DW_FORM_loclistptr'
             else:
