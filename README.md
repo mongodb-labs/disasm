@@ -15,7 +15,7 @@ Interactive Disassembler GUI
 About
 -----
 
-Disasm is a web application written in Flask. It allows you to disassemble ELF files into Intel x86 assembly. The assembly and analysis can be displayed in a browser so that you can click around and interact with it.
+Disasm is a browser-based application, built on Flask, that allows you to disassemble ELF files into Intel x86 assembly. The assembly and analysis is displayed in a browser so that you can click around and interact with it.
 
 Before running
 -----------------
@@ -33,16 +33,15 @@ There is optional IACA integration. To use it, you must first download IACA from
 
 [PyPy](http://pypy.org/) is an alternative implementation of python that provides a considerable speedup. To use it, there is a little more setup involved.
 
-1. Setup the requirements for pypy using either of the following:
-    * Use pip_pypy
-        * `pip_pypy install -r requirements.pypy.txt` (regular pip doesn't install to a directory that pypy can find)
-    * Use virtualenv and pip
-2. Ensure that you have either `c++filt` or `gc++filt` on your machine/in your `$PATH` (The demangler library we use does not work with pypy. If you know of a python demangler library that can run on pypy, let us know!)
+1. Set up the requirements for pypy using either of the following methods:
+    * `pip_pypy install -r requirements.pypy.txt` (regular pip doesn't install to a directory that pypy can find)
+    * OR create a pypy virtualenv and `pip install -r requirements.pypy.txt` within that virtualenv
+2. Ensure that you have either `c++filt` or `gc++filt` on your machine and in your `$PATH`. The demangler library we use does not work with pypy so we use command line tools instead. If you know of a python demangler library that can run on pypy, please let us know!
 
 Running
 -------
 
-The best way to run the application is the following way:
+You can run the application with
 
 ```python
 python run.py
@@ -63,12 +62,12 @@ pypy run.py
 ### Options
 
 * -f <file(s)>, --files <file(s)>
-    * File(s) that you want to appear on the homepage to disassemble.
+    * File(s) that you want to disassemble.
 
 Features
 --------
 
-Features marked with an asterisk (*) require that the .dwarf_info and .dwarf_aranges sections be defined in order to use it.
+Features marked with an asterisk (*) require that the .dwarf_info section be defined in order to use it.
 
 ### Disassembly
 
@@ -98,7 +97,7 @@ Whenever possible, the contents of a register will be displayed, including the o
 
 ### Register tracking *
 
-Observe which instructions read and/or write to a particular register. To activate this feature, right click the desired register and select the appropriate option.
+Observe which instructions read and/or write to a particular register by right clicking on the desired register and selecting the appropriate option from the dropdown menu.
 
 ![registers written to and read from](screenshots/relevant-registers.png "Display all of the instructions that write to or read from this register")
 
@@ -110,13 +109,13 @@ Instructions that write to a flag(s) will display a white flag next to the mnemo
 
 ### Jump table resolution 
 
-Jump tables are parsed. Clicking on the first instruction in a jump table sequence will display a the table the mapping between value in rdi (the condition) and the address to jump to. Clicking on one of these addresses will allow you to jump to this instruction as well.
+Jump tables are parsed. Clicking on the jump table instruction displays the mapping between each condition value and the address to jump to. Clicking on each of these addresses jumps to the respective instruction.
 
 ![jump table parsing](screenshots/jump-table.png "Display the information relevant to the detected jump table")
 
 ### Rip-relative address resolution and interpretation
 
-A rip-relative adddress (e.g, "rip + 0x129d866") can be resolved into a single address by right clicking on that part of the instruction. The value at this address can also be read from the file as an 8/16/32/64-bit signed decimal/unsigned decimal/hexadecimal/binary number, single/double precision floating point number, or null-terminated C String (up to 128 bytes).
+A rip-relative adddress (e.g, `rip + 0x129d866`) can be resolved into a single address by right clicking on that part of the instruction. The value at this address can also be read from the file as an 8/16/32/64-bit signed decimal/unsigned decimal/hexadecimal/binary number, single/double precision floating point number, or null-terminated C String (up to 128 bytes).
 
 ![rip relative resolution and interpretation](screenshots/rip-relative.gif "Resolving the RIP-relative address and interpreting the data at that address")
 
@@ -154,7 +153,7 @@ When a file is uploaded, it will be stored on the server for quicker lookup late
 
 ### NOP byte size
 
-There are various different NOP instructions, each of which is encoded as a different operation, and each with a different size. Instead of displaying the operation (which is essentially meaningless), the size of the NOP will be displayed.
+NOP operations (which are essentially meaningless) are replaced with the size of the NOP.
 
 ![NOP byte size](screenshots/nop-byte-size.png "Display the size of the NOP instruction")
 
@@ -162,42 +161,29 @@ There are various different NOP instructions, each of which is encoded as a diff
 
 #### Function search
 
-* Up/down
-    * Navigate through the list of functions
-* Enter
-    * Disassemble the currently selected function
-* ?
-    * Display the help menu
+* Up/down: Navigate through the list of functions
+* Enter: Disassemble the currently selected function
+* ?: Display the help menu
 
 #### Disassembly
 
-* Up/down 
-    * Navigate through the instructions
+* Up/down: Navigate through the instructions
 * Right Arrow
-    * On jmp/call
-        * Go to target address
-    * On ret
-        * Return to the calling function (only available if this function was reached by entering going through a call instruction)
+    * On jmp/call: Go to target address
+    * On ret: Return to the calling function (only available if this function was reached by entering going through a call instruction)
 * Left Arrow
     * Undo previous jump/call (if applicable)
-* Enter
-    * Open the analysis window relevant to this instruction
+* Enter: Open the analysis window relevant to this instruction
 
 ##### Analysis window open
 
-* Shift + up/down
-    * Go up/down the function stack
-* Tab
-    * Cycle through the analysis tabs
-* Escape
-    * Close the analysis window
+* Shift + up/down: Go up/down the function stack
+* Tab: Cycle through the analysis tabs
+* Escape: Close the analysis window
 
 Bugs
 ----
-
-No known bugs.
-
-If any bugs are found, please contact `hareldan95@gmail.com` or `dorothchen@gmail.com` with as much of the following information as possible:
+If you find any bugs, please contact `hareldan95@gmail.com` or `dorothchen@gmail.com` with as much of the following information as possible:
 
 * Version of python being run
 * Source code language and version
