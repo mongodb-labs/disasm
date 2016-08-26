@@ -564,7 +564,7 @@ function wrapAllRegisters() {
       if (ops[i].innerText == 'ptr' && !textInHtmlCollection(ops, 'rip')) {
         ops[i].classList.add("reg");
         var reg = assembly.contents[index].ptr;
-        reg = reg.filter(val => val != "").join(" ");
+        reg = reg.filter(function(val) {return val != ""}).join(" ");
         ops[i].setAttribute('id', reg);
       }
     }
