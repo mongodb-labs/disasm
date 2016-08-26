@@ -123,8 +123,7 @@ def index():
     else:
         files, errs = getExistingFiles()
         if request.args.get("err"):
-            errs.append("Cannot find file " + request.args["err"] + 
-                ". Has it been renamed or moved?")
+            errs.append(request.args["err"])
         if not errs:
             return render_template("index.jinja.html", 
                 uploaded_files=[file for file in files if not file.from_cmd],
@@ -202,20 +201,18 @@ def loadExec(filename):
     with open(md.path, 'rb') as f:
         a = get_executable(f)
     executables[filename] = a
-    print "Done loading the executable"
 
 ## determine which kind of executable
 def get_executable(f):
     if Executable.isElf(f):
         return ElfExecutable(f)
     elif Executable.isMacho(f):
-        return MachoExecutable(f)
+        # return MachoExecutable(f)
+        return None
     else:
-        raise Exception("Couldn't find executable format")
+        return None
 
 def load_functions(filename):
-    if not executables.get(filename):
-        loadExec(filename)
     functions = executables.get(filename).get_all_functions()
     storeFunctions(filename, functions)
 
@@ -229,6 +226,13 @@ def deleteFile():
 @app.route('/functions', methods=['GET'])
 def functions():
     filename = request.args['filename']
+    if not executables.get(filename):
+        loadExec(filename)
+    # still None
+    if not executables.get(filename):
+        errMsg = "Not able to parse " + request.args["basename"] \
+            + ". Currently we only support executables in the ELF format."
+        return redirect(url_for('index', err=errMsg))
     try:
         load_functions(filename)
         md = metadata.fromUUID(filename)
@@ -243,7 +247,8 @@ def functions():
             displayname=md.basename,
             warning="; ".join(warning))
     except OSError as e:
-        return redirect(url_for('index', err=request.args["basename"]))
+        errMsg = "Cannot find file " + request.args["basename"] + ". Has it been renamed or moved?"
+        return redirect(url_for('index', err=errMsg))
 
 # expects "filename", "st_value", "file_offset", "size", "func_name"
 @app.route('/disasm_function', methods=['GET'])
