@@ -57,6 +57,8 @@ var type_ctrl = {
   selectedTypeClicked: selectedTypeClicked,
   showTypeSearchResults: true,
   queryString: "",
+  stack: [],
+  // functions
   expandMember: expandMember,
   collapseMember: collapseMember,
 };

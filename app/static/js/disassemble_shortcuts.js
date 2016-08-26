@@ -58,7 +58,14 @@ mainListener.register_many([
     {
         "keys"          : "left",
         "on_keydown"    : function() {
-            history.back();
+            if (analysisVisible && assembly.in_typeinfo && type_ctrl.stack.length > 1) {
+                var prev_type = type_ctrl.stack.pop();
+                var stackLen = type_ctrl.stack.length;
+                type_ctrl.selected_type = type_ctrl.stack[stackLen - 1];
+            }
+            else if (!analysisVisible && !assembly.in_typeinfo) {
+               history.back(); 
+            }
         }
     },
     {
@@ -227,7 +234,7 @@ typeSearchListener.register_many([
         "keys"          : "enter",
         "on_keydown"    : function() {
             if (selectedType) {
-                _selectedTypeClicked(selectedType.getAttribute("data-name"));
+                _selectedTypeClicked(selectedType.getAttribute("data-name"), true);
             }
         }
     }, 

@@ -128,14 +128,17 @@ function _tabClicked(classname) {
 }
 
 function tabStackInfoClicked(event, model) {
+  assembly.in_typeinfo = false;
   _tabClicked(".tab-stack-info");
 }
 
 function tabMnemonicDescClicked(event, model) {
+  assembly.in_typeinfo = false;
   _tabClicked(".tab-mnemonic-desc");
 }
 
 function tabIacaClicked(event, model) {
+  assembly.in_typeinfo = false;
   if (analysis.iaca_bytes && analysis.iaca_bytes.length > 0) {
     assembly.in_iaca = true;
   }
@@ -143,6 +146,7 @@ function tabIacaClicked(event, model) {
 }
 
 function tabTypeInfoClicked(event, model) {
+  assembly.in_typeinfo = true;
   _tabClicked(".tab-type-info");
 }
 /********** end tab click functions **********/
@@ -309,14 +313,22 @@ rivets.formatters.formatIndentation = function(depth) {
   return indentationStr;
 }
 
-function _selectedTypeClicked(typeName) {
+function _selectedTypeClicked(typeName, newStack=false) {
   var typeData = type_ctrl.typeData[typeName];
   if (typeData) {
     type_ctrl.selected_type = typeData;
     type_ctrl.showTypeSearchResults = false;
   }
-  else
+  else {
     return;  
+  }
+
+  if (newStack) {
+    type_ctrl.stack = [type_ctrl.selected_type];
+  }
+  else {
+    type_ctrl.stack.push(type_ctrl.selected_type);
+  }
 }
 
 function memberTypeClicked(e, model) {
@@ -361,7 +373,7 @@ $('#type-name-input').on('keyup', function() {
       newRes.appendChild(innerSpan);
       $(newRes).click(function(event) {
         var typeName = event.delegateTarget.getAttribute('data-name');
-        _selectedTypeClicked(typeName);
+        _selectedTypeClicked(typeName, true);
       });
       dataTypesEl.appendChild(newRes);
     }
