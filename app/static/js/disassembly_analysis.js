@@ -366,6 +366,9 @@ $('#type-name-input').on('keyup', function() {
       dataTypesEl.appendChild(newRes);
     }
   }
+  if (type_ctrl.queryResults.length == 0) {
+    return;
+  }
   dataTypesEl.firstChild.className += " selected";
   selectedType = dataTypesEl.firstChild;
   type_ctrl.showTypeSearchResults = true;
@@ -391,7 +394,7 @@ function expandMember(event, model) {
   var members = type_ctrl.selected_type.members;
   var thisDepth = model.member.depth;
   var i = model.index + 1;
-  while (members[i].depth > thisDepth) {
+  while (members[i] && members[i].depth > thisDepth) {
     if (members[i].depth == thisDepth + 1) {
       members[i].expanded = true;
     }
@@ -405,7 +408,7 @@ function collapseMember(event, model) {
   var members = type_ctrl.selected_type.members;
   var thisDepth = model.member.depth;
   var i = model.index + 1;
-  while (members[i].depth > thisDepth) {
+  while (members[i] && members[i].depth > thisDepth) {
     members[i].expanded = false;
     if (members[i].collapsable) {
       members[i].expandable = true;
