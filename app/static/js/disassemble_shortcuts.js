@@ -18,6 +18,17 @@ var instructionList = document.getElementById('function-disasm');
 var functionList = document.getElementById('functions');
 var typeList = document.getElementById('data-types');
 
+function goBack() {
+    if (analysisVisible && assembly.in_typeinfo && type_ctrl.stack.length > 1) {
+        var prev_type = type_ctrl.stack.pop();
+        var stackLen = type_ctrl.stack.length;
+        type_ctrl.selected_type = type_ctrl.stack[stackLen - 1];
+    }
+    else if (!analysisVisible && !assembly.in_typeinfo) {
+       history.back(); 
+    }
+}
+
 var mainListener = new window.keypress.Listener();
 mainListener.register_many([
     {
@@ -57,16 +68,11 @@ mainListener.register_many([
     },
     {
         "keys"          : "left",
-        "on_keydown"    : function() {
-            if (analysisVisible && assembly.in_typeinfo && type_ctrl.stack.length > 1) {
-                var prev_type = type_ctrl.stack.pop();
-                var stackLen = type_ctrl.stack.length;
-                type_ctrl.selected_type = type_ctrl.stack[stackLen - 1];
-            }
-            else if (!analysisVisible && !assembly.in_typeinfo) {
-               history.back(); 
-            }
-        }
+        "on_keydown"    : goBack
+    },
+    {
+        "keys"          : "backspace",
+        "on_keydown"    : goBack
     },
     {
         "keys"          : "right",
