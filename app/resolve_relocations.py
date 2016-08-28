@@ -30,6 +30,11 @@ def resolve_plt(addr, plt_section, exe):
 
     # update rela_addr if it's in the reloc table
     reloc_section = exe.elff.get_section_by_name(".rela.plt")
+    if not reloc_section:
+        reloc_section = exe.elff.get_section_by_name(".rel.plt")
+    if not reloc_section:
+        return None
+
     sym = sym_from_reloc_section(exe, rela_addr, reloc_section)
     if sym: # found in reloc table
         sym.name = demangle(sym.name) + " (.plt)"
@@ -47,6 +52,11 @@ def resolve_plt(addr, plt_section, exe):
 def resolve_got(addr, got_section, exe):
     # is GOT always populated by .dyn?? unclear. TODO
     reloc_section = exe.elff.get_section_by_name(".rela.dyn")
+    if not reloc_section:
+        reloc_section = exe.elff.get_section_by_name(".rel.dyn")
+    if not reloc_section:
+        return None
+        
     sym = sym_from_reloc_section(exe, addr, reloc_section)
     if sym:
         sym.name = demangle(sym.name) + " (.got)"
