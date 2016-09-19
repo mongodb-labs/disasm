@@ -119,7 +119,7 @@ def index():
         full_path = os.path.abspath(os.path.join(app.config['UPLOAD_DIR'], filename))
         # Save the file in the UPLOAD_DIR directory
         md = saveFile(file, full_path)
-        return redirect(url_for('functions', filename=md.UUID))
+        return redirect(url_for('functions', basename=md.basename, filename=md.UUID))
     else:
         files, errs = getExistingFiles()
         if request.args.get("err"):
