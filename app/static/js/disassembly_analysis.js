@@ -242,6 +242,10 @@ function startIaca(event, model) {
 
 function runIaca(event, model) {
   var string_of_bytes = ""
+  if (analysis.iaca_bytes[0] == analysis.iaca_bytes[analysis.iaca_bytes.length - 1]) {
+      // This happens if your last instruction was a jump to the start of the loop.
+      analysis.iaca_bytes.pop();
+  }
   analysis.iaca_bytes.forEach(function(i) {
     string_of_bytes += i.bytes;
   });
