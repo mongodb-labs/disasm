@@ -360,6 +360,11 @@ class ElfExecutable(Executable):
             if self._addr_in_DIE(child, address):
                 stack.append(child)
                 return self._get_addr_DIEs(child, address, stack)
+            elif type(child.tag) is str and 'subprogram' not in child.tag:
+                ret = self._get_addr_DIEs(child, address, stack)
+                if ret:
+                    return ret
+
         return stack
 
     # get line info for given address
